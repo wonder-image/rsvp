@@ -1,0 +1,81 @@
+{
+    "form" : {
+        "name" : "Nome",
+        "surname" : "Cognome",
+        "participants" : "Partecipanti",
+        "email" : "Email",
+        "phone" : "Cellulare",
+        "allergies" : "Hai qualche allergia?",
+        "password" : "Password",
+        "events" : "Per quale evento si conferma la presenza?",
+        "requests" : "Hai qualche richiesta?",
+        "person" : "Persona",
+        "people" : "Persone",
+        "continue" : "Continua",
+        "send" : "Invia",
+        "loading" : "Invio...",
+        "envoy" : "Inviato",
+        "error" : "Errore"
+    },
+    "week" : {
+        "monday" : "Lunedì",
+        "tuesday" : "Martedì",
+        "wednesday" : "Mercoledì",
+        "thursday" : "Giovedì",
+        "friday" : "Venerdì",
+        "saturday" : "Sabato",
+        "sunday" : "Domenica"
+    },
+    "month" : {
+        "january" : "Gennaio",
+        "february" : "Febbraio",
+        "march" : "Marzo",
+        "april" : "Aprile",
+        "may" : "Maggio",
+        "june" : "Giugno",
+        "july" : "Luglio",
+        "august" : "Agosto",
+        "september" : "Settembre",
+        "october" : "Ottobre",
+        "november" : "Novembre",
+        "december" : "Dicembre"
+    },
+    "location" : {
+        "dinnerParty" : "Dinner Party",
+        "weddingDay" : "Cerimonia e Ricevimento",
+        "brunch" : "Brunch"
+    },
+    "header" : {
+        "home" : "Home",
+        "story" : "Our story",
+        "events" : "Eventi",
+        "wishlist" : "Lista dei desideri",
+        "accommodation" : "Accommodation",
+        "rsvp" : "RSVP",
+        "gallery" : "Gallery"
+    },
+    "title" : { 
+        "big_day" : "Il grande giorno...",
+        "confirm_participation" : "Conferma la tua partecipazione"
+    },
+    "text" : {
+        "contact" : "Per ulteriori informazioni:<br>WEDDING PRODUCTION - PR Events<br><a href='mailto:info@paolarovelli.com' class='color'>info@paolarovelli.com</a> - <a href='tel:+393315063684' class='color'>+39 331 5063684</a>",
+        "file_not_fount" : "In questa pagina verranno caricate le fotografie dell'evento"
+    },
+    "terms" : {
+        "location" : "Location",
+        "meeting" : "Meeting point",
+        "parking" : "Parking"
+    },
+    "button" : {
+        "website" : "Sito web"
+    },
+    "word" : {
+        "days" : "GIORNI",
+        "hours" : "ORE",
+        "minutes" : "MINUTI",
+        "seconds" : "SECONDI",
+        "at" : "alle",
+        "hour" : "ore"
+    }
+}

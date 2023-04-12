@@ -5,7 +5,7 @@
             'title' => 'RSVP',
             'folder' => 'rsvp',
             'icon' => 'bi-people',
-            'file' => '',
+            'file' => 'list.php',
             'authority' => [],
             'subnavs' => []
         ],

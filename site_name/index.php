@@ -1,5 +1,7 @@
 <?php
-    
+
+    // header("Location: IT/");
+
     $FRONTEND = true;
     $PRIVATE = false;
     $PERMIT = [];
