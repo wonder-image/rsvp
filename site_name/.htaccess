@@ -1,0 +1,50 @@
+# ERROR 
+ErrorDocument 400 /error/?err=400
+ErrorDocument 401 /error/?err=401
+ErrorDocument 403 /error/?err=403
+ErrorDocument 404 /error/?err=404
+ErrorDocument 500 /error/?err=500
+
+<IfModule mod_headers.c>
+    <FilesMatch "\\.(ico|gz)$">
+        Header set Cache-Control "max-age=300, public"
+    </FilesMatch>
+    <FilesMatch "\\.(jpe?g|png|gif|swf|flv|pdf)$">
+        Header set Cache-Control "max-age=300, public"
+    </FilesMatch>
+    <FilesMatch "\\.(js|css)$">
+        Header set Cache-Control "max-age=0, private"
+    </FilesMatch>
+    <filesMatch "\\.(html|htm)$">
+        Header set Cache-Control "max-age=00, public"
+    </filesMatch>
+</IfModule>
+
+# CACHE EXPIRATION
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault A300
+    ExpiresByType image/jpg A0
+    ExpiresByType image/jpeg A0
+    ExpiresByType image/gif A0
+    ExpiresByType image/png A0
+    ExpiresByType image/x-icon A0
+    ExpiresByType video/x-flv A0
+    ExpiresByType application/pdf A0
+    ExpiresByType application/x-shockwave-flash A0
+    ExpiresByType application/x-javascript A0
+    ExpiresByType text/html A0
+    ExpiresByType text/css A0
+    ExpiresByType text/plain A0
+</IfModule>
+
+# Disable index view
+Options - Indexes
+
+# HIDE FILE .env
+<IfModule>
+    <Files .env>
+        Order allow, deny
+        Deny from all
+    </Files>
+</IfModule>
