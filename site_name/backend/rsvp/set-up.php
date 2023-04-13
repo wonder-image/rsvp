@@ -18,8 +18,12 @@
 
     $BUTTON_CUSTOM = [
         [
-            "value" => "Scarica .csv",
+            "value" => "<i class='bi bi-filetype-csv'></i> Scarica .csv",
             "action" => "href='$PATH->backend/rsvp/download.php?file=csv'"
+        ],
+        [
+            "value" => "<i class='bi bi-filetype-xls'></i> Scarica .xls",
+            "action" => "href='$PATH->backend/rsvp/download.php?file=xls'"
         ]
     ];
 
@@ -28,7 +32,8 @@
     $PAGE_TABLE = $TABLE->RSVP;
 
     $TABLE_ACTION = [ 
-        'modify' => true
+        'view' => true,
+        'delete' => true
     ];
 
     $TABLE_FIELD = [
@@ -42,11 +47,17 @@
             "href" => "mailto",
             "tablet" => false
         ],
-        "partecipants" => [
-            "label" => ""
+        "participants" => [
+            "label" => "Partecipanti"
         ]
     ];
 
     $FILTER_SEARCH = ['name', 'email'];
+
+    $EVENTI = [
+        "pool-party" => "Pool Party",
+        "wedding" => "Beach Wedding Day",
+        "brunch" => "Brunch"
+    ];
 
 ?>

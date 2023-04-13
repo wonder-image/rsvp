@@ -2,28 +2,14 @@
 
     $BACKEND = true;
     $PRIVATE = true;
-    $PERMIT = ['admin'];
+    $PERMIT = [];
 
     $ROOT = $_SERVER['DOCUMENT_ROOT'];
     require_once $ROOT."/vendor/wonder-image/app/wonder-image.php";
 
-    $INFO_PAGE = (object) array();
-    $INFO_PAGE->title = "Dettagli";
-    $INFO_PAGE->table = $TABLE->DETAILS;
-    $INFO_PAGE->tableName = "details";
-
-    $SQL = sqlSelect($INFO_PAGE->tableName, ['id' => 1], 1);
-    $VALUES = $SQL->row;
-
-    if (isset($_POST['modify'])) {
-
-        $VALUES = formToArray($INFO_PAGE->tableName, $_POST, $INFO_PAGE->table);
-        
-        if (empty($ALERT)) { sqlModify($INFO_PAGE->tableName, $VALUES, 'id', 1); }
-        if (empty($ALERT)) { header("Location: ?alert=650"); }
-
-    }
-
+    require_once "set-up.php";
+    require_once $ROOT_APP."/html/backend/index.php";
+    
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -31,7 +17,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?=$INFO_PAGE->title?></title>
+    <title><?=$TITLE?></title>
 
     <?php include $ROOT_APP."/utility/backend/head.php"; ?>
 
@@ -42,30 +28,28 @@
     <?php include $ROOT_APP."/utility/backend/header.php"; ?>
 
     <form action="" method="post" enctype="multipart/form-data" onsubmit="loadingSpinner()">
+
         <div class="row g-3">
 
             <wi-card class="col-12">
-                <h3><?=$INFO_PAGE->title?></h3>
+                <h3><a href="<?=$REDIRECT?>" type="button" class="text-dark"><i class="bi bi-arrow-left-short"></i></a> <?=$TITLE?></h3>
             </wi-card>
 
             <wi-card class="col-9">
                 <div class="col-6">
-                    <?=text('Nome evento', 'name', ''); ?>
+                    <?=text('Autorizzazione', 'name', 'required'); ?>
+                </div>
+                <div class="col-6">
+                    <?=text('Codice', 'code', 'required'); ?>
                 </div>
             </wi-card>
 
             <wi-card class="col-3">
                 <div class="col-12">
-                    <h6>Evento</h6>
-                </div>
-                <div class="col-12">
-                    <?=textDate('Data', 'date', ''); ?>
-                </div>
-                <div class="col-12">
-                    <?=submit('Modifica', 'modify'); ?>
+                    <?=submitAdd()?>
                 </div>
             </wi-card>
-
+        
         </div>
     </form>
 

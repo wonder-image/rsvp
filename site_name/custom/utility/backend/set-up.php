@@ -11,11 +11,31 @@
         ],
         [
             'title' => 'Dettagli',
-            'folder' => 'details',
+            'folder' => 'rsvp_details',
             'icon' => 'bi-file',
             'file' => '',
             'authority' => ['admin'],
             'subnavs' => []
+        ],
+        [
+            'title' => 'Password',
+            'folder' => 'password',
+            'icon' => 'bi-key',
+            'authority' => ['admin'],
+            'subnavs' => [
+                [
+                    'title' => 'Password',
+                    'folder' => 'rsvp_password',
+                    'file' => 'list.php',
+                    'authority' => ['admin']
+                ],
+                [
+                    'title' => 'Autorizzazioni',
+                    'folder' => 'rsvp_authority',
+                    'file' => 'list.php',
+                    'authority' => ['admin']
+                ]
+            ]
         ]
     ];
 

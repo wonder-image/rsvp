@@ -4,7 +4,7 @@
         <img src="<?=$PATH->logoIcon?>" alt="Icon <?=$SOCIETY->name?>" class="c-w" style="height: 50px;">
 
         <div class="p-a bottom c-w nav-list tx-color phone-none" style="line-height: calc((var(--header-height) - (var(--spacer) * 8)) - 50px)">
-            <a href="<?=$PATH->site?>" class="nav">Home</a>
+            <a href="<?=$PATH->site?>/<?=$LANG?>" class="nav">Home</a>
         </div>
 
         <div id="hamburger" class="c-h f-end pc-none" onclick="menuMobile()">

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb75e19888188312918c650489fcf336",
+    "content-hash": "47729fa89d73f59b4a344ac7044caa93",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2426,16 +2426,16 @@
         },
         {
             "name": "wonder-image/app",
-            "version": "1.0.8",
+            "version": "1.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wonder-image/app.git",
-                "reference": "3ad3807b39008329df8c89acd40fe4d6c13a381f"
+                "reference": "ddf0e95152d47d16f6175a44464e51decdcd554b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wonder-image/app/zipball/3ad3807b39008329df8c89acd40fe4d6c13a381f",
-                "reference": "3ad3807b39008329df8c89acd40fe4d6c13a381f",
+                "url": "https://api.github.com/repos/wonder-image/app/zipball/ddf0e95152d47d16f6175a44464e51decdcd554b",
+                "reference": "ddf0e95152d47d16f6175a44464e51decdcd554b",
                 "shasum": ""
             },
             "require": {
@@ -2463,9 +2463,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wonder-image/app/issues",
-                "source": "https://github.com/wonder-image/app/tree/1.0.8"
+                "source": "https://github.com/wonder-image/app/tree/1.0.9"
             },
-            "time": "2023-04-12T10:51:03+00:00"
+            "time": "2023-04-13T12:43:10+00:00"
         }
     ],
     "packages-dev": [],

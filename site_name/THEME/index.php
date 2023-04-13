@@ -4,6 +4,9 @@
     $PRIVATE = false;
     $PERMIT = [];
 
+    $RSVP_PRIVATE = true;
+    $RSVP_AUTHORITY = [];
+
     $ROOT = $_SERVER['DOCUMENT_ROOT'];
     require_once $ROOT."/vendor/wonder-image/app/wonder-image.php";
     require_once $ROOT."/LANG/set-up.php";

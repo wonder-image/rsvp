@@ -1,6 +1,7 @@
 <?php
 
     $TABLE->RSVP = [
+        "password_id" => [],
         "name" => [],
         "surname" => [],
         "participants" => [],
@@ -8,10 +9,11 @@
         "email" => [],
         "events" => [],
         "allergies" => [],
-        "requests" => []
+        "requests" => [],
+        "lang" => []
     ];
 
-    $TABLE->DETAILS = [
+    $TABLE->RSVP_DETAILS = [
         "name" => [],
         "date" => [
             "sql" => [
@@ -21,6 +23,18 @@
                 "format" => "date"
             ]
         ]
+    ];
+
+    $TABLE->RSVP_AUTHORITY = [
+        "code" => [],
+        "name" => []
+    ];
+
+    $TABLE->RSVP_PASSWORD = [
+        "password" => [],
+        "type" => [],
+        "authority_id" => [],
+        "active" => []
     ];
 
 ?>

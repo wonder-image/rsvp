@@ -1,8 +1,8 @@
 <?php
 
-    if (sqlSelect('details', ['id' => 1], 1)->Nrow == 0) {
+    if (sqlSelect('rsvp_details', ['id' => 1], 1)->Nrow == 0) {
                 
-        sqlInsert('details', []);
+        sqlInsert('rsvp_details', []);
         
     }
 
