@@ -4,7 +4,7 @@
         <div class="title a-c">
             <?=$TEXT->title->confirm_participation?>
         </div>
-        <form class="p-4 f-start w-100 d-grid col-2 gap-4 mt-4">
+        <form class="p-4 f-start w-100 d-grid col-2 gap-4 mt-10">
             <input type="hidden" name="password_id" value="<?=$PSW->id?>">
             <input type="hidden" name="lang" value="<?=$LANG?>">
             <?=text($TEXT->form->name, "name", "", "required")?>
