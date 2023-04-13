@@ -1,8 +1,10 @@
 <?php
 
     // Info evento
-    $EVENT = info('rsvp_details', 'id', '1');
-    $EVENT->datePretty = date('d.m.Y', strtotime($EVENT->date));
+    if (sqlTableExists('rsvp_details')) {
+        $EVENT = info('rsvp_details', 'id', '1');
+        $EVENT->datePretty = date('d.m.Y', strtotime($EVENT->date));    
+    }
 
     // Controllo password
     if (isset($RSVP_PRIVATE) && $RSVP_PRIVATE) {
