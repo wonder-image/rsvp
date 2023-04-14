@@ -154,7 +154,7 @@
         <div class="subtitle a-c">
             <?=$EVENT->name?>
         </div>
-        <div class="text mt-4 a-c">
+        <div class="text mt-1 a-c">
             <?=$EVENT->datePretty?>
         </div>
 
