@@ -44,7 +44,7 @@
             </div>
 
             <div class="col-2">
-                <?=submit($TEXT->form->send, "send", "btn-primary c-w", "sendForm(this)")?>
+                <?=submit($TEXT->form->send, "send", "btn-primary c-w", "sendRSVP(this)")?>
             </div>
         </form>
     </div>
@@ -52,7 +52,7 @@
 
 <script>
 
-    function sendForm(button) {
+    function sendRSVP(button) {
 
         loadingSpinner();
 
