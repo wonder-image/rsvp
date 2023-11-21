@@ -1,11 +1,11 @@
-<?php if (($PSW->use <= 0 && $PSW->type == "single_use") || $PSW->type == "multiple_use") { ?>
+<?php if ((isset($RSVP_PRIVATE) && !$RSVP_PRIVATE) || (($PSW->use <= 0 && $PSW->type == "single_use") || $PSW->type == "multiple_use")) { ?>
 <section id="rsvp">
     <div class="content content-little">
         <div class="title a-c">
             <?=$TEXT->title->confirm_participation?>
         </div>
         <form class="p-4 f-start w-100 d-grid col-2 gap-4 mt-10">
-            <input type="hidden" name="password_id" value="<?=$PSW->id?>">
+            <?php if (isset($RSVP_PRIVATE)  && $RSVP_PRIVATE) : ?><input type="hidden" name="password_id" value="<?=$PSW->id?>"><? endif; ?>
             <input type="hidden" name="lang" value="<?=$LANG?>">
             <?=text($TEXT->form->name, "name", "", "required")?>
             <?=text($TEXT->form->surname, "surname", "", "required")?>
