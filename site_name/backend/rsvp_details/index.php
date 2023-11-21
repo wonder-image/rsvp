@@ -59,7 +59,7 @@
                     <h6>Evento</h6>
                 </div>
                 <div class="col-12">
-                    <?=textDate('Data', 'date', ''); ?>
+                    <?=textDatetime('Data', 'date', ''); ?>
                 </div>
                 <div class="col-12">
                     <?=submit('Modifica', 'modify'); ?>
