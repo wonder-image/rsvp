@@ -3,7 +3,7 @@
 Esegui il comando nel terminale dopo l'installazione di wonder-image/new
 
 ```
-gh repo clone wonder-image/getrix git-tmp
+gh repo clone wonder-image/rsvp git-tmp
 cp -R git-tmp/src/ .
 rm -rf git-tmp
 clear
