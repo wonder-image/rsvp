@@ -33,10 +33,10 @@
 
 ?>
 <!DOCTYPE html>
-<html lang="it">
+<html lang="<?=$LANG?>">
 <head>
 
-    <?php  include $ROOT_APP.'/utility/frontend/head.php'; ?>
+    <?php include $ROOT_APP.'/utility/frontend/head.php'; ?>
 
 </head>
 <body>

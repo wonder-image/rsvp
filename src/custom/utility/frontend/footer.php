@@ -5,10 +5,15 @@
             <?=$TEXT->title->confirm_participation?>
         </div>
         <form class="p-4 f-start w-100 d-grid col-2 gap-4 mt-10">
+
             <?php if (isset($RSVP_PRIVATE)  && $RSVP_PRIVATE) : ?><input type="hidden" name="password_id" value="<?=$PSW->id?>"><? endif; ?>
+
             <input type="hidden" name="lang" value="<?=$LANG?>">
+
             <?=text($TEXT->form->name, "name", "", "required")?>
+
             <?=text($TEXT->form->surname, "surname", "", "required")?>
+
             <div class="col-2">
                 <?php
 
@@ -22,7 +27,9 @@
                 
                 ?>
             </div>
-            <?=text($TEXT->form->phone, "cel", "", "required")?>
+
+            <?=phone($TEXT->form->phone, "cel", "", "required")?>
+
             <?php
 
                 $OPTIONS = [
@@ -33,19 +40,27 @@
                 echo select($TEXT->form->participants, "participants", $OPTIONS, "", "required");
 
             ?>
+
             <div class="col-2">
                 <?=email($TEXT->form->email, "email", "", "required")?>
             </div>
+
             <div class="col-2">
                 <?=textarea($TEXT->form->allergies, "allergies")?>
             </div>
+
             <div class="col-2">
                 <?=textarea($TEXT->form->requests, "requests")?>
             </div>
 
             <div class="col-2">
+                <?=checkbox('', 'privacy', ["true" => ["label" => $TEXT->form->privacy, "attribute" => "required"]], 'checkbox', '');?>
+            </div>
+
+            <div class="col-2">
                 <?=submit($TEXT->form->send, "send", "btn-primary c-w", "sendRSVP(this)")?>
             </div>
+            
         </form>
     </div>
 </section>

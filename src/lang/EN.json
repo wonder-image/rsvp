@@ -18,7 +18,8 @@
         "envoy" : "Envoy",
         "error" : "Error",
         "try_again" : "Try again",
-        "back_site" : "Back to site"
+        "back_site" : "Back to site",
+        "privacy": "I accept the <a href='./legal/privacy-policy/' target='_blank' rel='noopener noreferrer'>Privacy Policy</a>"
     },
     "week" : {
         "monday" : "Monday",

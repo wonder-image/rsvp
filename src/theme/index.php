@@ -1,16 +1,16 @@
 <?php
 
-    $RSVP_PRIVATE = true;
+    $RSVP_PRIVATE = false;
     $RSVP_AUTHORITY = [];
 
     require_once __DIR__."/set-up.php";
 
 ?>
 <!DOCTYPE html>
-<html lang="it">
+<html lang="<?=$LANG?>">
 <head>
 
-    <?php  include $ROOT_APP.'/utility/frontend/head.php'; ?>
+    <?php include $ROOT_APP.'/utility/frontend/head.php'; ?>
 
 </head>
 <body>
@@ -18,7 +18,7 @@
     <?php include $ROOT_APP.'/utility/frontend/body-start.php' ?>
     <?php include $ROOT.'/custom/utility/frontend/header.php' ?>
 
-    <section class="intro full-page">
+    <section class="intro full-page h-70">
         <div class="content">
 
         </div>
@@ -29,7 +29,7 @@
             <div class="title a-c">
                 <?=$TEXT->title->big_day?>
             </div>
-            <div class="w-100 d-grid col-4 gap-4 mt-8">
+            <div class="w-100 d-grid col-4 col-t-2 col-p-1 gap-4 mt-8">
 
                 <div class="a-c">
                     <div class="title-big">
@@ -86,11 +86,14 @@
             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             if (distance < 0) {
+
                 clearInterval(x);
-                days = 00;
-                hours = 00;
-                minutes = 00;
-                seconds = 00;
+
+                days = '00';
+                hours = '00';
+                minutes = '00';
+                seconds = '00';
+
             }
 
             document.querySelector("#countdown .days").innerHTML = days;

@@ -18,7 +18,8 @@
         "envoy" : "Inviato",
         "error" : "Errore",
         "try_again" : "Riprova",
-        "back_site" : "Torna al sito"
+        "back_site" : "Torna al sito",
+        "privacy": "Accetto la <a href='./legal/privacy-policy/' target='_blank' rel='noopener noreferrer'>Politica sulla privacy</a>"
     },
     "week" : {
         "monday" : "Lunedì",
