@@ -1,6 +1,6 @@
 <?php
 
-    // header("Location: IT/");
+    // header("Location: it/");
 
     $FRONTEND = true;
     $PRIVATE = false;

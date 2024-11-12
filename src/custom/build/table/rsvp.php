@@ -10,7 +10,8 @@
         "events" => [],
         "allergies" => [],
         "requests" => [],
-        "lang" => []
+        "lang" => [],
+        "privacy" => []
     ];
 
     $TABLE->RSVP_DETAILS = [

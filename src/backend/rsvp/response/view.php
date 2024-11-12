@@ -88,7 +88,7 @@
                         <div class="w-100 mt-2">
                             Creazione: <b><?=$PARTECIPATION->prettyCreation?></b> <br>
                             Lingua: <b><?=$PARTECIPATION->lang?></b> <br>
-                            Password: <b><?=sqlSelect('rsvp_password', ['id' => $PARTECIPATION->password_id], 1)->row['password']?></b>
+                            Password: <b><?=empty($PARTECIPATION->password_id) ? "No" : sqlSelect('rsvp_password', ['id' => $PARTECIPATION->password_id], 1)->row['password']?></b>
                         </div>
                     </div>
                 </wi-card>

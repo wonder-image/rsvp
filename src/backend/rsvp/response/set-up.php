@@ -49,6 +49,12 @@
         ],
         "participants" => [
             "label" => "Partecipanti"
+        ],
+        "creation" => [
+            "label" => "Conferma",
+            "format" => "date",
+            "orderable" => true,
+            "dimension" => "medium"
         ]
     ];
 
