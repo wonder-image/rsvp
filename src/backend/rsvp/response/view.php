@@ -49,7 +49,24 @@
                     <div class="col-6">
                         <h6>DATI</h6>
                         <div class="w-100 mt-2">
-                            Nome: <b><?=$PARTECIPATION->name?> <?=$PARTECIPATION->surname?></b> <br>
+                            <?php
+
+                                if (is_array(json_decode($PARTECIPATION->name))) {
+
+                                    $ARRAY_NAME = json_decode($PARTECIPATION->name);
+                                    $ARRAY_SURNAME = json_decode($PARTECIPATION->surname);
+
+                                    foreach ($ARRAY_NAME as $key => $value) { 
+                                        echo 'Partecipante '.$key + 1 .': <b>'.$value.' '.$ARRAY_SURNAME[$key].'</b><br>'; 
+                                    }
+
+                                } else {
+
+                                    echo 'Nome: <b>'.$PARTECIPATION->name.' '.$PARTECIPATION->surname.'</b><br>'; 
+                                    
+                                }
+
+                            ?>
                             Email: <b><?=$PARTECIPATION->email?></b> <br>
                             Cel: <b><?=$PARTECIPATION->cel?></b>
                         </div>
