@@ -19,11 +19,11 @@
     $BUTTON_CUSTOM = [
         [
             "value" => "<i class='bi bi-filetype-csv'></i> Scarica .csv",
-            "action" => "href='$PATH->backend/rsvp/download.php?file=csv'"
+            "action" => "href='$PATH->backend/$NAME->folder/download.php?file=csv'"
         ],
         [
             "value" => "<i class='bi bi-filetype-xls'></i> Scarica .xls",
-            "action" => "href='$PATH->backend/rsvp/download.php?file=xls'"
+            "action" => "href='$PATH->backend/$NAME->folder/download.php?file=xls'"
         ]
     ];
 
