@@ -116,10 +116,8 @@
                         <div class="w-100 mt-2">
                             <?php
 
-                                $EVENT = json_decode($PARTECIPATION->events);
-                                foreach ($EVENT as $key => $value) {
-                                   echo $EVENTI[$value].'<br>';
-                                }
+                                $EVENT = is_array(json_decode($PARTECIPATION->events)) ? json_decode($PARTECIPATION->events) : [ $PARTECIPATION->events ];
+                                foreach ($EVENT as $key => $value) { echo $EVENTI[$value].'<br>'; }
 
                             ?>
                         </div>

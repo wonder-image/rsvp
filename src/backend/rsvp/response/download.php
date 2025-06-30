@@ -16,16 +16,13 @@
 
     foreach ($SQL->row as $key => $row) {
 
-        $eventi = "";
-
         $PARTECIPATION = info('rsvp', 'id', $row['id']);
 
-        $EVENT = json_decode($PARTECIPATION->events);
-        foreach ($EVENT as $key => $value) {
-            $eventi .= $EVENTI[$value].', ';
-        }
+        $EVENT = is_array(json_decode($PARTECIPATION->events)) ? json_decode($PARTECIPATION->events) : [ $PARTECIPATION->events ];
 
-        if (strlen($eventi) > 2) { $eventi = substr($eventi, 0, -2); }
+        $eventi = [];
+        foreach ($EVENT as $key => $value) { array_push($eventi, $EVENTI[$value]); }
+        $eventi = implode(', ', $eventi);
 
         array_push($ARRAY, [
             $PARTECIPATION->name,

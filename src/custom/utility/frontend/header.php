@@ -9,7 +9,7 @@
             <a href="#rsvp" class="nav">RSVP</a>
         </div>
 
-        <div id="hamburger" class="c-h f-end pc-none" onclick="menuMobile()">
+        <div id="hamburger" class="c-h f-end pc-none tablet-none" onclick="menuMobile()">
             <div class="bar bar-1 bg-primary"></div>
             <div class="bar bar-2 bg-primary"></div>
             <div class="bar bar-3 bg-primary"></div>

@@ -28,13 +28,6 @@
             'name' => 'Tipologia',
             'type' => 'radio'
         ],
-        "rsvp_authority" => [
-            'database' => true,
-            'column' => 'authority_id',
-            'name' => 'Autorizzazione',
-            'search' => false,
-            'type' => 'radio'
-        ],
         "active" => [
             'database' => false,
             'column' => 'active',

@@ -10,9 +10,31 @@
 
             <input type="hidden" name="lang" value="<?=$LANG?>">
 
-            <?=text($TEXT->form->name, "name", "", "required")?>
+            <div class="col-2">
+            <?php
 
-            <?=text($TEXT->form->surname, "surname", "", "required")?>
+                $OPTIONS = [ 1 => "1 Partecipante" ];
+                
+                for ($i=2; $i < 3; $i++) { $OPTIONS[$i] = "$i Partecipanti"; }
+
+                echo select($TEXT->form->participants, "participants", $OPTIONS, "", "required onchange=\"checkParticipants(this.id)\"");
+
+            ?>
+            </div>
+            
+            <div class="col-2 d-grid col-2 gap-4">
+                <div id="responsible" class="w-100 d-grid col-2 gap-4 r-gap-1 participant">
+                    <div class="col-2">
+                        <span class="text-small"><span id="n-partecipant">1</span>° Participante</span>
+                    </div>
+                    <div class="col-1">
+                        <?=text($TEXT->form->name, "name[]", "", "required");?>
+                    </div>
+                    <div class="col-1">
+                        <?=text($TEXT->form->surname, "surname[]", "", "required");?>
+                    </div>
+                </div>
+            </div>
 
             <div class="col-2">
                 <?php
@@ -28,19 +50,10 @@
                 ?>
             </div>
 
-            <?=phone($TEXT->form->phone, "cel", "", "required")?>
-
-            <?php
-
-                $OPTIONS = [
-                    1 => "1 Partecipante",
-                    2 => "2 Partecipanti"
-                ];
-
-                echo select($TEXT->form->participants, "participants", $OPTIONS, "", "required");
-
-            ?>
-
+            <div class="col-2">
+                <?=phone($TEXT->form->phone, "cel", "", "required")?>
+            </div>
+            
             <div class="col-2">
                 <?=email($TEXT->form->email, "email", "", "required")?>
             </div>
@@ -148,6 +161,51 @@
         });
 
     }
+
+    function checkParticipants(partecipant) {
+
+        var input = document.querySelectorAll('.participant');
+        var inputLenght = input.length;
+
+        if (inputLenght < partecipant) {
+
+            for (let i = inputLenght; i < partecipant; i++) {
+
+                var original = document.getElementById('responsible');
+                var copy = original.cloneNode(true);
+                copy.id = "participant-" + i;
+                original.parentNode.appendChild(copy);
+
+                var inputName = document.querySelector("#participant-"+i+" input[name='name[]']");
+                inputName.value = "";
+
+                var inputSurname = document.querySelector("#participant-"+i+" input[name='surname[]']");
+                inputSurname.value = "";
+
+                var labelPartecipant = document.querySelector("#participant-"+i+" #n-partecipant");
+                i++;
+                labelPartecipant.innerHTML = i;
+                i--;
+
+            }
+
+        } else {
+
+            inputLenght--;
+            
+            for (let i = inputLenght; i >= partecipant; i--) {
+                const element = document.getElementById('participant-'+i);
+                element.remove();
+            }
+
+        }
+
+        setInput();
+        check();
+
+    };
+
+    window.addEventListener('loaded', (event) => { checkParticipants(document.querySelector("select[name='participants']").value); });
 
 </script>
 <?php } else { ?>
