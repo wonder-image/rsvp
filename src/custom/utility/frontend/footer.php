@@ -6,7 +6,7 @@
         </div>
         <form class="p-4 f-start w-100 d-grid col-2 gap-4 mt-10">
 
-            <?php if (isset($RSVP_PRIVATE)  && $RSVP_PRIVATE) : ?><input type="hidden" name="password_id" value="<?=$PSW->id?>"><? endif; ?>
+            <?php if (isset($RSVP_PRIVATE)  && $RSVP_PRIVATE) { ?><input type="hidden" name="password_id" value="<?=$PSW->id?>"><?php } ?>
 
             <input type="hidden" name="lang" value="<?=$LANG?>">
 
