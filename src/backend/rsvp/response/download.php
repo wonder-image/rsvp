@@ -10,7 +10,7 @@
     require_once "set-up.php";
 
     $FILE_NAME = "Partecipanti-".date('Y-m-d-H-i');
-    $ARRAY = [["Nome", "Cognome", "Partecipanti", "Email", "Cel", "Eventi", "Allergie", "Richieste"]];
+    $ARRAY = [["Nome", "Cognome", "Partecipanti", "Email", "Cel", "Eventi", "Allergie", "Richieste", "Consenso Privacy", "Consenso Foto"]];
 
     $SQL = sqlSelect('rsvp', ['deleted' => 'false']);
 
@@ -24,6 +24,9 @@
         foreach ($EVENT as $key => $value) { array_push($eventi, $EVENTI[$value]); }
         $eventi = implode(', ', $eventi);
 
+        $privacy = json_decode($PARTECIPATION->privacy)[0] == true ? 'Accettato' : 'Rifiutato';
+        $photo = json_decode($PARTECIPATION->photo)[0] == true ? 'Accettato' : 'Rifiutato';
+
         array_push($ARRAY, [
             $PARTECIPATION->name,
             $PARTECIPATION->surname,
@@ -32,13 +35,18 @@
             $PARTECIPATION->cel,
             $eventi,
             $PARTECIPATION->allergies,
-            $PARTECIPATION->requests
+            $PARTECIPATION->requests,
+            $privacy,
+            $photo
         ]);
 
     }
 
-    if ($_GET['file'] == 'csv') {
-        arrayToCsv($ARRAY, $FILE_NAME);
-    } else if ($_GET['file'] == 'xls') {
-        arrayToXls($ARRAY, $FILE_NAME);
+    switch ($_GET['file']) {
+        case 'csv':
+            arrayToCsv($ARRAY, $FILE_NAME);
+            break;
+        case 'xls':
+            arrayToXls($ARRAY, $FILE_NAME);
+            break;
     }

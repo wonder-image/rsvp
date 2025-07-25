@@ -112,6 +112,16 @@
 
                 <wi-card class="col-12">
                     <div class="col-12">
+                        <h6>CONSENSO</h6>
+                        <div class="w-100 mt-2">
+                            Privacy: <b><?=json_decode($PARTECIPATION->privacy)[0] == true ? 'Accettato' : 'Rifiutato'?></b> <br>
+                            Foto: <b><?=json_decode($PARTECIPATION->photo)[0] == true ? 'Accettato' : 'Rifiutato'?></b>
+                        </div>
+                    </div>
+                </wi-card>
+
+                <wi-card class="col-12">
+                    <div class="col-12">
                         <h6>EVENTI</h6>
                         <div class="w-100 mt-2">
                             <?php
@@ -123,6 +133,7 @@
                         </div>
                     </div>
                 </wi-card>
+                
 
             </div>
         </div>

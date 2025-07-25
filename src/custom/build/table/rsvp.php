@@ -11,7 +11,8 @@
         "allergies" => [],
         "requests" => [],
         "lang" => [],
-        "privacy" => []
+        "privacy" => [],
+        "photo" => []
     ];
 
     $TABLE->RSVP_DETAILS = [
