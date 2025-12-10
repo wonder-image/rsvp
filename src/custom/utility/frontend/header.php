@@ -1,8 +1,8 @@
 <header class="bg-white">
     <div class="content">
 
-        <div class="w-100"  style="height: 50px;">
-            <a href="<?=__u()?>" class="c-w"  style="width: 50px;height: 50px;">
+        <div class="w-100 w-p-auto" style="height: 50px;">
+            <a href="<?=__u()?>" class="p-r f-start c-w p-c-w-off"  style="width: 50px;height: 50px;">
                 <?=__ri($SOCIETY->icon)
                         ->alt("Icona $SOCIETY->name")
                         ->fitContain()
@@ -12,9 +12,8 @@
             </a>
         </div>
 
-        <div class="w-100">
-            <div class="center phone-none">
-                <div class="d-flex tx-white gap-4 tx-uppe j-content-center" style="line-height: 16px">
+        <div class="w-100 phone-none">
+            <div class="w-100 d-flex tx-white gap-4 tx-uppe j-content-center" style="line-height: 16px">
                 <a href="<?=__u()?>" class="tx-none"> <?=__t("components.navigation.home")?> </a>
                 <a href="#rsvp" class="tx-none"> <?=__t("components.navigation.rsvp")?> </a>
             </div>
