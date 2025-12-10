@@ -1,12 +1,23 @@
 <header class="bg-white">
     <div class="content">
 
-        <img src="<?=$PATH->logoIcon?>" alt="Icon <?=$SOCIETY->name?>" class="c-w phone-none" style="height: 50px;">
-        <img src="<?=$PATH->logoIcon?>" alt="Icon <?=$SOCIETY->name?>" class="c-h pc-none" style="height: 50px;">
+        <div class="w-100"  style="height: 50px;">
+            <a href="<?=__u()?>" class="c-w"  style="width: 50px;height: 50px;">
+                <?=__ri($SOCIETY->icon)
+                        ->alt("Icona $SOCIETY->name")
+                        ->fitContain()
+                        ->skeleton(false)
+                        ->size(480)
+                        ->render()?>
+            </a>
+        </div>
 
-        <div class="p-a bottom c-w nav-list tx-color phone-none" style="line-height: 16px">
-            <a href="<?=$PATH->site?>/<?=$LANG?>" class="nav">HOME</a>
-            <a href="#rsvp" class="nav">RSVP</a>
+        <div class="w-100">
+            <div class="center phone-none">
+                <div class="d-flex tx-white gap-4 tx-uppe j-content-center" style="line-height: 16px">
+                <a href="<?=__u()?>" class="tx-none"> <?=__t("components.navigation.home")?> </a>
+                <a href="#rsvp" class="tx-none"> <?=__t("components.navigation.rsvp")?> </a>
+            </div>
         </div>
 
         <div id="hamburger" class="c-h f-end pc-none tablet-none" onclick="menuMobile()">
@@ -25,8 +36,8 @@
     <div class="content bg-white">
 
         <div class="nav-list">
-            <a href="<?=$PATH->site?>" class="nav">HOME</a>
-            <a href="#rsvp" onclick="menuMobile()" class="nav">RSVP</a>
+            <a href="<?=__u()?>" class="nav"> <?=__t("components.navigation.home")?> </a>
+            <a href="#rsvp" class="nav" onclick="menuMobile()"> <?=__t("components.navigation.rsvp")?> </a>
         </div>
 
     </div>

@@ -1,0 +1,18 @@
+{
+    "rsvp_request_customer" : {
+        "subject" : "Richiesta inviata",
+        "text" : "Buongiorno {{name}},<br>{{society_name}} ti aspetta al suo {{event_name}} il {{event_date_hour}} al seguente indirizzo:<br><a href=\"{{event_gmaps}}\" target=\"_blank\" rel=\"noopener noreferrer\">{{event_address}}</a>"
+    },
+    "rsvp_request_admin" : {
+        "subject" : "Nuova conferma di partecipazione per l'evento {{event_name}}",
+        "text" : "Ecco i dettagli dei partecipanti:<br>{{body}}<br><br><a href=\"{{request}}\">Clicca qui</a> per vedere la richiesta."
+    },
+    "contact_request_customer" : {
+        "subject" : "Richiesta inviata",
+        "text" : "Buongiorno {{name}},<br>La tua richiesta è stata inviata con successo. Ti risponderemo il prima possibile.<br>Cordiali saluti."
+    },
+    "contact_request_admin" : {
+        "subject" : "Nuovo contatto dal sito",
+        "text" : "Ecco i dettagli del contatto:<br>{{body}}<br><br><a href=\"{{request}}\">Clicca qui</a> per vedere la richiesta.<br><br>Link invio richiesta:<br><a href='{{request_url}}'>{{request_url}}</a>"
+    }
+}

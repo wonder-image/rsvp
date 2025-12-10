@@ -1,11 +1,5 @@
 <?php
 
-    // Info evento
-    if (sqlTableExists('rsvp_details')) {
-        $EVENT = info('rsvp_details', 'id', '1');
-        $EVENT->datePretty = date('d.m.Y', strtotime($EVENT->date));    
-    }
-
     // Controllo password
     if (isset($RSVP_PRIVATE) && $RSVP_PRIVATE) {
         if (isset($_SESSION['password_id']) && !empty($_SESSION['password_id'])) {
@@ -23,17 +17,21 @@
                         $PSW->authority = sqlSelect("rsvp_authority", ['id' => $SQL->row['authority_id']], 1)->row['code'];
     
                     } else {
-                        header("Location: $PATH->site/$LANG/login/");
+                        header("Location: ".__u('login'));
                     }
                 } else {
-                    header("Location: $PATH->site/$LANG/login/");
+                    header("Location: ".__u('login'));
                 }
                 
             } else {
-                header("Location: $PATH->site/$LANG/login/");
+                header("Location: ".__u('login'));
             }
 
         } else {
-            header("Location: $PATH->site/$LANG/login/");
+            header("Location: ".__u('login'));
         }
     }
+
+    $SEO->title = __t("pages.home.seo.title");
+    $SEO->description = __t("pages.home.seo.description");
+    // $SEO->image = $PATH->upload.'/images/hero/chi-siamo-3-960.webp';

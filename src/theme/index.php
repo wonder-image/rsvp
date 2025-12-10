@@ -3,11 +3,23 @@
     $RSVP_PRIVATE = false;
     $RSVP_AUTHORITY = [];
 
-    require_once __DIR__."/set-up.php";
+    $FRONTEND = true;
+    $PRIVATE = false;
+    $PERMIT = [];
+
+    $ROOT = $_SERVER['DOCUMENT_ROOT'];
+    require_once $ROOT."/vendor/wonder-image/app/wonder-image.php";
+
+    $PAGE_KEY = 'home';
+
+    $SEO->url = __u();
+    $SEO->breadcrumb = [
+        $SEO->url => __t("components.navigation.{$PAGE_KEY}")
+    ];
 
 ?>
 <!DOCTYPE html>
-<html lang="<?=$LANG?>">
+<html lang="<?=__l()?>">
 <head>
 
     <?php include $ROOT_APP.'/utility/frontend/head.php'; ?>
@@ -18,7 +30,7 @@
     <?php include $ROOT_APP.'/utility/frontend/body-start.php' ?>
     <?php include $ROOT.'/custom/utility/frontend/header.php' ?>
 
-    <section class="intro full-page h-70">
+    <section class="intro full-page vh-70">
         <div class="content">
 
         </div>
@@ -27,43 +39,43 @@
     <section id="countdown">
         <div class="content content-little">
             <div class="title a-c">
-                <?=$TEXT->title->big_day?>
+                <?=__t('pages.home.content.timer.title')?>
             </div>
             <div class="w-100 d-grid col-4 col-t-2 col-p-1 gap-4 mt-8">
 
                 <div class="a-c">
                     <div class="title-big">
-                        <span class="days"></span>
+                        <span class="days">00</span>
                     </div>
                     <div class="text mt-2">
-                        <?=$TEXT->word->days?>
+                        <?=__t('date.days')?>
                     </div>
                 </div>
 
                 <div class="a-c">
                     <div class="title-big">
-                        <span class="hours"></span>
+                        <span class="hours">00</span>
                     </div>
                     <div class="text mt-2">
-                        <?=$TEXT->word->hours?>
+                        <?=__t('date.hours')?>
                     </div>
                 </div>
 
                 <div class="a-c">
                     <div class="title-big">
-                        <span class="minutes"></span>
+                        <span class="minutes">00</span>
                     </div>
                     <div class="text mt-2">
-                        <?=$TEXT->word->minutes?>
+                        <?=__t('date.minutes')?>
                     </div>
                 </div>
 
                 <div class="a-c">
                     <div class="title-big">
-                        <span class="seconds"></span>
+                        <span class="seconds">00</span>
                     </div>
                     <div class="text mt-2">
-                        <?=$TEXT->word->seconds?>
+                        <?=__t('date.seconds')?>
                     </div>
                 </div>
 

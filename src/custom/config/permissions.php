@@ -9,7 +9,7 @@
                 "bg" => "bg-info",
                 "tx" => "text-light",
                 "color" => "info",
-                "creator" => ["admin"]
+                "creator" => [ "admin" ]
             ]
         ],
     ];

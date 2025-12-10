@@ -2,13 +2,13 @@
 <section id="rsvp">
     <div class="content content-little">
         <div class="title a-c">
-            <?=$TEXT->title->confirm_participation?>
+            <?=__t('components.forms.rsvp.title')?>
         </div>
         <form class="p-4 f-start w-100 d-grid col-2 gap-4 mt-10">
 
             <?php if (isset($RSVP_PRIVATE)  && $RSVP_PRIVATE) { ?><input type="hidden" name="password_id" value="<?=$PSW->id?>"><?php } ?>
 
-            <input type="hidden" name="lang" value="<?=$LANG?>">
+            <input type="hidden" name="lang" value="<?=__l()?>">
 
             <div class="col-2">
             <?php
@@ -17,7 +17,7 @@
                 
                 for ($i=2; $i < 3; $i++) { $OPTIONS[$i] = "$i Partecipanti"; }
 
-                echo select($TEXT->form->participants, "participants", $OPTIONS, "", "required onchange=\"checkParticipants(this.id)\"");
+                echo select(__t('components.forms.fields.participants.label'), "participants", $OPTIONS, "", "required onchange=\"checkParticipants(this.id)\"");
 
             ?>
             </div>
@@ -28,10 +28,10 @@
                         <span class="text-small"><span id="n-partecipant">1</span>° Participante</span>
                     </div>
                     <div class="col-1">
-                        <?=text($TEXT->form->name, "name[]", "", "required");?>
+                        <?=text(__t('components.forms.fields.name.label'), "name[]", "", "required");?>
                     </div>
                     <div class="col-1">
-                        <?=text($TEXT->form->surname, "surname[]", "", "required");?>
+                        <?=text(__t('components.forms.fields.surname.label'), "surname[]", "", "required");?>
                     </div>
                 </div>
             </div>
@@ -45,33 +45,44 @@
                         "brunch" => "Brunch <span class='text-small'>11.06.23 - h 11.30</span>",
                     ];
                 
-                    echo checkbox($TEXT->form->events, "events", $OPTIONS);
+                    echo checkbox(__t('components.forms.fields.events.label'), "events", $OPTIONS);
                 
                 ?>
             </div>
 
             <div class="col-2">
-                <?=phone($TEXT->form->phone, "cel", "", "required")?>
+                <?=phone(__t('components.forms.fields.phone.label'), "phone", "", "required")?>
             </div>
             
             <div class="col-2">
-                <?=email($TEXT->form->email, "email", "", "required")?>
+                <?=email(__t('components.forms.fields.email.label'), "email", "", "required")?>
             </div>
 
             <div class="col-2">
-                <?=textarea($TEXT->form->allergies, "allergies")?>
+                <?=textarea(__t('components.forms.fields.name.allergies'), "allergies")?>
             </div>
 
             <div class="col-2">
-                <?=textarea($TEXT->form->requests, "requests")?>
+                <?=textarea(__t('components.forms.fields.name.allergies'), "requests")?>
             </div>
 
             <div class="col-2">
-                <?=checkbox('', 'privacy', ["true" => ["label" => $TEXT->form->privacy, "attribute" => "required"]], 'checkbox', '');?>
+                <?=checkbox('', 'privacy', ["true" => ["label" => __t('components.forms.fields.privacy.label'), "attribute" => "required"]], 'checkbox', '');?>
             </div>
 
             <div class="col-2">
-                <?=submit($TEXT->form->send, "send", "btn-primary c-w", "sendRSVP(this)")?>
+                <?=checkbox('', 'photo', ["true" => ["label" => __t('components.forms.fields.privacy_photo.label'), "attribute" => "required"]], 'checkbox', '');?>
+            </div>
+
+            <div class="col-2">
+                <?=submit(__t('components.buttons.send'), "send", "btn-primary c-w", "formSubmit(this.form, '/frontend/rsvp/', showResponseRSVP)")?>
+            </div>
+
+            <div class="col-2 mt-5 a-c">
+                <div class="text">
+                    <?=__t('components.terms.concierge')?>: <br>
+                    <a href="mailto:<?=$SOCIETY->email?>"><?=$SOCIETY->email?></a>
+                </div>
             </div>
             
         </form>
@@ -80,85 +91,16 @@
 
 <script>
 
-    function sendRSVP(button) {
+    function showResponseRSVP(response) {
 
-        loadingSpinner();
+        var container = document.querySelector("#loading-spinner .center");
+        container.classList.add("w-80");
 
-        var formInput = button.form.elements;
-
-        const ARRAY = {};
-
-        for (let i = 0; i < formInput.length; i++) {
-
-            var add = false;
-
-            var input = formInput[i];
-
-            if (input.type == 'checkbox' || input.type == 'radio') {
-                if (input.checked == true) { var add = true; }
-            } else {
-                if (input.value != "") { var add = true;}
-            }
-
-            if (add) {
-
-                var inputName = input.name;
-                var inputValue = input.value;
-
-                if (inputName.includes("[]")) {
-                    inputName = inputName.replace("[]", "");
-
-                    if (inputName in ARRAY) {
-                        inputName = inputName.replace("[]", "");
-                        ARRAY[inputName].push(inputValue);
-                    } else {
-                        inputName = inputName.replace("[]", "");
-                        ARRAY[inputName] = [];
-                        ARRAY[inputName].push(inputValue);
-                    }
-                    
-                } else {
-                    if (inputName in ARRAY) {
-                    } else {
-                        ARRAY[inputName] = inputValue;
-                    }
-                }
-
-            }
-
+        if (response.success) {
+            container.innerHTML = '<div class="title-big a-c"><i class="bi bi-check2-circle tx-success"></i></div><div class="subtitle mt-8 a-c"><?=__t('components.forms.rsvp.success')?></div><div class="c-w mt-10"><a onclick="location.reload(); " class="btn btn-primary c-w"><?=__t('components.buttons.back_site')?></a></div>';
+        } else {
+            container.innerHTML = '<div class="title-big a-c"><i class="bi bi-x-circle tx-danger"></i></div><div class="subtitle mt-8 a-c"><?=__t('components.forms.rsvp.error')?></div><div class="c-w mt-10"><a onclick="loadingSpinner();" class="btn btn-primary c-w"><?=__t('components.buttons.retry')?></a></div>';
         }
-
-        var form = JSON.stringify(ARRAY);
-
-        $.ajax({
-            type: "POST",
-            url: pathSite+'/api/frontend/rsvp.php',
-            data: { 
-                post: 'true',
-                form: form
-            }, 
-            success: function (data) {
-
-                if (data != '') {
-
-                    var container = document.querySelector("#loading-spinner .center");
-                    container.classList.add("w-80");
-                    container.innerHTML = '<div class="title-big a-c"><i class="bi bi-x-circle tx-danger"></i></div><div class="subtitle mt-8 a-c"><?=$TEXT->title->participation_error?></div><div class="c-w mt-10"><a onclick="location.reload();" class="btn btn-primary c-w">Riprova</a></div>';
-
-                } else {
-                    
-                    var container = document.querySelector("#loading-spinner .center");
-                    container.classList.add("w-80");
-                    container.innerHTML = '<div class="title-big a-c"><i class="bi bi-check2-circle tx-success"></i></div><div class="subtitle mt-8 a-c"><?=$TEXT->title->participation_success?></div><div class="c-w mt-10"><a onclick="location.reload(); " class="btn btn-primary c-w">Torna al sito</a></div>';
-
-                }
-
-            },
-            error: function (XMLHttpRequest) {
-                ajaxRequestError(XMLHttpRequest);
-                loadingSpinner();
-            }
-        });
 
     }
 
@@ -212,10 +154,10 @@
 <section id="rsvp">
     <div class="content content-little">
         <div class="title a-c">
-            <?=$TEXT->title->participation_send?>
+            <?=__t('components.forms.rsvp.send')?>
         </div>
         <div class="subtitle a-c mt-4">
-            <?=$TEXT->subtitle->participation_send?> <?=$EVENT->datePretty?>
+            <?=__t('components.terms.waiting_date')?>
         </div>
     </div>
 </section>
@@ -224,15 +166,11 @@
 <footer class="bg-primary tx-white">
     <div class="content">
 
-        <div class="subtitle a-c">
-            <?=$EVENT->name?>
-        </div>
-        <div class="text mt-1 a-c">
-            <?=$EVENT->datePretty?>
-        </div>
+        <div class="subtitle a-c"> <?=$EVENT->name?> </div>
+        <div class="text mt-1 a-c"> <?=$EVENT->datePretty?> </div>
 
         <div class="text-small mt-8 a-c">
-            Credit by <a href="https://www.wonderimage.it/" target="_blank" rel="noopener noreferrer">Wonder Image</a>
+            <?=__t('components.terms.credit_by')?> <a href="https://www.wonderimage.it/" target="_blank" rel="noopener noreferrer">Wonder Image</a>
         </div>
 
     </div>

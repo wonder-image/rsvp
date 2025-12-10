@@ -5,7 +5,7 @@
         "name" => [],
         "surname" => [],
         "participants" => [],
-        "cel" => [],
+        "phone" => [],
         "email" => [],
         "events" => [],
         "allergies" => [],

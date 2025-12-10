@@ -5,5 +5,3 @@
         sqlInsert('rsvp_details', []);
         
     }
-
-    sqlModify('css_default', [ 'header_height' => "120" ], 'id', 1);

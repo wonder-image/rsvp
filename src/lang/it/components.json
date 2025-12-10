@@ -1,0 +1,53 @@
+{
+  "forms" : {
+    "fields" : {
+      "participants" : {
+        "label" : "Partecipanti"
+      },
+      "allergies" : {
+        "label" : "Hai qualche allergia?"
+      },
+      "events" : {
+        "label" : "Per quale evento si conferma la presenza?"
+      },
+      "privacy_photo" : {
+        "label" : "Acconsento alla raccolta di immagini fotografiche\\video per finalità commerciali e di carattere informativo\\promozionale sul sito web e sui social media."
+      }
+    },
+    "rsvp" : {
+      "title" : "Conferma la tua partecipazione",
+      "send" : "La tua partecipazione è già stata inviata",
+      "success" : "La tua partecipazione è stata inviata con successo!",
+      "error" : "C\\'è stato un problema con l\\'invio della tua partecipazione"
+    }
+  },
+  "navigation" : {
+    "home" : "Home",
+    "story" : "La nostra storia",
+    "events" : "Eventi",
+    "wishlist" : "Lista dei desideri",
+    "accommodation" : "Accommodation",
+    "rsvp" : "RSVP",
+    "gallery" : "Gallery",
+    "login": "Login",
+    "news" : "News",
+    "contact" : "Contatti",
+    "privacy_policy" : "Privacy Policy",
+    "cookie_policy" : "Cookie Policy",
+    "terms_conditions" : "Termini e Condizioni"
+  },
+  "buttons" : {
+    
+  },
+  "terms" : {
+    "wedding" : "Matrimonio",
+    "brunch" : "Brunch",
+    "dinner" : "Cena",
+    "lunch" : "Pranzo",
+    "waiting_date" : "Ti aspettiamo il {{event_date}}",
+    "location" : "Location",
+    "meeting" : "Ritrovo",
+    "parking" : "Parcheggio",
+    "concierge": "Wedding"
+  }
+}

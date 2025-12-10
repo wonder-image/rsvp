@@ -3,7 +3,19 @@
     $RSVP_PRIVATE = false;
     $RSVP_AUTHORITY = [];
     
-    require_once __DIR__."/../set-up.php";
+    $FRONTEND = true;
+    $PRIVATE = false;
+    $PERMIT = [];
+
+    $ROOT = $_SERVER['DOCUMENT_ROOT'];
+    require_once $ROOT."/vendor/wonder-image/app/wonder-image.php";
+
+    $PAGE_KEY = 'login';
+
+    $SEO->url = __u($PAGE_KEY);
+    $SEO->breadcrumb = [
+        $SEO->url => __t("components.navigation.$PAGE_KEY")
+    ];
 
     if (isset($_POST['login'])) {
         
@@ -33,7 +45,7 @@
 
 ?>
 <!DOCTYPE html>
-<html lang="<?=$LANG?>">
+<html lang="<?=__l()?>">
 <head>
 
     <?php include $ROOT_APP.'/utility/frontend/head.php'; ?>
@@ -48,10 +60,10 @@
             <form action="" method="post" class="w-100 p-6 center bg-white">
                 <img src="<?=$PATH->logoIcon?>" alt="Icon <?=$SOCIETY->name?>" alt="" class="w-30 c-w">
                 <div class="w-100 mt-6">
-                    <?=password($TEXT->form->password, 'password', '', 'required')?>
+                    <?=password(__t('components.forms.fields.name.password'), 'password', '', 'required')?>
                 </div>
                 <div class="w-100 mt-4">
-                    <?=submit($TEXT->form->log_in, "login", "btn-primary c-w")?>
+                    <?=submit(__t('components.buttons.login'), "login", "btn-primary c-w")?>
                 </div>
             </form>
         </div>

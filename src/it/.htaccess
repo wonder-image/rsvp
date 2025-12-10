@@ -1,6 +1,0 @@
-# Turn rewriting on
-Options +FollowSymLinks
-RewriteEngine On
-
-# Redirect requests
-RewriteRule (.*) ../theme/$1

@@ -1,0 +1,18 @@
+{
+  "home": {
+    "seo": {
+      "title": "{{event_name}} {{society_name}}",
+      "description": "{{society_name}} invites you to its event {{event_name}}, which will take place on {{event_date_hour}} at {{event_address}}."
+    },
+    "content": {
+      "hero": {
+        "title": "",
+        "subtitle": "",
+        "text": ""
+      },
+      "timer": {
+        "title": "The big day"
+      }
+    }
+  }
+}
