@@ -29,7 +29,7 @@
         "empty" => [
             "function" => [
                 "name" => "empty",
-                "tables" => [ 'rsvp_password' => [] ],
+                "tables" => [ 'rsvp_password' ],
                 "column" => "authority_id",
                 "multiple" => true
             ]

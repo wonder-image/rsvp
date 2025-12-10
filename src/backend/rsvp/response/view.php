@@ -68,7 +68,7 @@
 
                             ?>
                             Email: <b><?=$PARTECIPATION->email?></b> <br>
-                            Cel: <b><?=$PARTECIPATION->cel?></b>
+                            Cel: <b><?=$PARTECIPATION->phone?></b>
                         </div>
                     </div>
                     <div class="col-6">
@@ -120,7 +120,7 @@
                     </div>
                 </wi-card>
 
-                <wi-card class="col-12">
+                <!-- <wi-card class="col-12">
                     <div class="col-12">
                         <h6>EVENTI</h6>
                         <div class="w-100 mt-2">
@@ -132,7 +132,7 @@
                             ?>
                         </div>
                     </div>
-                </wi-card>
+                </wi-card> -->
                 
 
             </div>

@@ -36,19 +36,9 @@
                 </div>
             </div>
 
-            <div class="col-2">
-                <?php
-
-                    $OPTIONS = [
-                        "pool-party" => "Pool Party <span class='text-small'>09.06.23 - h 18.00</span>",
-                        "wedding" => "Beach Wedding Day <span class='text-small'>10.06.23 - h 19.00</span>",
-                        "brunch" => "Brunch <span class='text-small'>11.06.23 - h 11.30</span>",
-                    ];
-                
-                    echo checkbox(__t('components.forms.fields.events.label'), "events", $OPTIONS);
-                
-                ?>
-            </div>
+            <!-- <div class="col-2">
+                <?=checkbox(__t('components.forms.fields.events.label'), "events", $EVENTI)?>
+            </div> -->
 
             <div class="col-2">
                 <?=phone(__t('components.forms.fields.phone.label'), "phone", "", "required")?>
@@ -59,11 +49,11 @@
             </div>
 
             <div class="col-2">
-                <?=textarea(__t('components.forms.fields.name.allergies'), "allergies")?>
+                <?=textarea(__t('components.forms.fields.allergies.label'), "allergies")?>
             </div>
 
             <div class="col-2">
-                <?=textarea(__t('components.forms.fields.name.allergies'), "requests")?>
+                <?=textarea(__t('components.forms.fields.request.label'), "requests")?>
             </div>
 
             <div class="col-2">
@@ -118,10 +108,18 @@
                 copy.id = "participant-" + i;
                 original.parentNode.appendChild(copy);
 
+                var randID = code(5);
+
+                var labels = document.querySelectorAll("#participant-"+i+" label");
+
                 var inputName = document.querySelector("#participant-"+i+" input[name='name[]']");
+                inputName.id = randID+"-name";
+                labels[0].setAttribute("for", randID+"-name");
                 inputName.value = "";
 
                 var inputSurname = document.querySelector("#participant-"+i+" input[name='surname[]']");
+                inputSurname.id = randID+"-surname";
+                labels[1].setAttribute("for", randID+"-surname");
                 inputSurname.value = "";
 
                 var labelPartecipant = document.querySelector("#participant-"+i+" #n-partecipant");

@@ -1,5 +1,7 @@
 <?php
 
+    use Wonder\Localization\{ LanguageContext, TranslationProvider };
+
     // Info evento
     if (sqlTableExists('rsvp_details')) {
 
@@ -16,8 +18,6 @@
         ]);
         
     }
-
-    use Wonder\Localization\{ LanguageContext };
 
     # Imposto le lingue
     LanguageContext::addLangPath($ROOT.'/lang/')

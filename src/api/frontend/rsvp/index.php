@@ -23,7 +23,7 @@
             }
 
         # Preparo i valori per l'upload
-            $VALUES = Table::key('form')
+            $VALUES = Table::key('rsvp')
                         ->prepare($CALL->parameters);
 
             if (isset($ALERT) && !empty($ALERT)) { throw new Exception(__t("notifications.{$ALERT}.text"), $ALERT); } 
@@ -38,7 +38,7 @@
             }
 
         # Inserisco la richiesta
-            $SQL = sqlInsert('form', $VALUES);
+            $SQL = sqlInsert('rsvp', $VALUES);
             $REQUEST_ID = $SQL->insert_id;
             
             if (isset($ALERT) && !empty($ALERT)) { throw new Exception(__t("notifications.{$ALERT}.text"), $ALERT); } 
@@ -51,7 +51,7 @@
             if (is_array($names)) {
 
                 foreach ($names as $key => $v) {
-                    $nameList .= '<li>'.$key + 1 .': '.$v.' '.$surnames[$key].'</li>'; 
+                    $nameList .= '<li>'.$v.' '.$surnames[$key].'</li>'; 
                 }
 
             } else {
@@ -81,7 +81,7 @@
             $object = __t("emails.rsvp_request_admin.subject", $VALUES);
 
             $body = "";
-            foreach ([ 'participants', 'phone', 'email', 'request', 'allergies' ] as $field) { $body .= __t("components.forms.fields.{$field}.label").': '.$VALUES[$field].'<br>'; }
+            foreach ([ 'participants', 'phone', 'email', 'request', 'allergies' ] as $field) { $body .= __t("components.forms.fields.{$field}.label").' '.$VALUES[$field].'<br>'; }
 
             $body = __t("emails.rsvp_request_admin.text", [
                 'body' => $body,

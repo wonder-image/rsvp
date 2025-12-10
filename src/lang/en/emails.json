@@ -1,7 +1,7 @@
 {
     "rsvp_request_customer": {
         "subject": "Request sent",
-        "text": "Good morning {{name}},<br>you are expected on {{event_date_hour}} at the following address:<br><a href=\"{{event_gmaps}}\" target=\"_blank\" rel=\"noopener noreferrer\">{{event_address}}</a>"
+        "text": "Good morning {{name}},<br>{{society_name}} are looking forward to seeing you at their wedding on {{event_date_hour}} at the following address:<br><a href=\"{{event_gmaps}}\" target=\"_blank\" rel=\"noopener noreferrer\">{{event_address}}</a>"
     },
     "contact_request_customer": {
         "subject": "Request Sent",

@@ -37,7 +37,7 @@
     "terms_conditions": "Terms and Conditions"
   },
   "buttons": {
-    
+    "login" : "Login"
   },
   "terms": {
     "wedding": "Wedding",
@@ -48,6 +48,6 @@
     "location": "Location",
     "meeting": "Meeting point",
     "parking": "Parking",
-    "concierge": "Wedding"
+    "concierge": "Concierge"
   }
 }

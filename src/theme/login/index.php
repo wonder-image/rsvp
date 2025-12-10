@@ -60,7 +60,7 @@
             <form action="" method="post" class="w-100 p-6 center bg-white">
                 <img src="<?=$PATH->logoIcon?>" alt="Icon <?=$SOCIETY->name?>" alt="" class="w-30 c-w">
                 <div class="w-100 mt-6">
-                    <?=password(__t('components.forms.fields.name.password'), 'password', '', 'required')?>
+                    <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
                 </div>
                 <div class="w-100 mt-4">
                     <?=submit(__t('components.buttons.login'), "login", "btn-primary c-w")?>

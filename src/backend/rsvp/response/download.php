@@ -10,7 +10,7 @@
     require_once "set-up.php";
 
     $FILE_NAME = "Partecipanti-".date('Y-m-d-H-i');
-    $ARRAY = [["Nome", "Cognome", "Partecipanti", "Email", "Cel", "Eventi", "Allergie", "Richieste", "Consenso Privacy", "Consenso Foto"]];
+    $ARRAY = [["Nome", "Cognome", "Partecipanti", "Email", "Telefono", "Eventi", "Allergie", "Richieste", "Consenso Privacy", "Consenso Foto"]];
 
     $SQL = sqlSelect('rsvp', ['deleted' => 'false']);
 
@@ -18,27 +18,38 @@
 
         $PARTECIPATION = info('rsvp', 'id', $row['id']);
 
-        $EVENT = is_array(json_decode($PARTECIPATION->events)) ? json_decode($PARTECIPATION->events) : [ $PARTECIPATION->events ];
+        // $EVENT = is_array(json_decode($PARTECIPATION->events)) ? json_decode($PARTECIPATION->events) : [ $PARTECIPATION->events ];
 
-        $eventi = [];
-        foreach ($EVENT as $key => $value) { array_push($eventi, $EVENTI[$value]); }
-        $eventi = implode(', ', $eventi);
+        // $eventi = [];
+        // foreach ($EVENT as $key => $value) { array_push($eventi, $EVENTI[$value]); }
+        // $eventi = implode(', ', $eventi);
 
         $privacy = json_decode($PARTECIPATION->privacy)[0] == true ? 'Accettato' : 'Rifiutato';
         $photo = json_decode($PARTECIPATION->photo)[0] == true ? 'Accettato' : 'Rifiutato';
 
-        array_push($ARRAY, [
-            $PARTECIPATION->name,
-            $PARTECIPATION->surname,
-            $PARTECIPATION->participants,
-            $PARTECIPATION->email,
-            $PARTECIPATION->cel,
-            $eventi,
-            $PARTECIPATION->allergies,
-            $PARTECIPATION->requests,
-            $privacy,
-            $photo
-        ]);
+        $partecipantName = json_decode($PARTECIPATION->name);
+        $partecipantSurname = json_decode($PARTECIPATION->surname);
+
+        foreach ($partecipantName as $key => $name) {
+                
+            $surname = $partecipantSurname[$key];
+            
+            array_push($ARRAY, [
+                $name,
+                $surname,
+                $PARTECIPATION->participants,
+                $PARTECIPATION->email,
+                $PARTECIPATION->phone,
+                $eventi ?? '',
+                $PARTECIPATION->allergies,
+                $PARTECIPATION->requests,
+                $privacy,
+                $photo
+            ]);
+
+            break;
+            
+        }
 
     }
 
