@@ -67,7 +67,7 @@ final class Response extends Model
             Field::key('contact_name')->text()->required()->sanitizeFirst(),
             Field::key('contact_surname')->text()->sanitizeFirst(),
             Field::key('contact_phone')->text(),
-            Field::key('contact_email')->email()->required()->lower(),
+            Field::key('contact_email')->email()->required(),
             Field::key('participants_json')->text()->required()->json()->sanitize(false),
             Field::key('participants_count')->number()->required()->decimals(0),
             Field::key('children_count')->number()->required()->decimals(0),

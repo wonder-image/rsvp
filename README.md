@@ -1,5 +1,7 @@
 # wonder-image/rsvp
 
+Installazione del modulo via Packagist, valida sia in locale sia in produzione:
+
 ```bash
 composer require wonder-image/rsvp:dev-main
 ```
@@ -31,7 +33,7 @@ Modulo RSVP per `wonder-image/app`, adattato al nuovo sistema moduli.
 
 ## Installazione
 
-1. Installa il package nel consumer.
+1. Installa il package nel consumer con Composer.
 
 2. Abilita il modulo in `custom/config/modules.php`.
 
@@ -59,6 +61,8 @@ return [
 3. Se ti serve configurazione file-based del modulo, usa `custom/config/modules/rsvp.php`.
 
 4. Esegui l'update del progetto consumer per materializzare le tabelle dei model scoperti dal modulo.
+
+Non serve dichiarare `repositories` custom nel `composer.json` del consumer se installi il package da Packagist.
 
 ## Endpoint e route
 
