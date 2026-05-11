@@ -56,4 +56,15 @@ interface RsvpExtension
      * @param array<string, mixed> $payload   Payload originale
      */
     public function afterSubmit(array $response, array $payload): void;
+
+    /**
+     * Override dei meta SEO della pagina RSVP. Tornare un array con
+     * eventuali chiavi: title, description, image (path o url assoluta).
+     * Chiavi assenti → fallback ai default del modulo.
+     *
+     * @param string $page  'home' | 'login'
+     * @param array<string, mixed> $state  Output di FrontendContext::state()
+     * @return array{title?:string, description?:string, image?:string}
+     */
+    public function seo(string $page, array $state): array;
 }

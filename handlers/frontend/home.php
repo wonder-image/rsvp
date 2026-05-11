@@ -1,6 +1,7 @@
 <?php
 
 use Wonder\Plugin\Rsvp\Rsvp;
+use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
 use Wonder\Plugin\Rsvp\Support\FrontendContext;
 use Wonder\Plugin\Rsvp\Support\FrontendPage;
 
@@ -20,6 +21,23 @@ if ($requiresInviteCode && !$hasSession) {
 
 $title = (string) ($state['home_title'] ?? 'RSVP');
 $description = trim(strip_tags((string) ($state['home_text'] ?? '')));
+
+// Override SEO dal consumer (RsvpExtension::seo). Title/description sono
+// passati per parametro a FrontendPage::render; image va settata sul
+// global $SEO PRIMA del render perché head.php legge da $GLOBALS['SEO']
+// e FrontendPage::render non resetta la chiave `image`.
+$seoOverride = ExtensionRegistry::get()->seo('home', $state);
+
+if (!empty($seoOverride['title'])) {
+    $title = (string) $seoOverride['title'];
+}
+if (array_key_exists('description', $seoOverride)) {
+    $description = (string) $seoOverride['description'];
+}
+if (!empty($seoOverride['image'])) {
+    $GLOBALS['SEO'] = $GLOBALS['SEO'] ?? (object) [];
+    $GLOBALS['SEO']->image = (string) $seoOverride['image'];
+}
 
 FrontendPage::render(
     'rsvp.home',

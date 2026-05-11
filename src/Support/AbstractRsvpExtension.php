@@ -24,4 +24,9 @@ abstract class AbstractRsvpExtension implements RsvpExtension
     {
         // no-op
     }
+
+    public function seo(string $page, array $state): array
+    {
+        return [];
+    }
 }
