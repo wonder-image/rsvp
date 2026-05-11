@@ -53,6 +53,14 @@ final class FrontendPage
         $GLOBALS['PAGE_KEY'] = $pageKey;
         $PAGE_KEY = $pageKey;
 
+        // Esponi $data anche su $GLOBALS così Rsvp::component() (statico)
+        // può importarli quando i componenti vengono richiamati dalla view.
+        foreach ($data as $__dataKey => $__dataValue) {
+            if (is_string($__dataKey) && $__dataKey !== '') {
+                $GLOBALS[$__dataKey] = $__dataValue;
+            }
+        }
+
         extract($data, EXTR_SKIP);
 
         ?>
