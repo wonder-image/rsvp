@@ -309,104 +309,158 @@
                         <div class="rsvp-actions" style="margin-top: 1.5rem;">
                             <a class="rsvp-btn" href="<?=$escape($loginUrl)?>"><?= $escape((string) ($formContent['invite_required_button'] ?? 'Vai al login RSVP')) ?></a>
                         </div>
-                    <?php } else { ?>
+                    <?php } else {
+                            $participantsOptions = [];
+                            for ($i = 1; $i <= $maxParticipants; $i++) {
+                                $participantsOptions[(string) $i] = (string) $i;
+                            }
+                            $childrenOptions = [];
+                            for ($i = 0; $i <= $maxChildren; $i++) {
+                                $childrenOptions[(string) $i] = (string) $i;
+                            }
+                            $eventOptions = [];
+                            foreach ($visibleEvents as $eventKey => $event) {
+                                $eventOptions[(string) $eventKey] = (string) ($event['label'] ?? $eventKey);
+                            }
+                        ?>
                         <form id="rsvp-form" class="rsvp-form">
                             <input type="hidden" name="invite_code_id" value="<?=$escape((string) ($session['id'] ?? ''))?>">
                             <input type="hidden" name="locale" value="<?=$escape($locale)?>">
 
                             <?php if ($visibleEvents !== []) { ?>
-                                <div>
-                                    <label class="rsvp-label"><?= $escape((string) ($formContent['events_label'] ?? 'Eventi')) ?></label>
-                                    <div class="rsvp-events">
-                                        <?php if (count($visibleEvents) === 1) { ?>
-                                            <?php foreach ($visibleEvents as $eventKey => $event) { ?>
-                                                <input type="hidden" name="event_key" value="<?=$escape((string) $eventKey)?>">
-                                                <div class="rsvp-pill"><?= $escape((string) ($event['label'] ?? $eventKey)) ?></div>
-                                            <?php } ?>
-                                        <?php } else { ?>
-                                            <?php foreach ($visibleEvents as $eventKey => $event) { ?>
-                                                <label class="rsvp-checkbox">
-                                                    <input type="checkbox" name="events[]" value="<?=$escape((string) $eventKey)?>">
-                                                    <span><?= $escape((string) ($event['label'] ?? $eventKey)) ?></span>
-                                                </label>
-                                            <?php } ?>
-                                        <?php } ?>
-                                    </div>
+                                <div class="rsvp-events-wrap">
+                                    <?php if (count($visibleEvents) === 1) {
+                                        $eventKey = array_key_first($visibleEvents);
+                                        $event = $visibleEvents[$eventKey];
+                                        ?>
+                                        <input type="hidden" name="event_key" value="<?=$escape((string) $eventKey)?>">
+                                        <label class="rsvp-label"><?= $escape((string) ($formContent['events_label'] ?? 'Eventi')) ?></label>
+                                        <div class="rsvp-pill"><?= $escape((string) ($event['label'] ?? $eventKey)) ?></div>
+                                    <?php } else { ?>
+                                        <?= checkbox(
+                                            (string) ($formContent['events_label'] ?? 'Eventi'),
+                                            'events',
+                                            $eventOptions,
+                                            'checkbox'
+                                        ) ?>
+                                    <?php } ?>
                                 </div>
                             <?php } ?>
 
                             <div class="rsvp-form-row">
-                                <div>
-                                    <label class="rsvp-label" for="rsvp-contact-name"><?= $escape((string) ($formContent['contact_name_label'] ?? 'Nome referente')) ?></label>
-                                    <input class="rsvp-input" id="rsvp-contact-name" type="text" name="contact_name" required>
-                                </div>
-                                <div>
-                                    <label class="rsvp-label" for="rsvp-contact-surname"><?= $escape((string) ($formContent['contact_surname_label'] ?? 'Cognome referente')) ?></label>
-                                    <input class="rsvp-input" id="rsvp-contact-surname" type="text" name="contact_surname" required>
-                                </div>
+                                <div><?= text(
+                                    (string) ($formContent['contact_name_label'] ?? 'Nome referente'),
+                                    'contact_name',
+                                    null,
+                                    'required'
+                                ) ?></div>
+                                <div><?= text(
+                                    (string) ($formContent['contact_surname_label'] ?? 'Cognome referente'),
+                                    'contact_surname',
+                                    null,
+                                    'required'
+                                ) ?></div>
                             </div>
 
                             <div class="rsvp-form-row">
-                                <div>
-                                    <label class="rsvp-label" for="rsvp-contact-phone"><?= $escape((string) ($formContent['contact_phone_label'] ?? 'Telefono')) ?></label>
-                                    <input class="rsvp-input" id="rsvp-contact-phone" type="tel" name="contact_phone" required>
-                                </div>
-                                <div>
-                                    <label class="rsvp-label" for="rsvp-contact-email"><?= $escape((string) ($formContent['contact_email_label'] ?? 'Email')) ?></label>
-                                    <input class="rsvp-input" id="rsvp-contact-email" type="email" name="contact_email" required>
-                                </div>
+                                <div><?= phone(
+                                    (string) ($formContent['contact_phone_label'] ?? 'Telefono'),
+                                    'contact_phone',
+                                    null,
+                                    'required'
+                                ) ?></div>
+                                <div><?= email(
+                                    (string) ($formContent['contact_email_label'] ?? 'Email'),
+                                    'contact_email',
+                                    null,
+                                    'required'
+                                ) ?></div>
                             </div>
 
                             <div class="rsvp-form-row">
-                                <div>
-                                    <label class="rsvp-label" for="rsvp-participants-count"><?= $escape((string) ($formContent['participants_count_label'] ?? 'Numero adulti')) ?></label>
-                                    <select class="rsvp-select" id="rsvp-participants-count" name="participants_count">
-                                        <?php for ($i = 1; $i <= $maxParticipants; $i++) { ?>
-                                            <option value="<?=$i?>" <?=$i === 1 ? 'selected' : ''?>><?=$i?></option>
-                                        <?php } ?>
-                                    </select>
-                                </div>
+                                <div><?= select(
+                                    (string) ($formContent['participants_count_label'] ?? 'Numero adulti'),
+                                    'participants_count',
+                                    $participantsOptions,
+                                    '1'
+                                ) ?></div>
                                 <?php if ($allowChildren) { ?>
-                                    <div>
-                                        <label class="rsvp-label" for="rsvp-children-count"><?= $escape((string) ($formContent['children_count_label'] ?? 'Numero bambini')) ?></label>
-                                        <select class="rsvp-select" id="rsvp-children-count" name="children_count">
-                                            <?php for ($i = 0; $i <= $maxChildren; $i++) { ?>
-                                                <option value="<?=$i?>" <?=$i === 0 ? 'selected' : ''?>><?=$i?></option>
-                                            <?php } ?>
-                                        </select>
-                                    </div>
+                                    <div><?= select(
+                                        (string) ($formContent['children_count_label'] ?? 'Numero bambini'),
+                                        'children_count',
+                                        $childrenOptions,
+                                        '0'
+                                    ) ?></div>
                                 <?php } ?>
                             </div>
 
                             <div id="rsvp-participants"></div>
 
-                            <div>
-                                <label class="rsvp-label" for="rsvp-notes"><?= $escape((string) ($formContent['notes_label'] ?? 'Richieste aggiuntive')) ?></label>
-                                <textarea class="rsvp-textarea" id="rsvp-notes" name="notes"></textarea>
-                            </div>
-
-                            <div>
-                                <?php if ($privacyField !== '') { ?>
-                                    <?=$privacyField?>
-                                <?php } else { ?>
-                                    <label class="rsvp-checkbox">
-                                        <input type="checkbox" name="privacy" value="true" required>
-                                        <span><?= $escape((string) ($formContent['privacy_fallback_text'] ?? 'Acconsento al trattamento dei dati personali.')) ?></span>
-                                    </label>
-                                <?php } ?>
-                            </div>
-
-                            <?php if (!empty($state['require_image_release'])) { ?>
-                                <div>
-                                    <?php if ($imageField !== '') { ?>
-                                        <?=$imageField?>
-                                    <?php } else { ?>
-                                        <label class="rsvp-checkbox">
-                                            <input type="checkbox" name="photo_privacy" value="true" required>
-                                            <span><?= $escape((string) ($formContent['image_release_fallback_text'] ?? 'Acconsento alla raccolta e all’utilizzo di immagini fotografiche e video.')) ?></span>
-                                        </label>
-                                    <?php } ?>
+                            <template id="rsvp-participant-template" data-is-child="false">
+                                <div class="rsvp-participant" data-participant-block data-is-child="false" data-index="__INDEX__">
+                                    <div class="rsvp-participant-title">__TITLE__</div>
+                                    <div class="rsvp-form-row">
+                                        <div><?= text(
+                                            (string) ($formContent['participant_name_label'] ?? 'Nome'),
+                                            '',
+                                            null,
+                                            "data-field='name' data-index='__INDEX__' required"
+                                        ) ?></div>
+                                        <div><?= text(
+                                            (string) ($formContent['participant_surname_label'] ?? 'Cognome'),
+                                            '',
+                                            null,
+                                            "data-field='surname' data-index='__INDEX__' required"
+                                        ) ?></div>
+                                    </div>
+                                    <div style="margin-top: 1rem;"><?= textarea(
+                                        (string) ($formContent['participant_dietary_label'] ?? 'Esigenze alimentari'),
+                                        '',
+                                        null,
+                                        "data-field='dietary_requirements' data-index='__INDEX__'"
+                                    ) ?></div>
+                                    <input type="hidden" data-field="is_child" data-index="__INDEX__" value="false">
                                 </div>
+                            </template>
+
+                            <template id="rsvp-child-template" data-is-child="true">
+                                <div class="rsvp-participant" data-participant-block data-is-child="true" data-index="__INDEX__">
+                                    <div class="rsvp-participant-title">__TITLE__</div>
+                                    <div class="rsvp-form-row">
+                                        <div><?= text(
+                                            (string) ($formContent['participant_name_label'] ?? 'Nome'),
+                                            '',
+                                            null,
+                                            "data-field='name' data-index='__INDEX__' required"
+                                        ) ?></div>
+                                        <div><?= text(
+                                            (string) ($formContent['participant_surname_label'] ?? 'Cognome'),
+                                            '',
+                                            null,
+                                            "data-field='surname' data-index='__INDEX__' required"
+                                        ) ?></div>
+                                    </div>
+                                    <div style="margin-top: 1rem;"><?= textarea(
+                                        (string) ($formContent['participant_dietary_label'] ?? 'Esigenze alimentari'),
+                                        '',
+                                        null,
+                                        "data-field='dietary_requirements' data-index='__INDEX__'"
+                                    ) ?></div>
+                                    <input type="hidden" data-field="is_child" data-index="__INDEX__" value="true">
+                                </div>
+                            </template>
+
+                            <div><?= textarea(
+                                (string) ($formContent['notes_label'] ?? 'Richieste aggiuntive'),
+                                'notes'
+                            ) ?></div>
+
+                            <?php if ($privacyField !== '') { ?>
+                                <div><?=$privacyField?></div>
+                            <?php } ?>
+
+                            <?php if (!empty($state['require_image_release']) && $imageField !== '') { ?>
+                                <div><?=$imageField?></div>
                             <?php } ?>
 
                             <div class="rsvp-actions">
@@ -460,31 +514,36 @@
 
         const labels = <?=json_encode($ui, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
         const participantsContainer = document.getElementById('rsvp-participants');
-        const adultsSelect = document.getElementById('rsvp-participants-count');
-        const childrenSelect = document.getElementById('rsvp-children-count');
+        const adultsSelect = form.elements.participants_count;
+        const childrenSelect = form.elements.children_count;
         const feedback = document.getElementById('rsvp-feedback');
+        const adultTemplate = document.getElementById('rsvp-participant-template');
+        const childTemplate = document.getElementById('rsvp-child-template');
 
-        function participantTemplate(index, label, isChild) {
-            return `
-                <div class="rsvp-participant">
-                    <div class="rsvp-participant-title">${label}</div>
-                    <div class="rsvp-form-row">
-                        <div>
-                            <label class="rsvp-label">${labels.participantNameLabel}</label>
-                            <input class="rsvp-input" type="text" data-field="name" data-index="${index}" required>
-                        </div>
-                        <div>
-                            <label class="rsvp-label">${labels.participantSurnameLabel}</label>
-                            <input class="rsvp-input" type="text" data-field="surname" data-index="${index}" required>
-                        </div>
-                    </div>
-                    <div style="margin-top: 1rem;">
-                        <label class="rsvp-label">${labels.participantDietaryLabel}</label>
-                        <textarea class="rsvp-textarea" data-field="dietary_requirements" data-index="${index}"></textarea>
-                    </div>
-                    <input type="hidden" data-field="is_child" data-index="${index}" value="${isChild ? 'true' : 'false'}">
-                </div>
-            `;
+        // I framework helpers (text/textarea/select) generano id randomici
+        // condivisi nei <template>: quando cloni N blocchi, gli id si
+        // duplicano e i <label for="..."> puntano al primo input. Rimappiamo
+        // gli id per-blocco mantenendo la corrispondenza label↔input.
+        function uniquifyIds(html, suffix) {
+            const idMap = new Map();
+            return html.replace(/(id|for)=(["'])(input_[a-z0-9]+|checkbox_[a-z0-9]+)\2/g,
+                (_, attr, quote, id) => {
+                    if (!idMap.has(id)) {
+                        idMap.set(id, `${id}_${suffix}`);
+                    }
+                    return `${attr}=${quote}${idMap.get(id)}${quote}`;
+                });
+        }
+
+        function participantHTML(index, title, isChild) {
+            const template = isChild ? childTemplate : adultTemplate;
+            if (!template) {
+                return '';
+            }
+            const raw = template.innerHTML
+                .split('__INDEX__').join(String(index))
+                .replace('__TITLE__', title);
+            return uniquifyIds(raw, `p${index}`);
         }
 
         function renderParticipants() {
@@ -493,23 +552,29 @@
             let html = '';
             let cursor = 0;
 
-            for (let index = 0; index < adults; index += 1) {
-                html += participantTemplate(cursor, `${labels.participantLabel} ${index + 1}`, false);
+            for (let i = 0; i < adults; i += 1) {
+                html += participantHTML(cursor, `${labels.participantLabel} ${i + 1}`, false);
                 cursor += 1;
             }
 
-            for (let index = 0; index < children; index += 1) {
-                html += participantTemplate(cursor, `${labels.childLabel} ${index + 1}`, true);
+            for (let i = 0; i < children; i += 1) {
+                html += participantHTML(cursor, `${labels.childLabel} ${i + 1}`, true);
                 cursor += 1;
             }
 
             participantsContainer.innerHTML = html;
+
+            // Reinizializza eventuali enhancement framework (es. wi-select)
+            // appena iniettati. La funzione esiste se l'app la espone.
+            if (typeof window.wiInputInit === 'function') {
+                window.wiInputInit(participantsContainer);
+            }
         }
 
         function collectParticipants() {
             const grouped = {};
 
-            participantsContainer.querySelectorAll('[data-index]').forEach((element) => {
+            participantsContainer.querySelectorAll('[data-index][data-field]').forEach((element) => {
                 const index = element.getAttribute('data-index');
                 const field = element.getAttribute('data-field');
 
