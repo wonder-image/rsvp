@@ -60,7 +60,7 @@ final class Settings extends Model
             Field::key('allow_children')->text(),
             Field::key('max_children')->number()->decimals(0),
             Field::key('require_image_release')->text(),
-            Field::key('admin_email')->email()->lower(),
+            Field::key('admin_email')->email(),
             Field::key('admin_notifications')->text(),
             Field::key('customer_notifications')->text(),
             Field::key('customer_subject')->text()->sanitize(false),
