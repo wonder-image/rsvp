@@ -113,7 +113,7 @@ final class AuthorizationResource extends Resource
     public static function permissionSchema(): PermissionSchema
     {
         return PermissionSchema::for(static::class)
-            ->backend(['list', 'create', 'store', 'edit', 'update', 'delete'], []);
+            ->backend(['list', 'create', 'store', 'edit', 'update', 'delete'], ['admin']);
     }
 
     public static function navigationSchema(): NavigationSchema
@@ -122,7 +122,7 @@ final class AuthorizationResource extends Resource
             ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
             ->title('Autorizzazioni')
             ->order(15)
-            ->authority([]);
+            ->authority(['admin']);
     }
 
     public static function mutateRequestValues(

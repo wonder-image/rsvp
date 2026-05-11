@@ -31,6 +31,7 @@ final class ResponseExporter
 
     public static function rows(?string $eventKey = null): array
     {
+        $customFields = Response::customFieldDefinitions();
         $filters = ['deleted' => 'false'];
 
         if ($eventKey !== null && trim($eventKey) !== '') {
@@ -38,7 +39,7 @@ final class ResponseExporter
         }
 
         $result = Response::query()->Select(Response::$table, $filters, null, 'creation', 'DESC');
-        $rows = [[
+        $header = [
             'Creato il',
             'Evento',
             'Nome',
@@ -56,11 +57,19 @@ final class ResponseExporter
             'Foto',
             'Lingua',
             'URL origine',
-        ]];
+        ];
+
+        foreach ($customFields as $field) {
+            $header[] = (string) $field['label'];
+        }
+
+        $header[] = 'Metadati';
+        $rows = [$header];
 
         foreach ((array) ($result->row ?? []) as $row) {
             $participants = rsvpDecodeJsonArray($row['participants_json'] ?? '[]');
             $consents = rsvpDecodeJsonArray($row['consents_json'] ?? '[]');
+            $metadata = rsvpMetadataSummary($row['metadata_json'] ?? '[]');
             $participantSummary = [];
 
             foreach ($participants as $participant) {
@@ -97,6 +106,12 @@ final class ResponseExporter
                 (string) ($row['locale'] ?? ''),
                 (string) ($row['source_url'] ?? ''),
             ];
+
+            foreach ($customFields as $field) {
+                $rows[count($rows) - 1][] = (string) ($row[$field['column']] ?? '');
+            }
+
+            $rows[count($rows) - 1][] = $metadata;
         }
 
         return $rows;

@@ -16,8 +16,9 @@ namespace Wonder\Plugin\Rsvp\Contracts;
  *         ],
  *     ],
  *
- * I custom field finiscono nel campo `metadata_json` della tabella
- * `rsvp_response`: niente migration sullo schema del consumer.
+ * I custom field vengono materializzati in colonne dedicate della tabella
+ * `rsvp_response` con prefisso `meta_`. Dopo aver aggiunto o modificato i
+ * campi dell'estensione serve aggiornare lo schema del consumer.
  */
 interface RsvpExtension
 {

@@ -4,6 +4,7 @@ namespace Wonder\Plugin\Rsvp\Support;
 
 use Wonder\Plugin\Rsvp\Models\Event;
 use Wonder\Plugin\Rsvp\Models\Settings;
+use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Resources\ResponseResource;
 
 final class SubmissionNotifier
@@ -78,12 +79,11 @@ final class SubmissionNotifier
     public static function defaults(): array
     {
         return [
-            'customer_subject' => 'Conferma RSVP ricevuta',
-            'customer_message' => 'Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta RSVP'
-                .' per <strong>{{event_name}}</strong>.'
-                .'<br><br>{{summary_html}}',
-            'admin_subject' => 'Nuova risposta RSVP - {{contact_name}} {{contact_surname}}',
-            'admin_message' => 'È arrivata una nuova risposta RSVP per <strong>{{event_name}}</strong>.'
+            'customer_subject' => 'Conferma ricevuta',
+            'customer_message' => 'Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta.'
+                .' per <strong>{{event_name}}</strong> il {{event_starts_at}}.',
+            'admin_subject' => 'Nuova risposta per {{event_name}} - {{contact_name}} {{contact_surname}}',
+            'admin_message' => 'È arrivata una nuova risposta per <strong>{{event_name}}</strong>.'
                 .'<br><br>{{summary_html}}'
                 .'<br><br><a href="{{response_url}}">Apri il dettaglio in backend</a>',
         ];
@@ -170,21 +170,14 @@ final class SubmissionNotifier
             $lines[] = 'Richieste: <strong>'.nl2br(htmlspecialchars((string) $normalized['notes'], ENT_QUOTES, 'UTF-8')).'</strong>';
         }
 
-        // Custom field dichiarati dall'estensione del consumer: finiscono
-        // in metadata_json.custom_fields tramite SubmissionNormalizer.
-        $metadata = rsvpDecodeJsonArray($normalized['metadata_json'] ?? '[]');
-        $customFields = is_array($metadata['custom_fields'] ?? null) ? $metadata['custom_fields'] : [];
-        $schema = ExtensionRegistry::fields();
+        foreach (Response::customFieldDefinitions() as $field) {
+            $value = trim((string) ($normalized[$field['column']] ?? ''));
 
-        foreach ($customFields as $customKey => $customValue) {
-            $label = (string) ($schema[$customKey]['label'] ?? $customKey);
-            $value = is_array($customValue) ? implode(', ', array_map('strval', $customValue)) : (string) $customValue;
-
-            if (trim($value) === '') {
+            if ($value === '') {
                 continue;
             }
 
-            $lines[] = htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+            $lines[] = htmlspecialchars((string) $field['label'], ENT_QUOTES, 'UTF-8')
                 .': <strong>'.htmlspecialchars($value, ENT_QUOTES, 'UTF-8').'</strong>';
         }
 

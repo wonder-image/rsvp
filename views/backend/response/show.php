@@ -1,12 +1,23 @@
 <?php \Wonder\View\View::layout('backend.show'); ?>
 
 <?php
+    use Wonder\Plugin\Rsvp\Models\Response;
+
     $item = is_array($ITEM ?? null) ? $ITEM : [];
     $participants = json_decode((string) ($item['participants_json'] ?? '[]'), true) ?: [];
     $events = json_decode((string) ($item['events_json'] ?? '[]'), true) ?: [];
     $consents = json_decode((string) ($item['consents_json'] ?? '[]'), true) ?: [];
     $documents = json_decode((string) ($item['legal_documents_json'] ?? '[]'), true) ?: [];
     $metadata = json_decode((string) ($item['metadata_json'] ?? '[]'), true) ?: [];
+    $customFields = Response::customFieldDefinitions();
+    $hasCustomFieldValues = false;
+
+    foreach ($customFields as $field) {
+        if (trim((string) ($item[$field['column']] ?? '')) !== '') {
+            $hasCustomFieldValues = true;
+            break;
+        }
+    }
 ?>
 
 <div class="col-9">
@@ -45,15 +56,28 @@
             </div>
         </wi-card>
 
+        <?php if ($hasCustomFieldValues) { ?>
+        <wi-card class="col-12">
+            <div class="col-12">
+                <h6>Campi personalizzati</h6>
+                <div class="w-100 mt-2">
+                    <?php foreach ($customFields as $field) { ?>
+                        <?php $value = trim((string) ($item[$field['column']] ?? '')); ?>
+                        <?php if ($value === '') { continue; } ?>
+                        <?=htmlspecialchars((string) $field['label'], ENT_QUOTES, 'UTF-8')?>:
+                        <strong><?=htmlspecialchars($value, ENT_QUOTES, 'UTF-8')?></strong><br>
+                    <?php } ?>
+                </div>
+            </div>
+        </wi-card>
+        <?php } ?>
+
         <?php if ($metadata !== []) { ?>
         <wi-card class="col-12">
             <div class="col-12">
                 <h6>Dati aggiuntivi</h6>
                 <div class="w-100 mt-2">
-                    <?php foreach ($metadata as $key => $value) { ?>
-                        <strong><?=htmlspecialchars((string) $key, ENT_QUOTES, 'UTF-8')?>:</strong>
-                        <?=htmlspecialchars(is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8')?><br>
-                    <?php } ?>
+                    <pre class="mb-0"><?=htmlspecialchars(json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8')?></pre>
                 </div>
             </div>
         </wi-card>

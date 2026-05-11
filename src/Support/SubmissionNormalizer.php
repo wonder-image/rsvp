@@ -5,6 +5,7 @@ namespace Wonder\Plugin\Rsvp\Support;
 use Wonder\Plugin\Rsvp\Models\Authorization;
 use Wonder\Plugin\Rsvp\Models\InviteCode;
 use Wonder\Plugin\Rsvp\Models\InviteGroup;
+use Wonder\Plugin\Rsvp\Models\Response;
 
 final class SubmissionNormalizer
 {
@@ -25,8 +26,9 @@ final class SubmissionNormalizer
         $photoAccepted = self::boolean(
             $legalDocuments['image_release']['accepted'] ?? ($payload['photo'] ?? ($payload['photo_privacy'] ?? false))
         );
+        $customFieldColumns = self::customFieldColumns($payload);
 
-        return [
+        return array_merge([
             'invite_code_id' => $inviteCodeId > 0 ? $inviteCodeId : null,
             'invite_code' => $session['code'] ?? null,
             'invite_group_code' => $inviteGroupCode !== '' ? $inviteGroupCode : null,
@@ -54,7 +56,7 @@ final class SubmissionNormalizer
                 : null,
             'metadata_json' => json_encode(self::metadata($payload), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'source_url' => self::string($payload, ['source_url', 'request_url']),
-        ];
+        ], $customFieldColumns);
     }
 
     public static function participantsFromNormalized(array $normalized): array
@@ -311,6 +313,7 @@ final class SubmissionNormalizer
             'g-recaptcha-token',
             'dietary_requirements',
             'allergies',
+            'custom_fields',
         ];
 
         $metadata = [];
@@ -330,6 +333,22 @@ final class SubmissionNormalizer
         }
 
         return $metadata;
+    }
+
+    private static function customFieldColumns(array $payload): array
+    {
+        $schema = Response::customFieldDefinitions();
+        $customPayload = is_array($payload['custom_fields'] ?? null)
+            ? $payload['custom_fields']
+            : [];
+        $columns = [];
+
+        foreach ($schema as $fieldKey => $definition) {
+            $raw = $customPayload[$fieldKey] ?? ($payload[$fieldKey] ?? null);
+            $columns[(string) $definition['column']] = rsvpCustomFieldValue($raw);
+        }
+
+        return $columns;
     }
 
     private static function inviteGroupCode(int $inviteCodeId): string

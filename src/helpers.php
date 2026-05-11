@@ -385,3 +385,112 @@ if (!function_exists('rsvpBooleanText')) {
             : 'Rifiutato';
     }
 }
+
+if (!function_exists('rsvpCustomFieldColumn')) {
+    function rsvpCustomFieldColumn(string $key): string
+    {
+        $key = strtolower(trim($key));
+        $key = preg_replace('/[^a-z0-9_]+/', '_', $key) ?? '';
+        $key = trim($key, '_');
+
+        if ($key === '') {
+            $key = 'field';
+        }
+
+        return 'meta_'.$key;
+    }
+}
+
+if (!function_exists('rsvpCustomFieldValue')) {
+    function rsvpCustomFieldValue(mixed $value): ?string
+    {
+        if (is_array($value)) {
+            $items = array_values(array_filter(array_map(
+                static function ($item): string {
+                    if (is_bool($item)) {
+                        return $item ? 'true' : 'false';
+                    }
+
+                    return is_scalar($item) ? trim((string) $item) : '';
+                },
+                $value
+            )));
+
+            return $items === [] ? null : implode(', ', $items);
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value !== '' ? $value : null;
+    }
+}
+
+if (!function_exists('rsvpMetadataSummary')) {
+    function rsvpMetadataSummary(mixed $value): string
+    {
+        $metadata = rsvpDecodeJsonArray($value);
+
+        if ($metadata === []) {
+            return '';
+        }
+
+        $parts = [];
+
+        foreach ($metadata as $key => $item) {
+            $label = trim((string) $key);
+
+            if ($label === '') {
+                continue;
+            }
+
+            if (is_array($item)) {
+                $normalized = [];
+
+                foreach ($item as $nestedKey => $nestedValue) {
+                    if (is_array($nestedValue)) {
+                        $nestedValue = implode(', ', array_map('strval', $nestedValue));
+                    } elseif (is_bool($nestedValue)) {
+                        $nestedValue = rsvpBooleanText($nestedValue);
+                    } elseif ($nestedValue === null) {
+                        $nestedValue = '';
+                    } else {
+                        $nestedValue = (string) $nestedValue;
+                    }
+
+                    $nestedKey = trim((string) $nestedKey);
+                    $nestedValue = trim((string) $nestedValue);
+
+                    if ($nestedValue === '') {
+                        continue;
+                    }
+
+                    $normalized[] = $nestedKey !== ''
+                        ? $nestedKey.': '.$nestedValue
+                        : $nestedValue;
+                }
+
+                $text = implode(', ', $normalized);
+            } elseif (is_bool($item)) {
+                $text = rsvpBooleanText($item);
+            } elseif ($item === null) {
+                $text = '';
+            } else {
+                $text = trim((string) $item);
+            }
+
+            if ($text !== '') {
+                $parts[] = $label.': '.$text;
+            }
+        }
+
+        return implode(' | ', $parts);
+    }
+}

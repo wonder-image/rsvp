@@ -33,7 +33,7 @@ final class ResponseResource extends Resource
 
     public static function labelSchema(): array
     {
-        return [
+        $labels = [
             'contact_name' => 'Nome',
             'contact_surname' => 'Cognome',
             'contact_email' => 'Email',
@@ -48,6 +48,12 @@ final class ResponseResource extends Resource
             'notes' => 'Richieste',
             'source_url' => 'URL origine',
         ];
+
+        foreach (Response::customFieldDefinitions() as $field) {
+            $labels[$field['column']] = (string) $field['label'];
+        }
+
+        return $labels;
     }
 
     public static function tableSchema(): array
@@ -89,7 +95,8 @@ final class ResponseResource extends Resource
     public static function permissionSchema(): PermissionSchema
     {
         return PermissionSchema::for(static::class)
-            ->backend(['list', 'view', 'delete'], []);
+            ->backend(['list', 'view'], ['admin', 'rsvp_response_viewer'])
+            ->backend('delete', ['admin']);
     }
 
     public static function navigationSchema(): NavigationSchema
@@ -98,7 +105,7 @@ final class ResponseResource extends Resource
             ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
             ->title('Risposte')
             ->order(10)
-            ->authority([]);
+            ->authority(['admin', 'rsvp_response_viewer']);
     }
 
     public static function registerBackendRoutes(string $rootApp, string $slug): void
@@ -107,7 +114,7 @@ final class ResponseResource extends Resource
             'resource' => $slug,
             'resource_action' => 'export',
         ])->name('export')
-            ->permit([])
+            ->permit(['admin', 'rsvp_response_viewer'])
             ->where('format', '(csv|xls)');
     }
 }

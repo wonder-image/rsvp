@@ -93,6 +93,32 @@ Dopo l’attivazione trovi queste resource:
 - `rsvp/invite-groups`
 - `rsvp/responses`
 
+## Permessi backend
+
+Il modulo registra un permesso custom backend:
+
+- `rsvp_response_viewer`
+
+Questo permesso serve per dare accesso solo alla lettura delle risposte RSVP.
+
+Un utente con `rsvp_response_viewer` può:
+
+- vedere la voce backend `rsvp/responses`
+- aprire lista risposte
+- aprire dettaglio risposta
+- esportare le risposte
+
+Un utente con `rsvp_response_viewer` non può:
+
+- modificare impostazioni RSVP
+- gestire eventi RSVP
+- gestire autorizzazioni
+- gestire codici invito
+- gestire gruppi invito
+- cancellare risposte
+
+La cancellazione delle risposte resta riservata ad `admin`.
+
 ## Come funziona il dominio RSVP
 
 ### `rsvp_event`
@@ -271,6 +297,19 @@ Le view RSVP vengono renderizzate dentro il layout frontend del progetto host, q
 - `footer.php`
 - asset e utility globali del sito
 
+## Custom field e colonne response
+
+Se il consumer registra custom field tramite l’estensione RSVP, ogni campo dichiarato viene materializzato anche come colonna dedicata nella tabella `rsvp_response`.
+
+Regola di naming:
+
+- campo `hotel` -> colonna `meta_hotel`
+- campo `transfer_arrival` -> colonna `meta_transfer_arrival`
+
+`metadata_json` resta disponibile solo come fallback per dati extra non dichiarati nello schema dell’estensione.
+
+Dopo aver aggiunto o modificato i custom field dell’estensione, esegui l’update del progetto consumer per sincronizzare lo schema della tabella risposte.
+
 ## Multilingua
 
 Il modulo è pronto per essere adattato al multilingua:
@@ -317,4 +356,10 @@ Campi legacy ancora normalizzati automaticamente:
 - `form` JSON legacy
 - `request_url`
 
-I campi extra non riconosciuti finiscono in `metadata_json`.
+I campi extra non riconosciuti e non dichiarati nell’estensione finiscono in `metadata_json`.
+
+I metadati extra non generano colonne dedicate nella tabella risposte:
+
+- restano nel campo unico `metadata_json`
+- nel backend dettaglio vengono mostrati come blocco compatto
+- negli export finiscono in una sola colonna `Metadati`

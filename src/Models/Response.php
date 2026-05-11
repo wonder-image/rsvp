@@ -4,6 +4,7 @@ namespace Wonder\Plugin\Rsvp\Models;
 
 use Wonder\App\Model;
 use Wonder\Data\UploadSchema as Field;
+use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
 use Wonder\Sql\TableSchema as Column;
 
 final class Response extends Model
@@ -14,7 +15,7 @@ final class Response extends Model
 
     public static function tableSchema(): array
     {
-        return [
+        $schema = [
             Column::key('invite_code_id')->int()->null()->foreign(InviteCode::$table),
             Column::key('invite_code')->length(120)->null(),
             Column::key('invite_group_code')->length(120)->null(),
@@ -35,6 +36,12 @@ final class Response extends Model
             Column::key('metadata_json')->type('LONGTEXT')->null(),
             Column::key('source_url')->type('TEXT')->null(),
         ];
+
+        foreach (self::customFieldDefinitions() as $field) {
+            $schema[] = Column::key((string) $field['column'])->type('LONGTEXT')->null();
+        }
+
+        return $schema;
     }
 
     public static function tablePseudos(): array
@@ -57,7 +64,7 @@ final class Response extends Model
 
     public static function dataSchema(): array
     {
-        return [
+        $schema = [
             Field::key('invite_code_id')->number()->decimals(0),
             Field::key('invite_code')->text()->sanitize(false),
             Field::key('invite_group_code')->text()->sanitize(false),
@@ -78,5 +85,31 @@ final class Response extends Model
             Field::key('metadata_json')->text()->json()->sanitize(false),
             Field::key('source_url')->text()->sanitize(false),
         ];
+
+        foreach (self::customFieldDefinitions() as $field) {
+            $schema[] = Field::key((string) $field['column'])->text()->sanitize(false);
+        }
+
+        return $schema;
+    }
+
+    /**
+     * @return array<string, array{key:string,label:string,type:string,column:string}>
+     */
+    public static function customFieldDefinitions(): array
+    {
+        $fields = ExtensionRegistry::fields();
+        $definitions = [];
+
+        foreach ($fields as $key => $field) {
+            $definitions[(string) $key] = [
+                'key' => (string) $key,
+                'label' => (string) ($field['label'] ?? $key),
+                'type' => (string) ($field['type'] ?? 'text'),
+                'column' => rsvpCustomFieldColumn((string) $key),
+            ];
+        }
+
+        return $definitions;
     }
 }

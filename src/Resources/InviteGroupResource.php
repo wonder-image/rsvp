@@ -96,7 +96,7 @@ final class InviteGroupResource extends Resource
     public static function permissionSchema(): PermissionSchema
     {
         return PermissionSchema::for(static::class)
-            ->backend(['list', 'create', 'store', 'edit', 'update', 'delete'], []);
+            ->backend(['list', 'create', 'store', 'edit', 'update', 'delete'], ['admin']);
     }
 
     public static function navigationSchema(): NavigationSchema
@@ -105,6 +105,6 @@ final class InviteGroupResource extends Resource
             ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
             ->title('Gruppi inviti')
             ->order(30)
-            ->authority([]);
+            ->authority(['admin']);
     }
 }
