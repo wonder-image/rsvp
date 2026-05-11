@@ -1,0 +1,387 @@
+<?php
+
+use Wonder\Plugin\Rsvp\Models\Authorization;
+use Wonder\Plugin\Rsvp\Models\InviteCode;
+use Wonder\Plugin\Rsvp\Models\InviteGroup;
+use Wonder\Plugin\Rsvp\Models\Response;
+
+if (!function_exists('rsvp_trans')) {
+    function rsvp_trans(string $key, string $fallback, array $replacements = []): string
+    {
+        $value = function_exists('__t') ? __t($key, $replacements) : $key;
+
+        if (!is_string($value) || trim($value) === '' || $value === $key) {
+            foreach ($replacements as $replacementKey => $replacementValue) {
+                $fallback = str_replace(
+                    '{{'.$replacementKey.'}}',
+                    is_scalar($replacementValue) ? (string) $replacementValue : '',
+                    $fallback
+                );
+            }
+
+            return $fallback;
+        }
+
+        return $value;
+    }
+}
+
+if (!function_exists('rsvpInviteUsageMode')) {
+    function rsvpInviteUsageMode(string $mode): object
+    {
+        $labels = [
+            'single_use' => 'Monouso',
+            'multiple_use' => 'Multiuso',
+        ];
+
+        $colors = [
+            'single_use' => 'warning',
+            'multiple_use' => 'success',
+        ];
+
+        $icons = [
+            'single_use' => '<i class="bi bi-1-circle"></i> ',
+            'multiple_use' => '<i class="bi bi-people"></i> ',
+        ];
+
+        $label = $labels[$mode] ?? ucfirst(str_replace('_', ' ', $mode));
+        $color = $colors[$mode] ?? 'secondary';
+        $icon = $icons[$mode] ?? '<i class="bi bi-ticket-perforated"></i> ';
+
+        return (object) [
+            'text' => $label,
+            'icon' => $icon,
+            'bootstrapColor' => $color,
+            'automaticResize' => '<span class="badge text-bg-'.$color.'">'.$icon.'<span class="phone-none">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</span></span>',
+        ];
+    }
+}
+
+if (!function_exists('rsvpInviteGroupLabel')) {
+    function rsvpInviteGroupLabel(mixed $groupId): string
+    {
+        $groupId = (int) $groupId;
+
+        if ($groupId <= 0) {
+            return '--';
+        }
+
+        $group = InviteGroup::find([ 'id' => $groupId ], 1);
+
+        return is_array($group) && $group !== []
+            ? (string) ($group['name'] ?? $group['code'] ?? '--')
+            : '--';
+    }
+}
+
+if (!function_exists('rsvpAuthorizationLabel')) {
+    function rsvpAuthorizationLabel(mixed $authorizationId): string
+    {
+        $authorizationId = (int) $authorizationId;
+
+        if ($authorizationId <= 0) {
+            return '--';
+        }
+
+        $authorization = Authorization::find(['id' => $authorizationId], 1);
+
+        return is_array($authorization) && $authorization !== []
+            ? (string) ($authorization['name'] ?? $authorization['code'] ?? '--')
+            : '--';
+    }
+}
+
+if (!function_exists('rsvpInviteCodeResponses')) {
+    function rsvpInviteCodeResponses(mixed $inviteCodeId): int
+    {
+        $inviteCodeId = (int) $inviteCodeId;
+
+        if ($inviteCodeId <= 0) {
+            return 0;
+        }
+
+        $result = Response::query()->Select(Response::$table, [
+            'invite_code_id' => $inviteCodeId,
+            'deleted' => 'false',
+        ]);
+
+        return (int) ($result->Nrow ?? 0);
+    }
+}
+
+if (!function_exists('rsvpInviteGroupCodes')) {
+    function rsvpInviteGroupCodes(mixed $groupId): int
+    {
+        $groupId = (int) $groupId;
+
+        if ($groupId <= 0) {
+            return 0;
+        }
+
+        $result = InviteCode::query()->Select(InviteCode::$table, [
+            'invite_group_id' => $groupId,
+            'deleted' => 'false',
+        ]);
+
+        return (int) ($result->Nrow ?? 0);
+    }
+}
+
+if (!function_exists('rsvpDecodeJsonArray')) {
+    function rsvpDecodeJsonArray(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (!is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+}
+
+if (!function_exists('rsvpEncodePrettyJson')) {
+    function rsvpEncodePrettyJson(mixed $value): string
+    {
+        if ($value === null || $value === '' || $value === []) {
+            return '';
+        }
+
+        $json = json_encode(
+            $value,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        );
+
+        return is_string($json) ? $json : '';
+    }
+}
+
+if (!function_exists('rsvpDecodeJsonOrDefault')) {
+    function rsvpDecodeJsonOrDefault(mixed $value, array $default = []): array
+    {
+        $decoded = rsvpDecodeJsonArray($value);
+
+        return $decoded !== [] ? $decoded : $default;
+    }
+}
+
+if (!function_exists('rsvpJsonPrettyList')) {
+    function rsvpJsonPrettyList(mixed $value): string
+    {
+        $items = rsvpDecodeJsonArray($value);
+
+        if ($items === []) {
+            return '--';
+        }
+
+        $labels = array_values(array_filter(array_map(
+            static fn ($item) => is_scalar($item) ? trim((string) $item) : '',
+            $items
+        )));
+
+        return $labels === [] ? '--' : implode(', ', $labels);
+    }
+}
+
+if (!function_exists('rsvpResolveLocalizedValue')) {
+    function rsvpResolveLocalizedValue(mixed $value, ?string $locale = null, string $fallbackLocale = 'it'): mixed
+    {
+        $locale = $locale !== null && trim($locale) !== ''
+            ? trim($locale)
+            : (function_exists('__l') ? __l() : $fallbackLocale);
+
+        if (!is_array($value)) {
+            return $value;
+        }
+
+        $localizedKeys = [$locale, strtolower($locale), $fallbackLocale, 'default'];
+
+        foreach ($localizedKeys as $key) {
+            if (!array_key_exists($key, $value)) {
+                continue;
+            }
+
+            $localized = $value[$key];
+
+            if (!is_array($localized)) {
+                return $localized;
+            }
+        }
+
+        $isAssociative = array_keys($value) !== range(0, count($value) - 1);
+
+        if (!$isAssociative) {
+            return array_map(
+                static fn ($item) => rsvpResolveLocalizedValue($item, $locale, $fallbackLocale),
+                $value
+            );
+        }
+
+        $resolved = [];
+
+        foreach ($value as $key => $item) {
+            $resolved[$key] = rsvpResolveLocalizedValue($item, $locale, $fallbackLocale);
+        }
+
+        return $resolved;
+    }
+}
+
+if (!function_exists('rsvpMergeRecursive')) {
+    function rsvpMergeRecursive(array $base, array $override): array
+    {
+        foreach ($override as $key => $value) {
+            if (
+                isset($base[$key])
+                && is_array($base[$key])
+                && is_array($value)
+                && array_keys($base[$key]) !== range(0, count($base[$key]) - 1)
+                && array_keys($value) !== range(0, count($value) - 1)
+            ) {
+                $base[$key] = rsvpMergeRecursive($base[$key], $value);
+                continue;
+            }
+
+            $base[$key] = $value;
+        }
+
+        return $base;
+    }
+}
+
+if (!function_exists('rsvpDatePart')) {
+    function rsvpDatePart(?string $date, string $part): string
+    {
+        if ($date === null || trim($date) === '' || strtotime($date) === false) {
+            return '';
+        }
+
+        if (function_exists('translateDate') && in_array($part, ['day', 'month'], true)) {
+            return (string) translateDate($date, $part);
+        }
+
+        $timestamp = strtotime($date);
+
+        return match ($part) {
+            'day_number' => date('d', $timestamp),
+            'time' => date('H:i', $timestamp),
+            default => date('Y-m-d H:i', $timestamp),
+        };
+    }
+}
+
+if (!function_exists('rsvpParseListText')) {
+    function rsvpParseListText(string $value): array
+    {
+        $value = str_replace(["\r\n", "\r", ';'], "\n", trim($value));
+
+        if ($value === '') {
+            return [];
+        }
+
+        $lines = preg_split('/[\n,]+/', $value) ?: [];
+        $items = [];
+
+        foreach ($lines as $line) {
+            $line = trim((string) $line);
+
+            if ($line !== '') {
+                $items[] = $line;
+            }
+        }
+
+        return array_values(array_unique($items));
+    }
+}
+
+if (!function_exists('rsvpFormatListText')) {
+    function rsvpFormatListText(array $items): string
+    {
+        $items = array_values(array_filter(array_map(
+            static fn ($item) => is_scalar($item) ? trim((string) $item) : '',
+            $items
+        )));
+
+        return implode("\n", $items);
+    }
+}
+
+if (!function_exists('rsvpParseMapText')) {
+    function rsvpParseMapText(string $value): array
+    {
+        $lines = preg_split('/\r\n|\r|\n/', trim($value)) ?: [];
+        $map = [];
+
+        foreach ($lines as $line) {
+            $line = trim((string) $line);
+
+            if ($line === '') {
+                continue;
+            }
+
+            if (preg_match('/^([^:=]+)\s*[:=]\s*(.+)$/', $line, $matches) === 1) {
+                $key = trim((string) $matches[1]);
+                $label = trim((string) $matches[2]);
+            } else {
+                $key = $line;
+                $label = $line;
+            }
+
+            if ($key !== '') {
+                $map[$key] = $label !== '' ? $label : $key;
+            }
+        }
+
+        return $map;
+    }
+}
+
+if (!function_exists('rsvpFormatMapText')) {
+    function rsvpFormatMapText(array $items): string
+    {
+        $lines = [];
+
+        foreach ($items as $key => $label) {
+            $key = trim((string) $key);
+            $label = trim((string) $label);
+
+            if ($key !== '') {
+                $lines[] = $key.' = '.($label !== '' ? $label : $key);
+            }
+        }
+
+        return implode("\n", $lines);
+    }
+}
+
+if (!function_exists('rsvpEnsureJsonTextarea')) {
+    function rsvpEnsureJsonTextarea(mixed $value, array $default = []): string
+    {
+        $array = rsvpDecodeJsonOrDefault($value, $default);
+
+        return rsvpEncodePrettyJson($array);
+    }
+}
+
+if (!function_exists('rsvpBooleanText')) {
+    function rsvpBooleanText(mixed $value): string
+    {
+        if (is_array($value)) {
+            $value = $value[0] ?? null;
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'Accettato' : 'Rifiutato';
+        }
+
+        $value = strtolower(trim((string) $value));
+
+        return in_array($value, ['1', 'true', 'yes', 'on'], true)
+            ? 'Accettato'
+            : 'Rifiutato';
+    }
+}

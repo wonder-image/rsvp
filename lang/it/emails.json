@@ -1,0 +1,10 @@
+{
+    "rsvp_request_customer": {
+        "subject": "Conferma RSVP ricevuta",
+        "text": "Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta RSVP. Grazie."
+    },
+    "rsvp_request_admin": {
+        "subject": "Nuova risposta RSVP",
+        "text": "È arrivata una nuova risposta RSVP.<br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Apri il dettaglio</a>"
+    }
+}
