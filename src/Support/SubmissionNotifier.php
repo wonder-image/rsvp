@@ -170,6 +170,24 @@ final class SubmissionNotifier
             $lines[] = 'Richieste: <strong>'.nl2br(htmlspecialchars((string) $normalized['notes'], ENT_QUOTES, 'UTF-8')).'</strong>';
         }
 
+        // Custom field dichiarati dall'estensione del consumer: finiscono
+        // in metadata_json.custom_fields tramite SubmissionNormalizer.
+        $metadata = rsvpDecodeJsonArray($normalized['metadata_json'] ?? '[]');
+        $customFields = is_array($metadata['custom_fields'] ?? null) ? $metadata['custom_fields'] : [];
+        $schema = ExtensionRegistry::fields();
+
+        foreach ($customFields as $customKey => $customValue) {
+            $label = (string) ($schema[$customKey]['label'] ?? $customKey);
+            $value = is_array($customValue) ? implode(', ', array_map('strval', $customValue)) : (string) $customValue;
+
+            if (trim($value) === '') {
+                continue;
+            }
+
+            $lines[] = htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+                .': <strong>'.htmlspecialchars($value, ENT_QUOTES, 'UTF-8').'</strong>';
+        }
+
         $participantList = [];
 
         foreach ($participants as $participant) {

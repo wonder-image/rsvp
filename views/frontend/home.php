@@ -19,6 +19,33 @@
     $imageField = (!empty($state['require_image_release']) && function_exists('inputAcceptDocument'))
         ? inputAcceptDocument('image_release', 'required')
         : '';
+    $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
+
+    $renderCustomField = static function (string $key, array $def): string {
+        $type = (string) ($def['type'] ?? 'text');
+        $label = (string) ($def['label'] ?? $key);
+        $value = $def['value'] ?? null;
+        $attr = !empty($def['required']) ? 'required' : '';
+        $options = is_array($def['options'] ?? null) ? $def['options'] : [];
+
+        switch ($type) {
+            case 'email':
+                return email($label, $key, $value, $attr);
+            case 'phone':
+                return phone($label, $key, $value, $attr);
+            case 'number':
+                return number($label, $key, $value, $attr);
+            case 'textarea':
+                return textarea($label, $key, $value, $attr);
+            case 'select':
+                return select($label, $key, $options, $value, $attr);
+            case 'checkbox':
+                return checkbox($label, $key, $options);
+            case 'text':
+            default:
+                return text($label, $key, $value, $attr);
+        }
+    };
 
     $ambient = is_array($pageContent['ambient_background'] ?? null) ? $pageContent['ambient_background'] : [];
     $intro = is_array($pageContent['intro'] ?? null) ? $pageContent['intro'] : [];
@@ -455,6 +482,12 @@
                                 'notes'
                             ) ?></div>
 
+                            <?php foreach ($customFields as $customKey => $customDef) { ?>
+                                <div data-rsvp-custom-field="<?=$escape($customKey)?>">
+                                    <?= $renderCustomField($customKey, $customDef) ?>
+                                </div>
+                            <?php } ?>
+
                             <?php if ($privacyField !== '') { ?>
                                 <div><?=$privacyField?></div>
                             <?php } ?>
@@ -593,6 +626,34 @@
             }));
         }
 
+        function collectCustomFields(payload) {
+            const custom = {};
+
+            form.querySelectorAll('[data-rsvp-custom-field]').forEach((wrapper) => {
+                const key = wrapper.getAttribute('data-rsvp-custom-field');
+                if (!key) return;
+
+                // checkbox multipli: name finisce in []
+                const multi = wrapper.querySelectorAll(`input[name="${key}[]"]:checked`);
+                if (multi.length > 0) {
+                    custom[key] = Array.from(multi).map((el) => el.value);
+                    return;
+                }
+
+                const single = wrapper.querySelector(`[name="${key}"]`);
+                if (!single) return;
+
+                if (single.type === 'checkbox' || single.type === 'radio') {
+                    custom[key] = single.checked ? (single.value || 'true') : '';
+                    return;
+                }
+
+                custom[key] = (single.value || '').toString().trim();
+            });
+
+            payload.custom_fields = custom;
+        }
+
         function collectConsentFields(payload) {
             form.querySelectorAll('input[name^="accept_"], input[name$="_id"], input[name="privacy"], input[name="photo_privacy"]').forEach((input) => {
                 if (input.type === 'checkbox') {
@@ -654,6 +715,7 @@
             }
 
             collectConsentFields(payload);
+            collectCustomFields(payload);
 
             const requestBody = new URLSearchParams();
             requestBody.set('post', 'true');

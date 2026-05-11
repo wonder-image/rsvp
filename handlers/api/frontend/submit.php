@@ -3,6 +3,7 @@
 use Wonder\Api\Endpoint;
 use Wonder\Api\Handler;
 use Wonder\Plugin\Rsvp\Models\Response;
+use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
 use Wonder\Plugin\Rsvp\Support\FrontendContext;
 use Wonder\Plugin\Rsvp\Support\InviteCodeSession;
 use Wonder\Plugin\Rsvp\Support\SubmissionNormalizer;
@@ -48,6 +49,31 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
         throw new RuntimeException('È necessario accettare la liberatoria immagini.');
     }
 
+    // Validazione custom field richiesti (definiti dall'estensione del consumer)
+    $customFieldsSchema = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
+    $customFieldsPayload = is_array($call->parameters['custom_fields'] ?? null)
+        ? $call->parameters['custom_fields']
+        : [];
+
+    foreach ($customFieldsSchema as $key => $def) {
+        if (empty($def['required'])) {
+            continue;
+        }
+
+        $value = $customFieldsPayload[$key] ?? null;
+
+        $missing = $value === null
+            || (is_string($value) && trim($value) === '')
+            || (is_array($value) && $value === []);
+
+        if ($missing) {
+            throw new RuntimeException(sprintf('Campo obbligatorio mancante: %s.', $def['label'] ?? $key));
+        }
+    }
+
+    // Hook beforeSubmit: il consumer può modificare il normalized
+    $normalized = ExtensionRegistry::get()->beforeSubmit($normalized);
+
     $insert = Response::query()->Insert(Response::$table, $normalized);
 
     if (empty($insert->success)) {
@@ -58,6 +84,10 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
     $responseId = (int) ($insert->insert_id ?? 0);
 
     SubmissionNotifier::notify($normalized, $responseId);
+
+    // Hook afterSubmit: side-effect lato consumer (notifiche, integrazioni, ...)
+    $normalized['id'] = $responseId;
+    ExtensionRegistry::get()->afterSubmit($normalized, $call->parameters);
 
     return $call->response(rsvp_trans(
         'notifications.649.text',

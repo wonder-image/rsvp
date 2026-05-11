@@ -33,6 +33,7 @@ final class FrontendContext
             'max_participants' => $limits['max_participants'],
             'max_children' => $limits['max_children'],
             'require_image_release' => self::isTrue($settings['require_image_release'] ?? 'false'),
+            'custom_fields' => ExtensionRegistry::fields(),
             'login_title' => trim((string) ($settings['login_title'] ?? '')) !== ''
                 ? (string) $settings['login_title']
                 : (string) ($pageContent['login']['title'] ?? 'Accesso RSVP'),
