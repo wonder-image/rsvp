@@ -4,7 +4,6 @@ use Wonder\Http\Route;
 use Wonder\Plugin\Rsvp\Rsvp;
 
 Route::area('api')
-    ->prefix('/api')
     ->response('json')
     ->group(function () {
         Route::name('api.rsvp.')
