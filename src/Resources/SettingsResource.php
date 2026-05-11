@@ -77,9 +77,9 @@ final class SettingsResource extends SingletonResource
                 'false' => 'No',
             ])->value('true'),
             FormInput::key('customer_subject')->text(),
-            FormInput::key('customer_message')->textarea('blog'),
+            FormInput::key('customer_message')->textarea(),
             FormInput::key('admin_subject')->text(),
-            FormInput::key('admin_message')->textarea('blog'),
+            FormInput::key('admin_message')->textarea(),
         ];
     }
 
