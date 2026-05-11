@@ -63,7 +63,13 @@ final class FrontendContext
 
     public static function eventCatalog(string $locale): array
     {
-        $catalog = Event::all();
+        try {
+            $catalog = Event::all();
+        } catch (\Throwable) {
+            // Tabella rsvp_event ancora non creata sul consumer (primo avvio):
+            // restituiamo un catalogo vuoto, la view userà i fallback.
+            $catalog = [];
+        }
         $resolved = [];
 
         foreach ($catalog as $eventKey => $event) {
