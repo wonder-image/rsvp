@@ -3,6 +3,7 @@
 namespace Wonder\Plugin\Rsvp\Support;
 
 use Wonder\Plugin\Rsvp\Models\Authorization;
+use Wonder\Plugin\Rsvp\Models\Event;
 
 final class FrontendContext
 {
@@ -12,11 +13,11 @@ final class FrontendContext
         $session = is_array($session) ? $session : InviteCodeSession::current();
         $authorization = self::authorization($session);
         $locale = function_exists('__l') ? __l() : 'it';
-        $eventCatalog = self::eventCatalog($settings, $locale);
+        $eventCatalog = self::eventCatalog($locale);
         $visibleEvents = self::visibleEvents($eventCatalog, $authorization);
         $limits = self::limits($settings, $authorization);
-        $pageContent = self::pageContent($settings, $authorization, $locale);
-        $featuredEvent = self::featuredEvent($pageContent, $visibleEvents, $settings, $locale);
+        $pageContent = self::pageContent($locale);
+        $featuredEvent = self::featuredEvent($pageContent, $visibleEvents);
 
         return [
             'locale' => $locale,
@@ -32,10 +33,14 @@ final class FrontendContext
             'max_participants' => $limits['max_participants'],
             'max_children' => $limits['max_children'],
             'require_image_release' => self::isTrue($settings['require_image_release'] ?? 'false'),
-            'login_title' => (string) ($pageContent['login']['title'] ?? self::legacyLoginTitle($settings)),
-            'login_text' => (string) ($pageContent['login']['text'] ?? self::legacyLoginText($settings)),
-            'home_title' => (string) ($pageContent['form']['headline'] ?? self::legacyHomeTitle($settings, $authorization)),
-            'home_text' => (string) ($pageContent['form']['intro_text'] ?? self::legacyHomeText($settings, $authorization)),
+            'login_title' => trim((string) ($settings['login_title'] ?? '')) !== ''
+                ? (string) $settings['login_title']
+                : (string) ($pageContent['login']['title'] ?? 'Accesso RSVP'),
+            'login_text' => trim((string) ($settings['login_text'] ?? '')) !== ''
+                ? (string) $settings['login_text']
+                : (string) ($pageContent['login']['text'] ?? ''),
+            'home_title' => (string) ($pageContent['form']['headline'] ?? 'Conferma la tua partecipazione'),
+            'home_text' => (string) ($pageContent['form']['intro_text'] ?? ''),
         ];
     }
 
@@ -55,14 +60,9 @@ final class FrontendContext
         return is_array($authorization) ? $authorization : [];
     }
 
-    public static function eventCatalog(array $settings, string $locale): array
+    public static function eventCatalog(string $locale): array
     {
-        $catalog = rsvpDecodeJsonArray($settings['events_catalog_json'] ?? '[]');
-
-        if ($catalog === []) {
-            $catalog = self::legacyEventCatalog($settings);
-        }
-
+        $catalog = Event::all();
         $resolved = [];
 
         foreach ($catalog as $eventKey => $event) {
@@ -70,16 +70,36 @@ final class FrontendContext
                 continue;
             }
 
-            $eventKey = trim((string) $eventKey);
+            $eventKey = trim((string) ($event['code'] ?? $eventKey));
 
             if ($eventKey === '') {
                 continue;
             }
 
-            $resolved[$eventKey] = rsvpResolveLocalizedValue($event, $locale);
+            if (!self::isTrue($event['active'] ?? 'true')) {
+                continue;
+            }
+
+            $resolved[$eventKey] = rsvpResolveLocalizedValue([
+                'key' => $eventKey,
+                'label' => (string) ($event['name'] ?? $eventKey),
+                'description' => (string) ($event['description'] ?? ''),
+                'date' => (string) ($event['starts_at'] ?? ''),
+                'location_name' => (string) ($event['location_name'] ?? ''),
+                'location_address' => (string) ($event['location_address'] ?? ''),
+                'location_address_url' => (string) ($event['location_address_url'] ?? ''),
+                'location_position_url' => (string) ($event['location_position_url'] ?? ''),
+                'location_logo' => (string) ($event['location_logo'] ?? ''),
+                'position' => (int) ($event['position'] ?? 0),
+            ], $locale);
             $resolved[$eventKey]['key'] = $eventKey;
             $resolved[$eventKey]['label'] = trim((string) ($resolved[$eventKey]['label'] ?? $eventKey));
         }
+
+        uasort($resolved, static function (array $left, array $right): int {
+            return ((int) ($left['position'] ?? 0) <=> (int) ($right['position'] ?? 0))
+                ?: strcmp((string) ($left['label'] ?? ''), (string) ($right['label'] ?? ''));
+        });
 
         return $resolved;
     }
@@ -131,18 +151,12 @@ final class FrontendContext
         ];
     }
 
-    public static function pageContent(array $settings, array $authorization, string $locale): array
+    public static function pageContent(string $locale): array
     {
-        $defaults = self::defaultPageContent();
-        $settingsContent = rsvpDecodeJsonArray($settings['page_content_json'] ?? '[]');
-        $authorizationContent = rsvpDecodeJsonArray($authorization['page_content_json'] ?? '[]');
-        $merged = rsvpMergeRecursive($defaults, $settingsContent);
-        $merged = rsvpMergeRecursive($merged, $authorizationContent);
-
-        return rsvpResolveLocalizedValue($merged, $locale);
+        return rsvpResolveLocalizedValue(self::defaultPageContent(), $locale);
     }
 
-    public static function featuredEvent(array $pageContent, array $visibleEvents, array $settings, string $locale): array
+    public static function featuredEvent(array $pageContent, array $visibleEvents): array
     {
         $featuredKey = trim((string) ($pageContent['date_section']['featured_event_key'] ?? ''));
 
@@ -154,58 +168,7 @@ final class FrontendContext
             return array_values($visibleEvents)[0];
         }
 
-        $legacy = self::legacyEventCatalog($settings);
-
-        if ($legacy !== []) {
-            $resolved = self::eventCatalog($settings, $locale);
-            return $resolved !== [] ? array_values($resolved)[0] : [];
-        }
-
         return [];
-    }
-
-    private static function legacyEventCatalog(array $settings): array
-    {
-        $options = rsvpDecodeJsonArray($settings['event_options_json'] ?? '[]');
-
-        if ($options !== []) {
-            $catalog = [];
-
-            foreach ($options as $key => $label) {
-                if (!is_scalar($label) && !is_array($label)) {
-                    continue;
-                }
-
-                $catalog[(string) $key] = [
-                    'label' => $label,
-                    'date' => (string) ($settings['event_starts_at'] ?? ''),
-                    'location_name' => (string) ($settings['location_name'] ?? ''),
-                    'location_address' => (string) ($settings['location_name'] ?? ''),
-                    'location_address_url' => (string) ($settings['location_url'] ?? ''),
-                    'location_position_url' => (string) ($settings['location_url'] ?? ''),
-                ];
-            }
-
-            return $catalog;
-        }
-
-        if (
-            trim((string) ($settings['event_name'] ?? '')) === ''
-            && trim((string) ($settings['event_starts_at'] ?? '')) === ''
-        ) {
-            return [];
-        }
-
-        return [
-            'main-event' => [
-                'label' => (string) ($settings['event_name'] ?? 'Evento'),
-                'date' => (string) ($settings['event_starts_at'] ?? ''),
-                'location_name' => (string) ($settings['location_name'] ?? ''),
-                'location_address' => (string) ($settings['location_name'] ?? ''),
-                'location_address_url' => (string) ($settings['location_url'] ?? ''),
-                'location_position_url' => (string) ($settings['location_url'] ?? ''),
-            ],
-        ];
     }
 
     private static function defaultPageContent(): array
@@ -217,18 +180,14 @@ final class FrontendContext
                 'overlay_class' => 'bg bg-black-50 blur-3',
             ],
             'intro' => [
-                'enabled' => true,
+                'enabled' => false,
                 'video' => '',
                 'desktop_overlay_style' => 'background: linear-gradient(transparent 70%, #000000);',
                 'mobile_overlay_style' => 'background: linear-gradient(transparent 40%, #000000);',
                 'logo_path' => '',
-                'claim' => [
-                    'it' => '',
-                    'en' => '',
-                ],
             ],
             'message_section' => [
-                'enabled' => true,
+                'enabled' => false,
                 'content' => [
                     'it' => '',
                     'en' => '',
@@ -429,34 +388,6 @@ final class FrontendContext
                 ],
             ],
         ];
-    }
-
-    private static function legacyLoginTitle(array $settings): string
-    {
-        return trim((string) ($settings['login_title'] ?? '')) !== ''
-            ? (string) $settings['login_title']
-            : 'Accesso RSVP';
-    }
-
-    private static function legacyLoginText(array $settings): string
-    {
-        return trim((string) ($settings['login_text'] ?? '')) !== ''
-            ? (string) $settings['login_text']
-            : 'Inserisci il tuo codice invito per accedere alla pagina RSVP.';
-    }
-
-    private static function legacyHomeTitle(array $settings, array $authorization): string
-    {
-        return trim((string) ($authorization['home_title'] ?? '')) !== ''
-            ? (string) $authorization['home_title']
-            : (trim((string) ($settings['home_title'] ?? '')) !== '' ? (string) $settings['home_title'] : 'Conferma la tua partecipazione');
-    }
-
-    private static function legacyHomeText(array $settings, array $authorization): string
-    {
-        return trim((string) ($authorization['home_text'] ?? '')) !== ''
-            ? (string) $authorization['home_text']
-            : (string) ($settings['home_text'] ?? '');
     }
 
     private static function isTrue(mixed $value): bool

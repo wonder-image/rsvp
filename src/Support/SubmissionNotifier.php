@@ -2,6 +2,7 @@
 
 namespace Wonder\Plugin\Rsvp\Support;
 
+use Wonder\Plugin\Rsvp\Models\Event;
 use Wonder\Plugin\Rsvp\Models\Settings;
 use Wonder\Plugin\Rsvp\Resources\ResponseResource;
 
@@ -12,8 +13,10 @@ final class SubmissionNotifier
         $settings = self::settings();
         $summaryHtml = self::summaryHtml($normalized);
         $responseUrl = self::responseUrl($responseId);
-        $eventName = trim((string) ($settings['event_name'] ?? ''));
-        $eventDate = trim((string) ($settings['event_starts_at'] ?? ''));
+        $event = self::eventFromNormalized($normalized);
+        $defaults = self::defaults();
+        $eventName = trim((string) ($event['name'] ?? ''));
+        $eventDate = trim((string) ($event['starts_at'] ?? ''));
         $adminEmail = trim((string) ($settings['admin_email'] ?? ($GLOBALS['SOCIETY']->email ?? '')));
         $customerEmail = trim((string) ($normalized['contact_email'] ?? ''));
 
@@ -33,13 +36,13 @@ final class SubmissionNotifier
                 self::message(
                     (string) ($settings['admin_subject'] ?? ''),
                     'emails.rsvp_request_admin.subject',
-                    'Nuova risposta RSVP',
+                    $defaults['admin_subject'],
                     $replacements
                 ),
                 self::message(
                     (string) ($settings['admin_message'] ?? ''),
                     'emails.rsvp_request_admin.text',
-                    "È arrivata una nuova risposta RSVP.<br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Apri il dettaglio</a>",
+                    $defaults['admin_message'],
                     $replacements
                 )
             );
@@ -52,13 +55,13 @@ final class SubmissionNotifier
                 self::message(
                     (string) ($settings['customer_subject'] ?? ''),
                     'emails.rsvp_request_customer.subject',
-                    'Conferma RSVP ricevuta',
+                    $defaults['customer_subject'],
                     $replacements
                 ),
                 self::message(
                     (string) ($settings['customer_message'] ?? ''),
                     'emails.rsvp_request_customer.text',
-                    "Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta RSVP. {{event_name}} {{event_starts_at}}",
+                    $defaults['customer_message'],
                     $replacements
                 )
             );
@@ -72,11 +75,54 @@ final class SubmissionNotifier
         return is_array($settings) ? $settings : [];
     }
 
+    public static function defaults(): array
+    {
+        return [
+            'customer_subject' => 'Conferma RSVP ricevuta',
+            'customer_message' => 'Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta RSVP'
+                .' per <strong>{{event_name}}</strong>.'
+                .'<br><br>{{summary_html}}',
+            'admin_subject' => 'Nuova risposta RSVP - {{contact_name}} {{contact_surname}}',
+            'admin_message' => 'È arrivata una nuova risposta RSVP per <strong>{{event_name}}</strong>.'
+                .'<br><br>{{summary_html}}'
+                .'<br><br><a href="{{response_url}}">Apri il dettaglio in backend</a>',
+        ];
+    }
+
     private static function responseUrl(int $responseId): string
     {
         return function_exists('__r')
             ? __r('backend.resource.'.ResponseResource::slug().'.view', ['id' => $responseId])
             : '';
+    }
+
+    private static function eventFromNormalized(array $normalized): array
+    {
+        $eventKey = trim((string) ($normalized['event_key'] ?? ''));
+
+        if ($eventKey === '') {
+            $events = SubmissionNormalizer::eventsFromNormalized($normalized);
+            $eventKey = trim((string) ($events[0] ?? ''));
+        }
+
+        if ($eventKey === '') {
+            return [
+                'name' => 'RSVP',
+                'starts_at' => '',
+            ];
+        }
+
+        $event = Event::find([
+            'code' => $eventKey,
+            'deleted' => 'false',
+        ], 1);
+
+        return is_array($event) && $event !== []
+            ? $event
+            : [
+                'name' => $eventKey,
+                'starts_at' => '',
+            ];
     }
 
     private static function message(string $configured, string $key, string $fallback, array $replacements): string
@@ -99,6 +145,7 @@ final class SubmissionNotifier
         $participants = SubmissionNormalizer::participantsFromNormalized($normalized);
         $consents = SubmissionNormalizer::consents($normalized);
         $documents = SubmissionNormalizer::legalDocumentsFromNormalized($normalized);
+        $event = self::eventFromNormalized($normalized);
         $lines = [];
 
         $lines[] = 'Nome: <strong>'.htmlspecialchars(trim(((string) ($normalized['contact_name'] ?? '')).' '.((string) ($normalized['contact_surname'] ?? ''))), ENT_QUOTES, 'UTF-8').'</strong>';
@@ -108,7 +155,7 @@ final class SubmissionNotifier
         $lines[] = 'Bambini: <strong>'.(int) ($normalized['children_count'] ?? 0).'</strong>';
 
         if (!empty($normalized['event_key'])) {
-            $lines[] = 'Evento principale: <strong>'.htmlspecialchars((string) $normalized['event_key'], ENT_QUOTES, 'UTF-8').'</strong>';
+            $lines[] = 'Evento principale: <strong>'.htmlspecialchars((string) ($event['name'] ?? $normalized['event_key']), ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['invite_code'] ?? '') !== '') {

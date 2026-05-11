@@ -1,6 +1,5 @@
 <?php
     $state = is_array($STATE ?? null) ? $STATE : [];
-    $settings = is_array($state['settings'] ?? null) ? $state['settings'] : [];
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
     $pageContent = is_array($state['page_content'] ?? null) ? $state['page_content'] : [];
     $visibleEvents = is_array($state['visible_events'] ?? null) ? $state['visible_events'] : [];
@@ -68,11 +67,11 @@
             .'</video>';
     };
 
-    $eventLabel = (string) $valueFrom($featuredEvent, ['label', 'title', 'name'], (string) ($settings['event_name'] ?? ''));
-    $eventDate = (string) $valueFrom($featuredEvent, ['date', 'starts_at', 'event_starts_at'], (string) ($settings['event_starts_at'] ?? ''));
-    $locationName = (string) $valueFrom($featuredEvent, ['location_name', 'position', 'name'], (string) ($settings['location_name'] ?? ''));
+    $eventLabel = (string) $valueFrom($featuredEvent, ['label', 'title', 'name'], '');
+    $eventDate = (string) $valueFrom($featuredEvent, ['date', 'starts_at', 'event_starts_at'], '');
+    $locationName = (string) $valueFrom($featuredEvent, ['location_name', 'position', 'name'], '');
     $locationAddress = (string) $valueFrom($featuredEvent, ['location_address', 'address'], $locationName);
-    $locationAddressUrl = (string) $valueFrom($featuredEvent, ['location_address_url', 'urlAddress', 'location_url'], (string) ($settings['location_url'] ?? ''));
+    $locationAddressUrl = (string) $valueFrom($featuredEvent, ['location_address_url', 'urlAddress', 'location_url'], '');
     $locationPositionUrl = (string) $valueFrom($featuredEvent, ['location_position_url', 'urlPosition', 'location_url'], $locationAddressUrl);
     $locationLogo = (string) $valueFrom($featuredEvent, ['location_logo', 'location_logo_url', 'urlLogo'], '');
     $introLogo = trim((string) ($intro['logo_path'] ?? '')) !== ''

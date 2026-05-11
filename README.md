@@ -1,54 +1,17 @@
 # wonder-image/rsvp
 
-Installazione del modulo via Packagist, valida sia in locale sia in produzione:
+Installazione del modulo via Packagist:
 
 ```bash
 composer require wonder-image/rsvp:dev-main
 ```
 
-Modulo RSVP per `wonder-image/app`, adattato al nuovo sistema moduli.
-
-## Cosa include
-
-- discovery automatica di `Model`, `Resource`, route e traduzioni via `module.json`
-- backend resource-based per:
-  - `rsvp/responses`
-  - `rsvp/authorizations`
-  - `rsvp/invite-codes`
-  - `rsvp/invite-groups`
-  - `rsvp/settings`
-- endpoint API:
-  - `api.rsvp.submit`
-  - `api.rsvp.login`
-  - `api.rsvp.logout`
-  - `api.rsvp.session`
-- route frontend:
-  - `rsvp.home`
-  - `rsvp.login`
-- supporto RSVP libero o protetto da codice invito
-- autorizzazioni RSVP separate dai gruppi invito per governare eventi visibili e limiti del form
-- email di conferma ospite e admin
-- registrazione del documento legale `image_release` dal modulo stesso
-- contenuti frontend e catalogo eventi pronti per multilingua via JSON localizzati
+Modulo RSVP per `wonder-image/app`, pronto per `wonder-image/new-site`.
 
 ## Installazione
 
-1. Installa il package nel consumer con Composer.
-
+1. Installa il package con Composer.
 2. Abilita il modulo in `custom/config/modules.php`.
-
-```php
-<?php
-
-return [
-    'rsvp' => [
-        'enabled' => true,
-        'config' => [],
-    ],
-];
-```
-
-Forma breve equivalente:
 
 ```php
 <?php
@@ -58,147 +21,270 @@ return [
 ];
 ```
 
-3. Se ti serve configurazione file-based del modulo, usa `custom/config/modules/rsvp.php`.
+3. Esegui l’update del progetto consumer per materializzare le tabelle del modulo.
 
-4. Esegui l'update del progetto consumer per materializzare le tabelle dei model scoperti dal modulo.
+Non servono `repositories` custom nel `composer.json` del consumer se il package viene installato da Packagist.
 
-Non serve dichiarare `repositories` custom nel `composer.json` del consumer se installi il package da Packagist.
+## URL frontend
 
-## Endpoint e route
+Le due pagine frontend del modulo sono:
+
+- `rsvp.home`
+- `rsvp.login`
+
+Path canonical:
+
+- `GET /rsvp/`
+- `GET /rsvp/login/`
+
+Traduzioni URL incluse nel package:
+
+- IT:
+  - home: `/rsvp/`
+  - login: `/rsvp/accedi/`
+- EN:
+  - home: `/rsvp/`
+  - login: `/rsvp/login/`
+
+Nei template del progetto host usa sempre gli helper route:
+
+```php
+<?=__r('rsvp.home')?>
+<?=__r('rsvp.login')?>
+```
+
+## Flusso frontend
+
+Se `require_invite_code = true`:
+
+1. l’utente apre `rsvp.login`
+2. inserisce un codice invito valido
+3. il modulo apre una sessione RSVP
+4. l’utente entra in `rsvp.home`
+
+Se `require_invite_code = false`, `rsvp.home` è accessibile direttamente.
+
+## API
+
+Route name API:
+
+- `api.rsvp.submit`
+- `api.rsvp.login`
+- `api.rsvp.logout`
+- `api.rsvp.session`
+
+Path API:
 
 - `POST /api/rsvp/`
 - `POST /api/rsvp/login/`
 - `POST /api/rsvp/logout/`
 - `GET /api/rsvp/session/`
-- `GET /rsvp/`
-- `GET /rsvp/login/`
 
-Le route frontend sono traducibili via:
+Le API restano intenzionalmente fisse e cross-lingua.
+
+## Backend del modulo
+
+Dopo l’attivazione trovi queste resource:
+
+- `rsvp/settings`
+- `rsvp/events`
+- `rsvp/authorizations`
+- `rsvp/invite-codes`
+- `rsvp/invite-groups`
+- `rsvp/responses`
+
+## Come funziona il dominio RSVP
+
+### `rsvp_event`
+
+Definisce un evento selezionabile nel form RSVP.
+
+Campi principali:
+
+- `code`
+- `name`
+- `starts_at`
+- `location_name`
+- `location_address`
+- `location_address_url`
+- `location_position_url`
+- `location_logo`
+- `position`
+- `active`
+
+Usalo per casi come:
+
+- matrimonio
+- aperitivo
+- cena
+- festa aziendale
+- welcome party
+
+### `rsvp_authorization`
+
+Definisce cosa un invitato può vedere o selezionare.
+
+Campi principali:
+
+- `visible_event_keys_json`
+- `max_participants`
+- `allow_children`
+- `max_children`
+
+Usa una `authorization` quando codici diversi devono avere regole diverse. Esempio:
+
+- `WEDDING_ONLY`
+- `WEDDING_AND_APERITIF`
+- `CORPORATE_GUEST`
+
+### `rsvp_invite_code`
+
+È il codice effettivamente inserito dall’utente nella pagina login.
+
+Campi principali:
+
+- `code`
+- `usage_mode`: `single_use` o `multiple_use`
+- `authorization_id`
+- `invite_group_id`
+- `active`
+
+Il codice:
+
+- apre la sessione RSVP
+- eredita le regole dalla sua `authorization`
+- può essere monouso o multiuso
+- può essere organizzato in un gruppo invito
+
+### `rsvp_invite_group`
+
+È un contenitore organizzativo. Non governa il frontend da solo.
+
+Serve per segmentazioni come:
+
+- famiglia
+- colleghi
+- fornitori
+- tavoli
+- lato sposa / lato sposo
+
+Le regole di visibilità restano nella `authorization`.
+
+## Flusso consigliato di configurazione
+
+1. configura `rsvp/settings`
+2. crea gli eventi in `rsvp/events`
+3. crea una o più `rsvp/authorizations`
+4. crea eventuali `rsvp/invite-groups`
+5. crea i `rsvp/invite-codes`
+6. condividi `rsvp.login` o `rsvp.home` a seconda del caso
+
+Esempio:
+
+- evento `WEDDING`
+- evento `APERITIF`
+- autorizzazione `WEDDING_ONLY` con `visible_event_keys_json = ["WEDDING"]`
+- autorizzazione `WEDDING_AND_APERITIF` con `visible_event_keys_json = ["WEDDING", "APERITIF"]`
+- gruppo `FAMIGLIA_ROSSI`
+- codice `ROSSI01` collegato a `FAMIGLIA_ROSSI` e `WEDDING_AND_APERITIF`
+
+## Cosa configuri in `rsvp/settings`
+
+`rsvp/settings` contiene solo la configurazione operativa del modulo:
+
+- `require_invite_code`
+- `login_title`
+- `login_text`
+- `max_participants`
+- `allow_children`
+- `max_children`
+- `require_image_release`
+- `admin_email`
+- `admin_notifications`
+- `customer_notifications`
+- `customer_subject`
+- `customer_message`
+- `admin_subject`
+- `admin_message`
+
+Non ci sono più in `settings`:
+
+- `Titolo RSVP`
+- `Testo RSVP`
+- `Catalogo eventi`
+- `Catalogo eventi esteso`
+- `Contenuti pagina multilingua`
+
+Gli eventi stanno in `rsvp/events`. La personalizzazione strutturale del frontend si fa nelle view override del progetto host.
+
+## Default email inclusi nel codice
+
+Il modulo include fallback reali per le email, usati quando i campi in `rsvp/settings` sono vuoti.
+
+Default ospite:
+
+- oggetto: `Conferma RSVP ricevuta`
+- contenuto: conferma della ricezione con riepilogo RSVP
+
+Default admin:
+
+- oggetto: `Nuova risposta RSVP - {{contact_name}} {{contact_surname}}`
+- contenuto: riepilogo completo RSVP con link al dettaglio backend
+
+Placeholder supportati nei messaggi:
+
+- `{{contact_name}}`
+- `{{contact_surname}}`
+- `{{event_name}}`
+- `{{event_starts_at}}`
+- `{{summary_html}}`
+- `{{response_url}}`
+
+## Come customizzare le view dopo l’installazione
+
+Il modulo supporta override view dal consumer.
+
+Se nel progetto host crei questi file, il modulo userà quelli al posto delle view del package:
+
+- `custom/modules/rsvp/views/frontend/home.php`
+- `custom/modules/rsvp/views/frontend/login.php`
+
+Questa è la meccanica corretta per personalizzare HTML, struttura, sezioni, stile e logica presentazionale senza toccare `vendor/`.
+
+Le view del package usano come contesto `STATE`, quindi nelle override hai già accesso ai dati principali:
+
+- `$STATE['settings']`
+- `$STATE['session']`
+- `$STATE['authorization']`
+- `$STATE['visible_events']`
+- `$STATE['featured_event']`
+- `$STATE['requires_invite_code']`
+- `$STATE['max_participants']`
+- `$STATE['allow_children']`
+- `$STATE['max_children']`
+- `$STATE['require_image_release']`
+
+Le view RSVP vengono renderizzate dentro il layout frontend del progetto host, quindi ereditano automaticamente:
+
+- `head.php`
+- `header.php`
+- `footer.php`
+- asset e utility globali del sito
+
+## Multilingua
+
+Il modulo è pronto per essere adattato al multilingua:
+
+- route frontend traducibili via `lang/{locale}/urls.json`
+- testi di default nel frontend già strutturati con fallback IT/EN nel codice
+- le view override del consumer possono usare `__l()`, `__t()` e `__r()` come qualsiasi altra pagina del progetto
+
+File URL inclusi:
 
 - [lang/it/urls.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/it/urls.json)
 - [lang/en/urls.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/en/urls.json)
 
-Le API restano intenzionalmente fisse e cross-lingua:
-
-- `/api/rsvp/`
-- `/api/rsvp/login/`
-- `/api/rsvp/logout/`
-- `/api/rsvp/session/`
-
-## Frontend multilingua
-
-La resource `rsvp/settings` espone due JSON chiave:
-
-- `events_catalog_json`
-- `page_content_json`
-
-Entrambi accettano valori localizzati per lingua, per esempio:
-
-```json
-{
-  "it": "Ti aspettiamo",
-  "en": "We are waiting for you"
-}
-```
-
-### Esempio `events_catalog_json`
-
-```json
-{
-  "wedding": {
-    "label": {
-      "it": "Matrimonio",
-      "en": "Wedding"
-    },
-    "date": "2026-09-14 18:30:00",
-    "location_name": {
-      "it": "Villa Rossi",
-      "en": "Villa Rossi"
-    },
-    "location_address": {
-      "it": "Via Roma 10, Milano",
-      "en": "10 Via Roma, Milan"
-    },
-    "location_address_url": "https://maps.example.com/address",
-    "location_position_url": "https://maps.example.com/position",
-    "location_logo": "/upload/location/logo.png"
-  },
-  "aperitif": {
-    "label": {
-      "it": "Aperitivo",
-      "en": "Aperitif"
-    },
-    "date": "2026-09-14 16:30:00"
-  }
-}
-```
-
-### Esempio `page_content_json`
-
-```json
-{
-  "ambient_background": {
-    "enabled": true,
-    "video": "/upload/video/red-and-white-pulsating-disco-light-background.mp4"
-  },
-  "intro": {
-    "enabled": true,
-    "video": "/upload/video/disco-ball-background.mp4",
-    "logo_path": "/upload/logo/site-logo.png"
-  },
-  "message_section": {
-    "enabled": true,
-    "content": {
-      "it": "60 anni di storia sono 60 anni di voi. Festeggiamoci assieme.",
-      "en": "60 years of history means 60 years of you. Let us celebrate together."
-    }
-  },
-  "date_section": {
-    "featured_event_key": "wedding",
-    "eyebrow": {
-      "it": "Ti aspettiamo",
-      "en": "We are waiting for you"
-    }
-  },
-  "location_section": {
-    "eyebrow": {
-      "it": "Location",
-      "en": "Location"
-    }
-  },
-  "countdown": {
-    "enabled": true,
-    "title": {
-      "it": "Festeggeremo tra...",
-      "en": "We will celebrate in..."
-    }
-  },
-  "login": {
-    "title": {
-      "it": "Accesso RSVP",
-      "en": "RSVP Access"
-    },
-    "text": {
-      "it": "Inserisci il tuo codice invito per accedere alla pagina RSVP.",
-      "en": "Enter your invite code to access the RSVP page."
-    }
-  },
-  "form": {
-    "headline": {
-      "it": "Conferma la tua partecipazione",
-      "en": "Confirm your attendance"
-    },
-    "submit_button": {
-      "it": "Invia conferma",
-      "en": "Send RSVP"
-    }
-  }
-}
-```
-
-`page_content_json` puo essere definito a livello globale in `rsvp/settings` e sovrascritto per codice/autorizzazione via `rsvp/authorizations.page_content_json`, così codici diversi possono vedere varianti diverse della landing RSVP.
-
-## Payload submission supportato
+## Payload RSVP supportato
 
 Campi supportati direttamente:
 
@@ -228,13 +314,7 @@ Campi legacy ancora normalizzati automaticamente:
 - `lang`
 - `photo_privacy`
 - `password_id`
-- `form` JSON incapsulato in stile legacy
+- `form` JSON legacy
 - `request_url`
 
 I campi extra non riconosciuti finiscono in `metadata_json`.
-
-## Note
-
-- il modulo non usa più `custom/build/table`, `custom/config/resource/resources.php` o route copiate nel consumer come meccanica primaria
-- `config/module.php` registra il doc type `image_release` in fase bootstrap modulo
-- le traduzioni del modulo vengono caricate automaticamente dal registry moduli

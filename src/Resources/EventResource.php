@@ -12,23 +12,23 @@ use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\ResourceSchema\TableLayoutSchema;
 use Wonder\Elements\Components\Card;
 use Wonder\Elements\Form\Form;
-use Wonder\Plugin\Rsvp\Models\Authorization;
+use Wonder\Plugin\Rsvp\Models\Event;
 
-final class AuthorizationResource extends Resource
+final class EventResource extends Resource
 {
-    public static string $model = Authorization::class;
+    public static string $model = Event::class;
 
     public static function textSchema(): array
     {
         return [
-            'label' => 'autorizzazione RSVP',
-            'plural_label' => 'autorizzazioni RSVP',
-            'last' => 'ultime',
-            'all' => 'tutte',
-            'article' => 'le',
-            'full' => 'piene',
-            'empty' => 'vuote',
-            'this' => 'questa',
+            'label' => 'evento RSVP',
+            'plural_label' => 'eventi RSVP',
+            'last' => 'ultimi',
+            'all' => 'tutti',
+            'article' => 'gli',
+            'full' => 'pieni',
+            'empty' => 'vuoti',
+            'this' => 'questo',
         ];
     }
 
@@ -38,10 +38,14 @@ final class AuthorizationResource extends Resource
             'code' => 'Codice',
             'name' => 'Nome',
             'description' => 'Descrizione',
-            'visible_event_keys_json' => 'Eventi visibili',
-            'max_participants' => 'Max adulti',
-            'allow_children' => 'Bambini',
-            'max_children' => 'Max bambini',
+            'starts_at' => 'Data evento',
+            'location_name' => 'Location',
+            'location_address' => 'Indirizzo',
+            'location_address_url' => 'Link indirizzo',
+            'location_position_url' => 'Link posizione',
+            'location_logo' => 'Logo location',
+            'position' => 'Ordine',
+            'active' => 'Attivo',
         ];
     }
 
@@ -51,13 +55,17 @@ final class AuthorizationResource extends Resource
             FormInput::key('code')->text()->required(),
             FormInput::key('name')->text()->required(),
             FormInput::key('description')->textarea(),
-            FormInput::key('visible_event_keys_json')->textarea()->prepare('sanitize', false),
-            FormInput::key('max_participants')->number(),
-            FormInput::key('allow_children')->select([
-                'false' => 'No',
+            FormInput::key('starts_at')->textDatetime(),
+            FormInput::key('location_name')->text(),
+            FormInput::key('location_address')->textarea(),
+            FormInput::key('location_address_url')->url(),
+            FormInput::key('location_position_url')->url(),
+            FormInput::key('location_logo')->url(),
+            FormInput::key('position')->number()->value('0'),
+            FormInput::key('active')->select([
                 'true' => 'Sì',
-            ])->required()->value('false'),
-            FormInput::key('max_children')->number(),
+                'false' => 'No',
+            ])->required()->value('true'),
         ];
     }
 
@@ -65,15 +73,19 @@ final class AuthorizationResource extends Resource
     {
         return (new Form)->components([
             (new Card)->components([
-                static::getInput('code')->columnSpan(4),
-                static::getInput('name')->columnSpan(8),
+                static::getInput('code')->columnSpan(3),
+                static::getInput('name')->columnSpan(6),
+                static::getInput('starts_at')->columnSpan(3),
                 static::getInput('description')->columnSpan(12),
-                static::getInput('visible_event_keys_json')->columnSpan(12),
+                static::getInput('location_name')->columnSpan(6),
+                static::getInput('location_address')->columnSpan(6),
+                static::getInput('location_address_url')->columnSpan(6),
+                static::getInput('location_position_url')->columnSpan(6),
+                static::getInput('location_logo')->columnSpan(12),
             ])->columns(12)->columnSpan(9),
             (new Card)->components([
-                static::getInput('max_participants')->columnSpan(12),
-                static::getInput('allow_children')->columnSpan(12),
-                static::getInput('max_children')->columnSpan(12),
+                static::getInput('position')->columnSpan(12),
+                static::getInput('active')->columnSpan(12),
             ])->columns(12)->columnSpan(3),
         ])->columns(12);
     }
@@ -83,9 +95,9 @@ final class AuthorizationResource extends Resource
         return [
             TableColumn::key('name')->text()->link('edit'),
             TableColumn::key('code')->text()->size('little'),
-            TableColumn::key('visible_event_keys_json')->text()->function('rsvpJsonPrettyList', 'visible_event_keys_json')->size('medium'),
-            TableColumn::key('max_participants')->text()->size('little'),
-            TableColumn::key('max_children')->text()->size('little'),
+            TableColumn::key('starts_at')->datetime()->size('medium'),
+            TableColumn::key('position')->text()->size('little'),
+            TableColumn::key('active')->text()->function('rsvpBooleanText', 'active')->size('little'),
             TableColumn::key('actions')->button()->actions(['edit', 'delete']),
         ];
     }
@@ -93,11 +105,11 @@ final class AuthorizationResource extends Resource
     public static function tableLayoutSchema(): TableLayoutSchema
     {
         return TableLayoutSchema::for(static::class)
-            ->title('Autorizzazioni RSVP')
-            ->buttonAdd('Aggiungi autorizzazione')
+            ->title('Eventi RSVP')
+            ->buttonAdd('Aggiungi evento')
             ->results()
             ->filters()
-            ->searchFields(['code', 'name', 'description']);
+            ->searchFields(['code', 'name', 'description', 'location_name']);
     }
 
     public static function pageSchema(): PageSchema
@@ -120,23 +132,9 @@ final class AuthorizationResource extends Resource
     {
         return NavigationSchema::for(static::class)
             ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
-            ->title('Autorizzazioni')
-            ->order(15)
+            ->title('Eventi')
+            ->order(10)
             ->authority([]);
-    }
-
-    public static function mutateRequestValues(
-        array $values,
-        string $action,
-        string $context = 'backend',
-        ?array $oldValues = null
-    ): array {
-        $values['visible_event_keys_json'] = json_encode(
-            rsvpParseListText((string) ($values['visible_event_keys_json'] ?? '')),
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-        );
-
-        return $values;
     }
 
     public static function mutateFormValues(
@@ -144,9 +142,9 @@ final class AuthorizationResource extends Resource
         string $mode,
         string $context = 'backend'
     ): array {
-        $values['visible_event_keys_json'] = rsvpFormatListText(
-            rsvpDecodeJsonArray($values['visible_event_keys_json'] ?? '[]')
-        );
+        if (!empty($values['starts_at']) && strtotime((string) $values['starts_at']) !== false) {
+            $values['starts_at'] = date('Y-m-d\TH:i', strtotime((string) $values['starts_at']));
+        }
 
         return $values;
     }

@@ -23,7 +23,17 @@ final class Rsvp implements ModuleInterface
 
     public static function viewPath(string $path): string
     {
-        return self::root().'/views/'.ltrim($path, '/');
+        $path = ltrim($path, '/');
+        $root = (string) ($GLOBALS['ROOT'] ?? $_SERVER['DOCUMENT_ROOT'] ?? '');
+        $override = $root !== ''
+            ? $root.'/custom/modules/rsvp/views/'.$path
+            : '';
+
+        if ($override !== '' && file_exists($override)) {
+            return $override;
+        }
+
+        return self::root().'/views/'.$path;
     }
 
     public static function langPath(): string
