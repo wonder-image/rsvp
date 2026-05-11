@@ -16,8 +16,17 @@ final class InviteCodeSession
     {
         $code = strtoupper(trim($code));
 
+        // Codice 905 = "Password errata" nelle traduzioni framework
+        // (resources/lang/<lang>/notifications.json). Lato client il
+        // toast viene mostrato con alertToast(905). Usiamo lo stesso
+        // codice per tutti i casi di "credenziale rifiutata" così l'UX
+        // è uniforme: l'ospite vede sempre "Password errata".
+        $rejected = static function (string $reason): RuntimeException {
+            return new RuntimeException($reason, 905);
+        };
+
         if ($code === '') {
-            throw new RuntimeException('Codice invito mancante.');
+            throw $rejected('Codice invito mancante.');
         }
 
         $rows = InviteCode::query()->Select(InviteCode::$table, [
@@ -26,19 +35,19 @@ final class InviteCodeSession
         ], 1);
 
         if (!$rows->success || !$rows->exists) {
-            throw new RuntimeException('Codice invito non valido.');
+            throw $rejected('Codice invito non valido.');
         }
 
         $record = $rows->row;
 
         if (($record['active'] ?? 'false') !== 'true') {
-            throw new RuntimeException('Codice invito disattivato.');
+            throw $rejected('Codice invito disattivato.');
         }
 
         $groupCode = self::groupCode((int) ($record['invite_group_id'] ?? 0));
 
         if ($allowedGroups !== [] && !in_array($groupCode, $allowedGroups, true)) {
-            throw new RuntimeException('Codice invito non autorizzato per questa area.');
+            throw $rejected('Codice invito non autorizzato per questa area.');
         }
 
         $_SESSION[self::SESSION_KEY] = (int) $record['id'];
