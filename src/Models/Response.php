@@ -16,6 +16,7 @@ final class Response extends Model
     public static function tableSchema(): array
     {
         $schema = [
+            Column::key('booking_code')->length(20)->null(),
             Column::key('invite_code_id')->int()->null()->foreign(InviteCode::$table),
             Column::key('invite_code')->length(120)->null(),
             Column::key('invite_group_code')->length(120)->null(),
@@ -50,6 +51,9 @@ final class Response extends Model
             'ind_event_key' => [
                 'index' => 'event_key',
             ],
+            'ind_booking_code' => [
+                'index' => 'booking_code',
+            ],
             'ind_contact_email' => [
                 'index' => 'contact_email',
             ],
@@ -65,6 +69,7 @@ final class Response extends Model
     public static function dataSchema(): array
     {
         $schema = [
+            Field::key('booking_code')->text()->sanitize(false),
             Field::key('invite_code_id')->number()->decimals(0),
             Field::key('invite_code')->text()->sanitize(false),
             Field::key('invite_group_code')->text()->sanitize(false),
@@ -116,5 +121,16 @@ final class Response extends Model
         }
 
         return $definitions;
+    }
+
+    public static function bookingCodeFromId(int|string|null $id): string
+    {
+        $id = (int) $id;
+
+        if ($id <= 0) {
+            return '';
+        }
+
+        return 'pre_'.str_pad((string) $id, 7, '0', STR_PAD_LEFT);
     }
 }

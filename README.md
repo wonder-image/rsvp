@@ -266,6 +266,22 @@ Placeholder supportati nei messaggi:
 - `{{summary_html}}`
 - `{{response_url}}`
 
+## Export risposte
+
+L’export RSVP genera una riga per ogni partecipante, non una sola riga per referente.
+
+Per rendere leggibili le prenotazioni multiple, ogni risposta ha un codice prenotazione:
+
+- formato: `pre_0000001`
+- salvato nel campo `booking_code`
+- usato anche come fallback calcolato da `id` per le risposte più vecchie
+
+Nell’export troverai quindi:
+
+- il referente
+- una riga per ciascun partecipante
+- il codice prenotazione ripetuto su tutte le righe della stessa prenotazione
+
 ## Come customizzare le view dopo l’installazione
 
 Il modulo supporta override view dal consumer.

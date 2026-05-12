@@ -34,6 +34,7 @@ final class ResponseResource extends Resource
     public static function labelSchema(): array
     {
         $labels = [
+            'booking_code' => 'Codice prenotazione',
             'contact_name' => 'Nome',
             'contact_surname' => 'Cognome',
             'contact_email' => 'Email',
@@ -59,6 +60,7 @@ final class ResponseResource extends Resource
     public static function tableSchema(): array
     {
         return [
+            TableColumn::key('booking_code')->text()->size('little'),
             TableColumn::key('contact_name')->text()->columns(['contact_name', 'contact_surname'])->link('view'),
             TableColumn::key('contact_email')->text()->link('mailto'),
             TableColumn::key('participants_count')->text()->size('little'),
