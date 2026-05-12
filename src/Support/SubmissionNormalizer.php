@@ -338,9 +338,13 @@ final class SubmissionNormalizer
     private static function customFieldColumns(array $payload): array
     {
         $schema = Response::customFieldDefinitions();
-        $customPayload = is_array($payload['custom_fields'] ?? null)
-            ? $payload['custom_fields']
-            : [];
+        $customPayloadRaw = $payload['custom_fields'] ?? [];
+
+        if (is_string($customPayloadRaw) && self::isJsonArray($customPayloadRaw)) {
+            $customPayloadRaw = json_decode($customPayloadRaw, true);
+        }
+
+        $customPayload = is_array($customPayloadRaw) ? $customPayloadRaw : [];
         $columns = [];
 
         foreach ($schema as $fieldKey => $definition) {

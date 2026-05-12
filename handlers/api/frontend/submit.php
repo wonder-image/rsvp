@@ -71,8 +71,17 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
         }
     }
 
+    $resolvedCustomColumns = [];
+
+    foreach (Response::customFieldColumns() as $column) {
+        if (array_key_exists($column, $normalized)) {
+            $resolvedCustomColumns[$column] = $normalized[$column];
+        }
+    }
+
     // Hook beforeSubmit: il consumer può modificare il normalized
     $normalized = ExtensionRegistry::get()->beforeSubmit($normalized);
+    $normalized = array_replace($resolvedCustomColumns, $normalized);
 
     $insert = Response::query()->Insert(Response::$table, $normalized);
 

@@ -123,6 +123,17 @@ final class Response extends Model
         return $definitions;
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function customFieldColumns(): array
+    {
+        return array_values(array_map(
+            static fn (array $field): string => (string) $field['column'],
+            self::customFieldDefinitions()
+        ));
+    }
+
     public static function bookingCodeFromId(int|string|null $id): string
     {
         $id = (int) $id;

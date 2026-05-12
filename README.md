@@ -327,6 +327,8 @@ Regola di naming:
 
 `metadata_json` resta disponibile solo come fallback per dati extra non dichiarati nello schema dell’estensione.
 
+I valori dei custom field vengono risolti prima della persistenza e i `meta_*` vengono preservati anche se l’estensione usa `beforeSubmit()`, quindi l’hook non deve ricostruire manualmente quelle colonne.
+
 Dopo aver aggiunto o modificato i custom field dell’estensione, esegui l’update del progetto consumer per sincronizzare lo schema della tabella risposte.
 
 ## Multilingua
