@@ -401,6 +401,21 @@ if (!function_exists('rsvpCustomFieldColumn')) {
     }
 }
 
+if (!function_exists('rsvpCustomFieldLabel')) {
+    function rsvpCustomFieldLabel(array $field, ?string $fallbackKey = null): string
+    {
+        $label = trim((string) ($field['label'] ?? ''));
+
+        if ($label !== '') {
+            return $label;
+        }
+
+        return $fallbackKey !== null && trim($fallbackKey) !== ''
+            ? trim($fallbackKey)
+            : 'Campo personalizzato';
+    }
+}
+
 if (!function_exists('rsvpCustomFieldValue')) {
     function rsvpCustomFieldValue(mixed $value): ?string
     {
@@ -430,6 +445,78 @@ if (!function_exists('rsvpCustomFieldValue')) {
         $value = trim((string) $value);
 
         return $value !== '' ? $value : null;
+    }
+}
+
+if (!function_exists('rsvpRenderCustomFieldValue')) {
+    function rsvpRenderCustomFieldValue(array $field, mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        $type = strtolower(trim((string) ($field['type'] ?? 'text')));
+        $options = is_array($field['options'] ?? null) ? $field['options'] : [];
+        $normalizedOptions = [];
+
+        foreach ($options as $optionValue => $optionLabel) {
+            $optionValue = trim((string) $optionValue);
+            $optionLabel = trim((string) $optionLabel);
+
+            if ($optionValue === '') {
+                continue;
+            }
+
+            $normalizedOptions[$optionValue] = $optionLabel !== '' ? $optionLabel : $optionValue;
+        }
+
+        if (is_bool($value)) {
+            return rsvpBooleanText($value);
+        }
+
+        if (is_array($value)) {
+            $rawValues = array_map(
+                static fn ($item) => is_scalar($item) ? trim((string) $item) : '',
+                $value
+            );
+        } else {
+            $stringValue = trim((string) $value);
+
+            if ($stringValue === '') {
+                return '';
+            }
+
+            $rawValues = in_array($type, ['select', 'checkbox'], true)
+                ? preg_split('/\s*,\s*/', $stringValue) ?: []
+                : [$stringValue];
+        }
+
+        $rawValues = array_values(array_filter($rawValues, static fn ($item) => $item !== ''));
+
+        if ($rawValues === []) {
+            return '';
+        }
+
+        if (in_array($type, ['select', 'checkbox'], true)) {
+            $rendered = array_map(
+                static function (string $item) use ($normalizedOptions): string {
+                    if (isset($normalizedOptions[$item])) {
+                        return $normalizedOptions[$item];
+                    }
+
+                    if (in_array(strtolower($item), ['1', 'true', 'yes', 'on'], true)) {
+                        return $normalizedOptions['true'] ?? $normalizedOptions['1'] ?? $item;
+                    }
+
+                    return $item;
+                },
+                $rawValues
+            );
+
+            return implode(', ', array_values(array_filter($rendered, static fn ($item) => trim($item) !== '')));
+        }
+
+        return implode(', ', $rawValues);
     }
 }
 

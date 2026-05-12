@@ -282,6 +282,8 @@ Nell’export troverai quindi:
 - il codice prenotazione ripetuto su tutte le righe della stessa prenotazione
 - le colonne fisse:
   `Codice prenotazione`, `Creato il`, `Nome`, `Cognome`, `Tipo`, `Esigenze alimentari`, `Referente email`, `Referente telefono`, `Partecipanti prenotazione`, `Bambini prenotazione`, `Eventi selezionati`, `Codice invito`, `Gruppo invito`, `Autorizzazione`, `Richieste`, `Privacy`, `Foto`, `Lingua`, `URL origine`
+- eventuali colonne custom dell'estensione RSVP aggiunte in coda
+- per i custom field `select` e `checkbox`, l'export usa la label dell'opzione configurata, non il valore tecnico salvato
 
 ## Come customizzare le view dopo l’installazione
 

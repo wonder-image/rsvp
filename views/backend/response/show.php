@@ -66,9 +66,9 @@
                     <h6>Campi personalizzati</h6>
                     <div class="w-100 mt-2">
                         <?php foreach ($customFields as $field) { ?>
-                            <?php $value = trim((string) ($item[$field['column']] ?? '')); ?>
+                            <?php $value = rsvpRenderCustomFieldValue($field, $item[$field['column']] ?? null); ?>
                             <?php if ($value === '') { continue; } ?>
-                            <?=htmlspecialchars((string) $field['label'], ENT_QUOTES, 'UTF-8')?>:
+                            <?=htmlspecialchars(rsvpCustomFieldLabel($field, (string) ($field['key'] ?? '')), ENT_QUOTES, 'UTF-8')?>:
                             <strong><?=htmlspecialchars($value, ENT_QUOTES, 'UTF-8')?></strong><br>
                         <?php } ?>
                     </div>

@@ -31,6 +31,7 @@ final class ResponseExporter
 
     public static function rows(?string $eventKey = null): array
     {
+        $customFields = Response::customFieldDefinitions();
         $filters = ['deleted' => 'false'];
 
         if ($eventKey !== null && trim($eventKey) !== '') {
@@ -60,6 +61,10 @@ final class ResponseExporter
             'URL origine',
         ];
 
+        foreach ($customFields as $fieldKey => $field) {
+            $header[] = rsvpCustomFieldLabel($field, (string) $fieldKey);
+        }
+
         $rows = [$header];
 
         foreach ((array) ($result->row ?? []) as $row) {
@@ -82,7 +87,7 @@ final class ResponseExporter
                 : (string) ($row['event_key'] ?? '');
 
             foreach ($participants as $participant) {
-                $rows[] = [
+                $exportRow = [
                     $bookingCode,
                     (string) ($row['creation'] ?? ''),
                     (string) ($participant['name'] ?? ''),
@@ -103,6 +108,15 @@ final class ResponseExporter
                     (string) ($row['locale'] ?? ''),
                     (string) ($row['source_url'] ?? ''),
                 ];
+
+                foreach ($customFields as $field) {
+                    $exportRow[] = rsvpRenderCustomFieldValue(
+                        $field,
+                        $row[$field['column']] ?? null
+                    );
+                }
+
+                $rows[] = $exportRow;
             }
         }
 
