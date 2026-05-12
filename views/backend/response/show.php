@@ -11,11 +11,7 @@
     $metadata = json_decode((string) ($item['metadata_json'] ?? '[]'), true) ?: [];
     $customFields = Response::customFieldDefinitions();
     $hasCustomFieldValues = false;
-    $bookingCode = trim((string) ($item['booking_code'] ?? ''));
-
-    if ($bookingCode === '' && !empty($item['id'])) {
-        $bookingCode = Response::bookingCodeFromId((int) $item['id']);
-    }
+    $bookingCode = Response::resolveBookingCode($item);
 
     foreach ($customFields as $field) {
         if (trim((string) ($item[$field['column']] ?? '')) !== '') {

@@ -122,19 +122,12 @@
         </div>
     <?php } ?>
 
-    <?php if ($privacyField !== '') { ?>
-        <div><?=$privacyField?></div>
-    <?php } else { ?>
-        <!-- Fallback: nessun documento privacy_policy in legal_documents.
-             Il SubmissionNormalizer riconosce sia `privacy[]` che `privacy`. -->
-        <div>
-            <?= checkbox(
-                '',
-                'privacy',
-                ['true' => ['label' => 'Acconsento al trattamento dei dati personali', 'attribute' => 'required']],
-                'checkbox'
-            ) ?>
-        </div>
+    <div>
+        <?= inputAcceptDocument('privacy_policy', 'required') ?>
+    </div>
+
+    <?php if (!empty($STATE['require_image_release'])) { ?>
+        <?=inputAcceptDocument('image_release', 'required')?>
     <?php } ?>
 
     <div class="rsvp-form-actions">

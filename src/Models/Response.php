@@ -133,4 +133,51 @@ final class Response extends Model
 
         return 'pre_'.str_pad((string) $id, 7, '0', STR_PAD_LEFT);
     }
+
+    public static function persistBookingCode(int|string|null $id): string
+    {
+        $id = (int) $id;
+
+        if ($id <= 0) {
+            return '';
+        }
+
+        $bookingCode = self::bookingCodeFromId($id);
+
+        if ($bookingCode === '') {
+            return '';
+        }
+
+        self::query()->Update(
+            self::$table,
+            ['booking_code' => $bookingCode],
+            'id',
+            $id
+        );
+
+        return $bookingCode;
+    }
+
+    public static function resolveBookingCode(array $row, bool $persistIfMissing = true): string
+    {
+        $bookingCode = trim((string) ($row['booking_code'] ?? ''));
+
+        if ($bookingCode !== '') {
+            return $bookingCode;
+        }
+
+        $id = (int) ($row['id'] ?? 0);
+        $bookingCode = self::bookingCodeFromId($id);
+
+        if ($persistIfMissing && $bookingCode !== '' && $id > 0) {
+            self::query()->Update(
+                self::$table,
+                ['booking_code' => $bookingCode],
+                'id',
+                $id
+            );
+        }
+
+        return $bookingCode;
+    }
 }

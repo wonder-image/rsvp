@@ -278,9 +278,10 @@ Per rendere leggibili le prenotazioni multiple, ogni risposta ha un codice preno
 
 Nell’export troverai quindi:
 
-- il referente
 - una riga per ciascun partecipante
 - il codice prenotazione ripetuto su tutte le righe della stessa prenotazione
+- le colonne fisse:
+  `Codice prenotazione`, `Creato il`, `Nome`, `Cognome`, `Tipo`, `Esigenze alimentari`, `Referente email`, `Referente telefono`, `Partecipanti prenotazione`, `Bambini prenotazione`, `Eventi selezionati`, `Codice invito`, `Gruppo invito`, `Autorizzazione`, `Richieste`, `Privacy`, `Foto`, `Lingua`, `URL origine`
 
 ## Come customizzare le view dopo l’installazione
 

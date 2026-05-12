@@ -82,10 +82,9 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
     }
 
     $responseId = (int) ($insert->insert_id ?? 0);
-    $bookingCode = Response::bookingCodeFromId($responseId);
+    $bookingCode = Response::persistBookingCode($responseId);
 
     if ($bookingCode !== '') {
-        Response::update(['booking_code' => $bookingCode], $responseId);
         $normalized['booking_code'] = $bookingCode;
     }
 

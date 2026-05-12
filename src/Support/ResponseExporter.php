@@ -31,7 +31,6 @@ final class ResponseExporter
 
     public static function rows(?string $eventKey = null): array
     {
-        $customFields = Response::customFieldDefinitions();
         $filters = ['deleted' => 'false'];
 
         if ($eventKey !== null && trim($eventKey) !== '') {
@@ -42,17 +41,15 @@ final class ResponseExporter
         $header = [
             'Codice prenotazione',
             'Creato il',
-            'Eventi selezionati',
-            'Referente nome',
-            'Referente cognome',
+            'Nome',
+            'Cognome',
+            'Tipo',
+            'Esigenze alimentari',
             'Referente email',
             'Referente telefono',
             'Partecipanti prenotazione',
             'Bambini prenotazione',
-            'Partecipante nome',
-            'Partecipante cognome',
-            'Partecipante tipo',
-            'Esigenze alimentari',
+            'Eventi selezionati',
             'Codice invito',
             'Gruppo invito',
             'Autorizzazione',
@@ -63,28 +60,18 @@ final class ResponseExporter
             'URL origine',
         ];
 
-        foreach ($customFields as $field) {
-            $header[] = (string) $field['label'];
-        }
-
-        $header[] = 'Metadati';
         $rows = [$header];
 
         foreach ((array) ($result->row ?? []) as $row) {
             $participants = rsvpDecodeJsonArray($row['participants_json'] ?? '[]');
             $events = rsvpDecodeJsonArray($row['events_json'] ?? '[]');
             $consents = rsvpDecodeJsonArray($row['consents_json'] ?? '[]');
-            $metadata = rsvpMetadataSummary($row['metadata_json'] ?? '[]');
-            $bookingCode = trim((string) ($row['booking_code'] ?? ''));
-
-            if ($bookingCode === '') {
-                $bookingCode = Response::bookingCodeFromId($row['id'] ?? null);
-            }
+            $bookingCode = Response::resolveBookingCode($row);
 
             if ($participants === []) {
                 $participants[] = [
-                    'name' => '',
-                    'surname' => '',
+                    'name' => (string) ($row['contact_name'] ?? ''),
+                    'surname' => (string) ($row['contact_surname'] ?? ''),
                     'dietary_requirements' => '',
                     'is_child' => false,
                 ];
@@ -98,17 +85,15 @@ final class ResponseExporter
                 $rows[] = [
                     $bookingCode,
                     (string) ($row['creation'] ?? ''),
-                    $eventSummary,
-                    (string) ($row['contact_name'] ?? ''),
-                    (string) ($row['contact_surname'] ?? ''),
-                    (string) ($row['contact_email'] ?? ''),
-                    (string) ($row['contact_phone'] ?? ''),
-                    (string) ($row['participants_count'] ?? ''),
-                    (string) ($row['children_count'] ?? ''),
                     (string) ($participant['name'] ?? ''),
                     (string) ($participant['surname'] ?? ''),
                     !empty($participant['is_child']) ? 'Bambino' : 'Adulto',
                     (string) ($participant['dietary_requirements'] ?? ''),
+                    (string) ($row['contact_email'] ?? ''),
+                    (string) ($row['contact_phone'] ?? ''),
+                    (string) ($row['participants_count'] ?? ''),
+                    (string) ($row['children_count'] ?? ''),
+                    $eventSummary,
                     (string) ($row['invite_code'] ?? ''),
                     (string) ($row['invite_group_code'] ?? ''),
                     (string) ($row['authorization_code'] ?? ''),
@@ -118,12 +103,6 @@ final class ResponseExporter
                     (string) ($row['locale'] ?? ''),
                     (string) ($row['source_url'] ?? ''),
                 ];
-
-                foreach ($customFields as $field) {
-                    $rows[count($rows) - 1][] = (string) ($row[$field['column']] ?? '');
-                }
-
-                $rows[count($rows) - 1][] = $metadata;
             }
         }
 
