@@ -36,12 +36,12 @@ final class FrontendContext
             'custom_fields' => ExtensionRegistry::fields(),
             'login_title' => trim((string) ($settings['login_title'] ?? '')) !== ''
                 ? (string) $settings['login_title']
-                : (string) ($pageContent['login']['title'] ?? 'Accesso RSVP'),
+                : rsvp_trans('rsvp.frontend.login.title', 'Accesso RSVP'),
             'login_text' => trim((string) ($settings['login_text'] ?? '')) !== ''
                 ? (string) $settings['login_text']
-                : (string) ($pageContent['login']['text'] ?? ''),
-            'home_title' => (string) ($pageContent['form']['headline'] ?? 'Conferma la tua partecipazione'),
-            'home_text' => (string) ($pageContent['form']['intro_text'] ?? ''),
+                : rsvp_trans('rsvp.frontend.login.text', 'Inserisci il tuo codice invito per accedere alla pagina RSVP.'),
+            'home_title' => rsvp_trans('rsvp.frontend.home.section_title', 'Conferma la tua partecipazione'),
+            'home_text' => rsvp_trans('rsvp.frontend.home.intro_text', ''),
         ];
     }
 
@@ -195,204 +195,69 @@ final class FrontendContext
             ],
             'message_section' => [
                 'enabled' => false,
-                'content' => [
-                    'it' => '',
-                    'en' => '',
-                ],
+                'content' => rsvp_trans('rsvp.frontend.home.intro_text', ''),
             ],
             'date_section' => [
                 'enabled' => true,
                 'featured_event_key' => '',
-                'eyebrow' => [
-                    'it' => 'Ti aspettiamo',
-                    'en' => 'We are waiting for you',
-                ],
-                'time_prefix' => [
-                    'it' => 'dalle ore',
-                    'en' => 'from',
-                ],
+                'eyebrow' => rsvp_trans('rsvp.frontend.event_date.eyebrow', 'Ti aspettiamo'),
+                'time_prefix' => rsvp_trans('rsvp.frontend.event_date.time_prefix', 'dalle ore'),
             ],
             'location_section' => [
                 'enabled' => true,
-                'eyebrow' => [
-                    'it' => 'Location',
-                    'en' => 'Location',
-                ],
+                'eyebrow' => rsvp_trans('rsvp.frontend.location.eyebrow', 'Location'),
             ],
             'countdown' => [
                 'enabled' => true,
                 'video' => '',
-                'title' => [
-                    'it' => 'Festeggeremo tra...',
-                    'en' => 'We will celebrate in...',
-                ],
+                'title' => rsvp_trans('rsvp.frontend.countdown.title', 'Festeggeremo tra...'),
                 'labels' => [
-                    'days' => [
-                        'it' => 'Giorni',
-                        'en' => 'Days',
-                    ],
-                    'hours' => [
-                        'it' => 'Ore',
-                        'en' => 'Hours',
-                    ],
-                    'minutes' => [
-                        'it' => 'Minuti',
-                        'en' => 'Minutes',
-                    ],
-                    'seconds' => [
-                        'it' => 'Secondi',
-                        'en' => 'Seconds',
-                    ],
+                    'days' => rsvp_trans('rsvp.frontend.countdown.days', 'Giorni'),
+                    'hours' => rsvp_trans('rsvp.frontend.countdown.hours', 'Ore'),
+                    'minutes' => rsvp_trans('rsvp.frontend.countdown.minutes', 'Minuti'),
+                    'seconds' => rsvp_trans('rsvp.frontend.countdown.seconds', 'Secondi'),
                 ],
             ],
             'login' => [
-                'kicker' => 'RSVP',
-                'title' => [
-                    'it' => 'Accesso RSVP',
-                    'en' => 'RSVP Access',
-                ],
-                'text' => [
-                    'it' => 'Inserisci il tuo codice invito per accedere alla pagina RSVP.',
-                    'en' => 'Enter your invite code to access the RSVP page.',
-                ],
-                'code_placeholder' => [
-                    'it' => 'Inserisci il codice invito',
-                    'en' => 'Enter your invite code',
-                ],
-                'reserved_title' => [
-                    'it' => 'Accesso riservato',
-                    'en' => 'Reserved access',
-                ],
-                'reserved_text' => [
-                    'it' => 'Per compilare questo RSVP devi prima autenticarti con un codice invito valido.',
-                    'en' => 'You must authenticate with a valid invite code before filling in this RSVP.',
-                ],
-                'login_button' => [
-                    'it' => 'Accedi',
-                    'en' => 'Sign in',
-                ],
-                'home_button' => [
-                    'it' => 'Vai al form RSVP',
-                    'en' => 'Open RSVP form',
-                ],
-                'session_text' => [
-                    'it' => 'Sessione attiva con codice',
-                    'en' => 'Active session with code',
-                ],
-                'logout_button' => [
-                    'it' => 'Esci',
-                    'en' => 'Logout',
-                ],
-                'loading_text' => [
-                    'it' => 'Accesso in corso...',
-                    'en' => 'Signing in...',
-                ],
-                'error_text' => [
-                    'it' => 'Accesso non riuscito.',
-                    'en' => 'Login failed.',
-                ],
-                'free_text' => [
-                    'it' => 'Questo RSVP è libero: puoi entrare direttamente nella pagina di conferma.',
-                    'en' => 'This RSVP is open: you can go directly to the confirmation page.',
-                ],
+                'kicker' => rsvp_trans('rsvp.frontend.login.kicker', 'RSVP'),
+                'title' => rsvp_trans('rsvp.frontend.login.title', 'Accesso RSVP'),
+                'text' => rsvp_trans('rsvp.frontend.login.text', 'Inserisci il tuo codice invito per accedere alla pagina RSVP.'),
+                'code_placeholder' => rsvp_trans('rsvp.frontend.login.code_placeholder', 'Inserisci il codice invito'),
+                'reserved_title' => rsvp_trans('rsvp.frontend.login.reserved_title', 'Accesso riservato'),
+                'reserved_text' => rsvp_trans('rsvp.frontend.login.reserved_text', 'Per compilare questo RSVP devi prima autenticarti con un codice invito valido.'),
+                'login_button' => rsvp_trans('rsvp.frontend.login.login_button', 'Accedi'),
+                'home_button' => rsvp_trans('rsvp.frontend.login.home_button', 'Vai al form RSVP'),
+                'session_text' => rsvp_trans('rsvp.frontend.login.session_text', 'Sessione attiva con codice'),
+                'logout_button' => rsvp_trans('rsvp.frontend.login.logout_button', 'Esci'),
+                'loading_text' => rsvp_trans('rsvp.frontend.login.loading_text', 'Accesso in corso...'),
+                'error_text' => rsvp_trans('rsvp.frontend.login.error_text', 'Accesso non riuscito.'),
+                'free_text' => rsvp_trans('rsvp.frontend.login.free_text', 'Questo RSVP è libero: puoi entrare direttamente nella pagina di conferma.'),
             ],
             'form' => [
-                'headline' => [
-                    'it' => 'Conferma la tua partecipazione',
-                    'en' => 'Confirm your attendance',
-                ],
-                'intro_text' => [
-                    'it' => '',
-                    'en' => '',
-                ],
-                'events_label' => [
-                    'it' => 'Eventi',
-                    'en' => 'Events',
-                ],
-                'events_required_text' => [
-                    'it' => 'Seleziona almeno un evento.',
-                    'en' => 'Select at least one event.',
-                ],
-                'contact_name_label' => [
-                    'it' => 'Nome referente',
-                    'en' => 'Contact first name',
-                ],
-                'contact_surname_label' => [
-                    'it' => 'Cognome referente',
-                    'en' => 'Contact last name',
-                ],
-                'contact_phone_label' => [
-                    'it' => 'Telefono',
-                    'en' => 'Phone',
-                ],
-                'contact_email_label' => [
-                    'it' => 'Email',
-                    'en' => 'Email',
-                ],
-                'participants_count_label' => [
-                    'it' => 'Numero adulti',
-                    'en' => 'Number of adults',
-                ],
-                'children_count_label' => [
-                    'it' => 'Numero bambini',
-                    'en' => 'Number of children',
-                ],
-                'participant_label' => [
-                    'it' => 'Partecipante',
-                    'en' => 'Participant',
-                ],
-                'child_label' => [
-                    'it' => 'Bambino',
-                    'en' => 'Child',
-                ],
-                'participant_name_label' => [
-                    'it' => 'Nome',
-                    'en' => 'First name',
-                ],
-                'participant_surname_label' => [
-                    'it' => 'Cognome',
-                    'en' => 'Last name',
-                ],
-                'participant_dietary_label' => [
-                    'it' => 'Esigenze alimentari',
-                    'en' => 'Dietary requirements',
-                ],
-                'notes_label' => [
-                    'it' => 'Richieste aggiuntive',
-                    'en' => 'Additional notes',
-                ],
-                'privacy_fallback_text' => [
-                    'it' => 'Acconsento al trattamento dei dati personali.',
-                    'en' => 'I consent to the processing of personal data.',
-                ],
-                'image_release_fallback_text' => [
-                    'it' => 'Acconsento alla raccolta e all’utilizzo di immagini fotografiche e video.',
-                    'en' => 'I consent to the collection and use of photos and videos.',
-                ],
-                'submit_button' => [
-                    'it' => 'Invia conferma',
-                    'en' => 'Send RSVP',
-                ],
-                'sending_text' => [
-                    'it' => 'Invio in corso...',
-                    'en' => 'Sending RSVP...',
-                ],
-                'success_text' => [
-                    'it' => 'Conferma inviata con successo.',
-                    'en' => 'RSVP sent successfully.',
-                ],
-                'error_text' => [
-                    'it' => 'Invio non riuscito.',
-                    'en' => 'Unable to send RSVP.',
-                ],
-                'manage_invite_button' => [
-                    'it' => 'Gestisci codice invito',
-                    'en' => 'Manage invite code',
-                ],
-                'invite_required_button' => [
-                    'it' => 'Vai al login RSVP',
-                    'en' => 'Go to RSVP login',
-                ],
+                'headline' => rsvp_trans('rsvp.frontend.home.section_title', 'Conferma la tua partecipazione'),
+                'intro_text' => rsvp_trans('rsvp.frontend.home.intro_text', ''),
+                'events_label' => rsvp_trans('rsvp.frontend.form.events_label', 'Eventi'),
+                'events_required_text' => rsvp_trans('rsvp.frontend.form.events_required_text', 'Seleziona almeno un evento.'),
+                'contact_name_label' => rsvp_trans('rsvp.frontend.form.contact_name_label', 'Nome referente'),
+                'contact_surname_label' => rsvp_trans('rsvp.frontend.form.contact_surname_label', 'Cognome referente'),
+                'contact_phone_label' => rsvp_trans('rsvp.frontend.form.contact_phone_label', 'Telefono'),
+                'contact_email_label' => rsvp_trans('rsvp.frontend.form.contact_email_label', 'Email'),
+                'participants_count_label' => rsvp_trans('rsvp.frontend.form.participants_count_label', 'Numero adulti'),
+                'children_count_label' => rsvp_trans('rsvp.frontend.form.children_count_label', 'Numero bambini'),
+                'participant_label' => rsvp_trans('rsvp.frontend.form.participant_label', 'Partecipante'),
+                'child_label' => rsvp_trans('rsvp.frontend.form.child_label', 'Bambino'),
+                'participant_name_label' => rsvp_trans('rsvp.frontend.form.participant_name_label', 'Nome'),
+                'participant_surname_label' => rsvp_trans('rsvp.frontend.form.participant_surname_label', 'Cognome'),
+                'participant_dietary_label' => rsvp_trans('rsvp.frontend.form.participant_dietary_label', 'Esigenze alimentari'),
+                'notes_label' => rsvp_trans('rsvp.frontend.form.notes_label', 'Richieste aggiuntive'),
+                'privacy_fallback_text' => rsvp_trans('rsvp.frontend.form.privacy_fallback_text', 'Acconsento al trattamento dei dati personali.'),
+                'image_release_fallback_text' => rsvp_trans('rsvp.frontend.form.image_release_fallback_text', 'Acconsento alla raccolta e all’utilizzo di immagini fotografiche e video.'),
+                'submit_button' => rsvp_trans('rsvp.frontend.form.submit_label', 'Invia conferma'),
+                'sending_text' => rsvp_trans('rsvp.frontend.form.sending_text', 'Invio in corso...'),
+                'success_text' => rsvp_trans('rsvp.frontend.form.success_text', 'Conferma inviata con successo.'),
+                'error_text' => rsvp_trans('rsvp.frontend.form.error_text', 'Invio non riuscito.'),
+                'manage_invite_button' => rsvp_trans('rsvp.frontend.form.manage_invite_button', 'Gestisci codice invito'),
+                'invite_required_button' => rsvp_trans('rsvp.frontend.form.invite_required_button', 'Vai al login RSVP'),
             ],
         ];
     }

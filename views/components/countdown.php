@@ -23,10 +23,10 @@
 
     $labels = is_array($args['labels'] ?? null) ? $args['labels'] : [];
     $labels = array_merge([
-        'days' => 'GIORNI',
-        'hours' => 'ORE',
-        'minutes' => 'MINUTI',
-        'seconds' => 'SECONDI',
+        'days' => rsvp_trans('rsvp.frontend.countdown.days', 'Giorni'),
+        'hours' => rsvp_trans('rsvp.frontend.countdown.hours', 'Ore'),
+        'minutes' => rsvp_trans('rsvp.frontend.countdown.minutes', 'Minuti'),
+        'seconds' => rsvp_trans('rsvp.frontend.countdown.seconds', 'Secondi'),
     ], $labels);
 
     $ts = $targetDate !== '' ? strtotime($targetDate) : false;

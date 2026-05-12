@@ -1,0 +1,111 @@
+{
+    "common": {
+        "accepted": "Accettato",
+        "rejected": "Rifiutato"
+    },
+    "legal_documents": {
+        "privacy_policy": "Privacy policy",
+        "image_release": "Liberatoria immagini"
+    },
+    "frontend": {
+        "home": {
+            "title": "RSVP",
+            "section_title": "Conferma la tua partecipazione",
+            "intro_text": ""
+        },
+        "event_date": {
+            "eyebrow": "Ti aspettiamo",
+            "time_prefix": "dalle ore"
+        },
+        "countdown": {
+            "title": "Festeggeremo tra...",
+            "days": "Giorni",
+            "hours": "Ore",
+            "minutes": "Minuti",
+            "seconds": "Secondi"
+        },
+        "location": {
+            "eyebrow": "Location"
+        },
+        "form": {
+            "invite_required_text": "Per compilare questo RSVP serve un codice invito.",
+            "invite_required_button": "Vai al login",
+            "events_label": "Eventi",
+            "events_required_text": "Seleziona almeno un evento.",
+            "contact_name_label": "Nome referente",
+            "contact_surname_label": "Cognome referente",
+            "participants_count_label": "Partecipanti",
+            "children_count_label": "Numero bambini",
+            "participant_label": "Ospite",
+            "child_label": "Bambino",
+            "participant_name_label": "Nome",
+            "participant_surname_label": "Cognome",
+            "participant_dietary_label": "Intolleranze o allergie",
+            "contact_phone_label": "Cellulare",
+            "contact_email_label": "Email",
+            "notes_label": "Richieste aggiuntive",
+            "privacy_fallback_text": "Acconsento al trattamento dei dati personali.",
+            "image_release_fallback_text": "Acconsento alla raccolta e all’utilizzo di immagini fotografiche e video.",
+            "submit_label": "Invia conferma",
+            "sending_text": "Invio in corso...",
+            "success_text": "La tua partecipazione è stata confermata!",
+            "error_text": "Non è stato possibile inviare la tua conferma. Riprova.",
+            "success_button_label": "Torna al sito",
+            "error_button_label": "Riprova",
+            "manage_invite_button": "Gestisci codice invito"
+        },
+        "login": {
+            "kicker": "RSVP",
+            "title": "Accesso RSVP",
+            "text": "Inserisci il tuo codice invito per accedere alla pagina RSVP.",
+            "reserved_title": "Accesso riservato",
+            "reserved_text": "Per compilare questo RSVP devi prima autenticarti con un codice invito valido.",
+            "session_text": "Sessione attiva con codice",
+            "home_button": "Vai al form RSVP",
+            "logout_button": "Esci",
+            "code_placeholder": "Inserisci il codice invito",
+            "login_button": "Accedi",
+            "free_text": "Questo RSVP è libero: puoi entrare direttamente nella pagina di conferma.",
+            "loading_text": "Accesso in corso...",
+            "error_text": "Accesso non riuscito."
+        }
+    },
+    "email_summary": {
+        "name": "Nome",
+        "email": "Email",
+        "phone": "Telefono",
+        "participants": "Partecipanti",
+        "children": "Bambini",
+        "primary_event": "Evento principale",
+        "invite_code": "Codice invito",
+        "authorization": "Autorizzazione",
+        "notes": "Richieste",
+        "participant_list": "Elenco partecipanti",
+        "child_suffix": "bambino",
+        "privacy": "Privacy",
+        "photo": "Foto",
+        "documents": "Documenti"
+    },
+    "api": {
+        "login": {
+            "missing_code": "Codice invito mancante.",
+            "invalid_code": "Codice invito non valido.",
+            "inactive_code": "Codice invito disattivato.",
+            "unauthorized_group": "Codice invito non autorizzato per questa area."
+        },
+        "session": {
+            "not_active": "Sessione RSVP non attiva.",
+            "unauthorized_group": "Sessione RSVP non autorizzata per questa area."
+        },
+        "submit": {
+            "missing_email": "Email mancante.",
+            "missing_participants": "Partecipanti mancanti.",
+            "invite_code_required": "Questo RSVP richiede un codice invito valido.",
+            "invite_code_exhausted": "Il codice invito ha già esaurito gli invii disponibili.",
+            "privacy_required": "È necessario accettare la privacy.",
+            "image_release_required": "È necessario accettare la liberatoria immagini.",
+            "required_field_missing": "Campo obbligatorio mancante: {{field}}.",
+            "save_failed": "Salvataggio RSVP non riuscito."
+        }
+    }
+}

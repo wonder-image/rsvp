@@ -28,8 +28,9 @@
 
     $eventName = trim((string) ($featuredEvent['label']
         ?? ($featuredEvent['name'] ?? '')));
-    $homeTitle = trim((string) ($state['home_title'] ?? 'RSVP'));
+    $homeTitle = trim((string) ($state['home_title'] ?? rsvp_trans('rsvp.frontend.home.title', 'RSVP')));
     $homeText = trim((string) ($state['home_text'] ?? ''));
+    $sectionTitle = rsvp_trans('rsvp.frontend.home.section_title', 'Conferma la tua partecipazione');
 ?>
 
 <section class="rsvp-section rsvp-hero">
@@ -53,6 +54,6 @@
 </section>
 
 <section class="rsvp-section rsvp-section-form">
-    <h2 class="rsvp-section-title">Conferma la tua partecipazione</h2>
+    <h2 class="rsvp-section-title"><?=$escape($sectionTitle)?></h2>
     <?php Rsvp::component('form'); ?>
 </section>

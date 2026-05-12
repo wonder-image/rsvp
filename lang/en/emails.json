@@ -1,10 +1,10 @@
 {
     "rsvp_request_customer": {
         "subject": "RSVP received",
-        "text": "Hello {{contact_name}},<br>we have successfully received your RSVP response. Thank you."
+        "text": "Hello {{contact_name}},<br>we have successfully received your response for <strong>{{event_name}}</strong> on {{event_starts_at}}."
     },
     "rsvp_request_admin": {
-        "subject": "New RSVP response",
-        "text": "A new RSVP response has been received.<br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Open the details</a>"
+        "subject": "New response for {{event_name}} - {{contact_name}} {{contact_surname}}",
+        "text": "A new response has been received for <strong>{{event_name}}</strong>.<br><br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Open the backend detail</a>"
     }
 }

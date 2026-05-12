@@ -42,11 +42,20 @@
         : '';
     $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
 
-    $submitLabel = (string) ($args['submit_label'] ?? 'INVIA');
-    $successText = (string) ($args['success_text'] ?? 'La tua partecipazione è stata confermata!');
-    $errorText   = (string) ($args['error_text'] ?? 'Non è stato possibile inviare la tua conferma. Riprova.');
-    $successButton = (string) ($args['success_button_label'] ?? 'Torna al sito');
-    $errorButton   = (string) ($args['error_button_label'] ?? 'Riprova');
+    $submitLabel = (string) ($args['submit_label'] ?? rsvp_trans('rsvp.frontend.form.submit_label', 'Invia conferma'));
+    $successText = (string) ($args['success_text'] ?? rsvp_trans('rsvp.frontend.form.success_text', 'La tua partecipazione è stata confermata!'));
+    $errorText   = (string) ($args['error_text'] ?? rsvp_trans('rsvp.frontend.form.error_text', 'Non è stato possibile inviare la tua conferma. Riprova.'));
+    $successButton = (string) ($args['success_button_label'] ?? rsvp_trans('rsvp.frontend.form.success_button_label', 'Torna al sito'));
+    $errorButton   = (string) ($args['error_button_label'] ?? rsvp_trans('rsvp.frontend.form.error_button_label', 'Riprova'));
+    $inviteRequiredText = rsvp_trans('rsvp.frontend.form.invite_required_text', 'Per compilare questo RSVP serve un codice invito.');
+    $inviteRequiredButton = rsvp_trans('rsvp.frontend.form.invite_required_button', 'Vai al login');
+    $participantsLabel = rsvp_trans('rsvp.frontend.form.participants_count_label', 'Partecipanti');
+    $participantLabel = rsvp_trans('rsvp.frontend.form.participant_label', 'Ospite');
+    $participantNameLabel = rsvp_trans('rsvp.frontend.form.participant_name_label', 'Nome');
+    $participantSurnameLabel = rsvp_trans('rsvp.frontend.form.participant_surname_label', 'Cognome');
+    $participantDietaryLabel = rsvp_trans('rsvp.frontend.form.participant_dietary_label', 'Intolleranze o allergie');
+    $contactPhoneLabel = rsvp_trans('rsvp.frontend.form.contact_phone_label', 'Cellulare');
+    $contactEmailLabel = rsvp_trans('rsvp.frontend.form.contact_email_label', 'Email');
 
     $escape = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 
@@ -76,8 +85,8 @@
 
 <?php if (!$canAccessForm) { ?>
     <div class="rsvp-form-reserved">
-        Per compilare questo RSVP serve un codice invito.<br>
-        <a href="<?=$escape($loginUrl)?>">Vai al login</a>
+        <?=$escape($inviteRequiredText)?><br>
+        <a href="<?=$escape($loginUrl)?>"><?=$escape($inviteRequiredButton)?></a>
     </div>
 <?php } else { ?>
 
@@ -94,7 +103,7 @@
         <input type="hidden" name="event_key" value="<?=$escape((string) $singleKey)?>">
     <?php } ?>
 
-    <?= select('Partecipanti', 'participants_count', $partecipantiOptions, '1', 'required') ?>
+    <?= select($participantsLabel, 'participants_count', $partecipantiOptions, '1', 'required') ?>
 
     <!-- Container per i blocchi ospite dinamici -->
     <div id="rsvp-participants" class="rsvp-participants"></div>
@@ -103,18 +112,18 @@
         <div class="rsvp-guest" data-participant-block data-index="__INDEX__" data-is-child="false">
             <div class="rsvp-guest-label">__TITLE__</div>
             <div class="rsvp-guest-row">
-                <div><?= text('Nome', '', null, "data-field='name' data-index='__INDEX__' required") ?></div>
-                <div><?= text('Cognome', '', null, "data-field='surname' data-index='__INDEX__' required") ?></div>
+                <div><?= text($participantNameLabel, '', null, "data-field='name' data-index='__INDEX__' required") ?></div>
+                <div><?= text($participantSurnameLabel, '', null, "data-field='surname' data-index='__INDEX__' required") ?></div>
             </div>
             <div class="rsvp-guest-allergies">
-                <?= textarea('Intolleranze o allergie', '', null, "data-field='dietary_requirements' data-index='__INDEX__'") ?>
+                <?= textarea($participantDietaryLabel, '', null, "data-field='dietary_requirements' data-index='__INDEX__'") ?>
             </div>
             <input type="hidden" data-field="is_child" data-index="__INDEX__" value="false">
         </div>
     </template>
 
-    <?= phone('Cellulare', 'contact_phone', null, 'required') ?>
-    <?= email('Email', 'contact_email', null, 'required') ?>
+    <?= phone($contactPhoneLabel, 'contact_phone', null, 'required') ?>
+    <?= email($contactEmailLabel, 'contact_email', null, 'required') ?>
 
     <?php foreach ($customFields as $customKey => $customDef) { ?>
         <div data-rsvp-custom-field="<?=$escape($customKey)?>">
@@ -152,6 +161,7 @@
     const ERROR_TEXT = <?=json_encode($errorText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const SUCCESS_BUTTON = <?=json_encode($successButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const ERROR_BUTTON = <?=json_encode($errorButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+    const PARTICIPANT_LABEL = <?=json_encode($participantLabel, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
 
     // Gli helper framework (text/textarea/select) generano id randomici
     // condivisi nel <template>: quando cloniamo gli id si duplicano e i
@@ -166,7 +176,7 @@
     }
 
     function guestHTML(index) {
-        const title = `Ospite ${index + 1}`;
+        const title = `${PARTICIPANT_LABEL} ${index + 1}`;
         const raw = guestTemplate.innerHTML
             .split('__INDEX__').join(String(index))
             .replace('__TITLE__', title);

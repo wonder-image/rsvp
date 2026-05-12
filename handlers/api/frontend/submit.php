@@ -22,31 +22,40 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
     $state = FrontendContext::state();
 
     if (trim((string) ($normalized['contact_email'] ?? '')) === '') {
-        throw new RuntimeException('Email mancante.');
+        throw new RuntimeException(rsvp_trans('rsvp.api.submit.missing_email', 'Email mancante.'));
     }
 
     if ((int) ($normalized['participants_count'] ?? 0) <= 0) {
-        throw new RuntimeException('Partecipanti mancanti.');
+        throw new RuntimeException(rsvp_trans('rsvp.api.submit.missing_participants', 'Partecipanti mancanti.'));
     }
 
     $session = InviteCodeSession::current();
 
     if (($state['requires_invite_code'] ?? false) && ($session['id'] ?? 0) <= 0) {
-        throw new RuntimeException('Questo RSVP richiede un codice invito valido.');
+        throw new RuntimeException(rsvp_trans(
+            'rsvp.api.submit.invite_code_required',
+            'Questo RSVP richiede un codice invito valido.'
+        ));
     }
 
     if (($session['id'] ?? 0) > 0 && !($session['can_submit'] ?? true)) {
-        throw new RuntimeException('Il codice invito ha già esaurito gli invii disponibili.');
+        throw new RuntimeException(rsvp_trans(
+            'rsvp.api.submit.invite_code_exhausted',
+            'Il codice invito ha già esaurito gli invii disponibili.'
+        ));
     }
 
     $consents = SubmissionNormalizer::consents($normalized);
 
     if (empty($consents['privacy'])) {
-        throw new RuntimeException('È necessario accettare la privacy.');
+        throw new RuntimeException(rsvp_trans('rsvp.api.submit.privacy_required', 'È necessario accettare la privacy.'));
     }
 
     if (($state['require_image_release'] ?? false) && empty($consents['photo'])) {
-        throw new RuntimeException('È necessario accettare la liberatoria immagini.');
+        throw new RuntimeException(rsvp_trans(
+            'rsvp.api.submit.image_release_required',
+            'È necessario accettare la liberatoria immagini.'
+        ));
     }
 
     // Validazione custom field richiesti (definiti dall'estensione del consumer)
@@ -67,7 +76,11 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
             || (is_array($value) && $value === []);
 
         if ($missing) {
-            throw new RuntimeException(sprintf('Campo obbligatorio mancante: %s.', $def['label'] ?? $key));
+            throw new RuntimeException(rsvp_trans(
+                'rsvp.api.submit.required_field_missing',
+                'Campo obbligatorio mancante: {{field}}.',
+                ['field' => (string) ($def['label'] ?? $key)]
+            ));
         }
     }
 
@@ -86,7 +99,10 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
     $insert = Response::query()->Insert(Response::$table, $normalized);
 
     if (empty($insert->success)) {
-        $message = (string) ($insert->response->alert->message ?? 'Salvataggio RSVP non riuscito.');
+        $message = (string) ($insert->response->alert->message ?? rsvp_trans(
+            'rsvp.api.submit.save_failed',
+            'Salvataggio RSVP non riuscito.'
+        ));
         throw new RuntimeException($message);
     }
 

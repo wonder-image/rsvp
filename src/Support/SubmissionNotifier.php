@@ -79,13 +79,22 @@ final class SubmissionNotifier
     public static function defaults(): array
     {
         return [
-            'customer_subject' => 'Conferma ricevuta',
-            'customer_message' => 'Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta.'
-                .' per <strong>{{event_name}}</strong> il {{event_starts_at}}.',
-            'admin_subject' => 'Nuova risposta per {{event_name}} - {{contact_name}} {{contact_surname}}',
-            'admin_message' => 'È arrivata una nuova risposta per <strong>{{event_name}}</strong>.'
+            'customer_subject' => rsvp_trans('emails.rsvp_request_customer.subject', 'Conferma ricevuta'),
+            'customer_message' => rsvp_trans(
+                'emails.rsvp_request_customer.text',
+                'Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta.'
+                .' per <strong>{{event_name}}</strong> il {{event_starts_at}}.'
+            ),
+            'admin_subject' => rsvp_trans(
+                'emails.rsvp_request_admin.subject',
+                'Nuova risposta per {{event_name}} - {{contact_name}} {{contact_surname}}'
+            ),
+            'admin_message' => rsvp_trans(
+                'emails.rsvp_request_admin.text',
+                'È arrivata una nuova risposta per <strong>{{event_name}}</strong>.'
                 .'<br><br>{{summary_html}}'
-                .'<br><br><a href="{{response_url}}">Apri il dettaglio in backend</a>',
+                .'<br><br><a href="{{response_url}}">Apri il dettaglio in backend</a>'
+            ),
         ];
     }
 
@@ -107,7 +116,7 @@ final class SubmissionNotifier
 
         if ($eventKey === '') {
             return [
-                'name' => 'RSVP',
+                'name' => rsvp_trans('rsvp.frontend.home.title', 'RSVP'),
                 'starts_at' => '',
             ];
         }
@@ -148,36 +157,45 @@ final class SubmissionNotifier
         $event = self::eventFromNormalized($normalized);
         $lines = [];
 
-        $lines[] = 'Nome: <strong>'.htmlspecialchars(trim(((string) ($normalized['contact_name'] ?? '')).' '.((string) ($normalized['contact_surname'] ?? ''))), ENT_QUOTES, 'UTF-8').'</strong>';
-        $lines[] = 'Email: <strong>'.htmlspecialchars((string) ($normalized['contact_email'] ?? ''), ENT_QUOTES, 'UTF-8').'</strong>';
-        $lines[] = 'Telefono: <strong>'.htmlspecialchars((string) ($normalized['contact_phone'] ?? '--'), ENT_QUOTES, 'UTF-8').'</strong>';
-        $lines[] = 'Partecipanti: <strong>'.(int) ($normalized['participants_count'] ?? 0).'</strong>';
-        $lines[] = 'Bambini: <strong>'.(int) ($normalized['children_count'] ?? 0).'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.name', 'Nome')
+            .': <strong>'.htmlspecialchars(trim(((string) ($normalized['contact_name'] ?? '')).' '.((string) ($normalized['contact_surname'] ?? ''))), ENT_QUOTES, 'UTF-8').'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.email', 'Email')
+            .': <strong>'.htmlspecialchars((string) ($normalized['contact_email'] ?? ''), ENT_QUOTES, 'UTF-8').'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.phone', 'Telefono')
+            .': <strong>'.htmlspecialchars((string) ($normalized['contact_phone'] ?? '--'), ENT_QUOTES, 'UTF-8').'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.participants', 'Partecipanti')
+            .': <strong>'.(int) ($normalized['participants_count'] ?? 0).'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.children', 'Bambini')
+            .': <strong>'.(int) ($normalized['children_count'] ?? 0).'</strong>';
 
         if (!empty($normalized['event_key'])) {
-            $lines[] = 'Evento principale: <strong>'.htmlspecialchars((string) ($event['name'] ?? $normalized['event_key']), ENT_QUOTES, 'UTF-8').'</strong>';
+            $lines[] = rsvp_trans('rsvp.email_summary.primary_event', 'Evento principale')
+                .': <strong>'.htmlspecialchars((string) ($event['name'] ?? $normalized['event_key']), ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['invite_code'] ?? '') !== '') {
-            $lines[] = 'Codice invito: <strong>'.htmlspecialchars((string) $normalized['invite_code'], ENT_QUOTES, 'UTF-8').'</strong>';
+            $lines[] = rsvp_trans('rsvp.email_summary.invite_code', 'Codice invito')
+                .': <strong>'.htmlspecialchars((string) $normalized['invite_code'], ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['authorization_code'] ?? '') !== '') {
-            $lines[] = 'Autorizzazione: <strong>'.htmlspecialchars((string) $normalized['authorization_code'], ENT_QUOTES, 'UTF-8').'</strong>';
+            $lines[] = rsvp_trans('rsvp.email_summary.authorization', 'Autorizzazione')
+                .': <strong>'.htmlspecialchars((string) $normalized['authorization_code'], ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['notes'] ?? '') !== '') {
-            $lines[] = 'Richieste: <strong>'.nl2br(htmlspecialchars((string) $normalized['notes'], ENT_QUOTES, 'UTF-8')).'</strong>';
+            $lines[] = rsvp_trans('rsvp.email_summary.notes', 'Richieste')
+                .': <strong>'.nl2br(htmlspecialchars((string) $normalized['notes'], ENT_QUOTES, 'UTF-8')).'</strong>';
         }
 
         foreach (Response::customFieldDefinitions() as $field) {
-            $value = trim((string) ($normalized[$field['column']] ?? ''));
+            $value = rsvpRenderCustomFieldValue($field, $normalized[$field['column']] ?? null);
 
             if ($value === '') {
                 continue;
             }
 
-            $lines[] = htmlspecialchars((string) $field['label'], ENT_QUOTES, 'UTF-8')
+            $lines[] = htmlspecialchars(rsvpCustomFieldLabel($field, (string) ($field['key'] ?? '')), ENT_QUOTES, 'UTF-8')
                 .': <strong>'.htmlspecialchars($value, ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
@@ -185,7 +203,9 @@ final class SubmissionNotifier
 
         foreach ($participants as $participant) {
             $label = trim(((string) ($participant['name'] ?? '')).' '.((string) ($participant['surname'] ?? '')));
-            $suffix = !empty($participant['is_child']) ? ' (bambino)' : '';
+            $suffix = !empty($participant['is_child'])
+                ? ' ('.rsvp_trans('rsvp.email_summary.child_suffix', 'bambino').')'
+                : '';
             $dietary = trim((string) ($participant['dietary_requirements'] ?? ''));
             $item = htmlspecialchars($label.$suffix, ENT_QUOTES, 'UTF-8');
 
@@ -199,20 +219,25 @@ final class SubmissionNotifier
         }
 
         if ($participantList !== []) {
-            $lines[] = 'Elenco partecipanti:<ul>'.implode('', $participantList).'</ul>';
+            $lines[] = rsvp_trans('rsvp.email_summary.participant_list', 'Elenco partecipanti')
+                .':<ul>'.implode('', $participantList).'</ul>';
         }
 
         $documentLines = [];
 
         foreach ($documents as $docType => $document) {
-            $documentLines[] = htmlspecialchars($docType, ENT_QUOTES, 'UTF-8').': <strong>'.rsvpBooleanText($document['accepted'] ?? false).'</strong>';
+            $documentLines[] = htmlspecialchars(rsvpLegalDocumentLabel((string) $docType), ENT_QUOTES, 'UTF-8')
+                .': <strong>'.rsvpBooleanText($document['accepted'] ?? false).'</strong>';
         }
 
-        $lines[] = 'Privacy: <strong>'.rsvpBooleanText($consents['privacy'] ?? false).'</strong>';
-        $lines[] = 'Foto: <strong>'.rsvpBooleanText($consents['photo'] ?? false).'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.privacy', 'Privacy')
+            .': <strong>'.rsvpBooleanText($consents['privacy'] ?? false).'</strong>';
+        $lines[] = rsvp_trans('rsvp.email_summary.photo', 'Foto')
+            .': <strong>'.rsvpBooleanText($consents['photo'] ?? false).'</strong>';
 
         if ($documentLines !== []) {
-            $lines[] = 'Documenti: '.implode('<br>', $documentLines);
+            $lines[] = rsvp_trans('rsvp.email_summary.documents', 'Documenti')
+                .': '.implode('<br>', $documentLines);
         }
 
         return implode('<br>', $lines);

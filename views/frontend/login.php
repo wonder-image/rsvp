@@ -2,7 +2,6 @@
     $state = is_array($STATE ?? null) ? $STATE : [];
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
     $pageContent = is_array($state['page_content'] ?? null) ? $state['page_content'] : [];
-    $loginContent = is_array($pageContent['login'] ?? null) ? $pageContent['login'] : [];
     $ambient = is_array($pageContent['ambient_background'] ?? null) ? $pageContent['ambient_background'] : [];
     $requiresInviteCode = !empty($state['requires_invite_code']);
     $homeUrl = function_exists('__r') ? __r('rsvp.home') : '/rsvp/';
@@ -28,6 +27,15 @@
             .'<source src="'.$escape($path).'">'
             .'</video>';
     };
+    $kicker = rsvp_trans('rsvp.frontend.login.kicker', 'RSVP');
+    $sessionText = rsvp_trans('rsvp.frontend.login.session_text', 'Sessione attiva con codice');
+    $homeButton = rsvp_trans('rsvp.frontend.login.home_button', 'Vai al form RSVP');
+    $logoutButton = rsvp_trans('rsvp.frontend.login.logout_button', 'Esci');
+    $codePlaceholder = rsvp_trans('rsvp.frontend.login.code_placeholder', 'Inserisci il codice invito');
+    $loginButton = rsvp_trans('rsvp.frontend.login.login_button', 'Accedi');
+    $freeText = rsvp_trans('rsvp.frontend.login.free_text', 'Questo RSVP è libero: puoi entrare direttamente nella pagina di conferma.');
+    $loadingText = rsvp_trans('rsvp.frontend.login.loading_text', 'Accesso in corso...');
+    $errorText = rsvp_trans('rsvp.frontend.login.error_text', 'Accesso non riuscito.');
 ?>
 
 <style>
@@ -58,18 +66,18 @@
 
     <section class="rsvp-shell">
         <div class="rsvp-card">
-            <div class="rsvp-kicker"><?= $escape((string) ($loginContent['kicker'] ?? 'RSVP')) ?></div>
-            <h1 class="rsvp-title"><?= $escape((string) ($state['login_title'] ?? 'Accesso RSVP')) ?></h1>
+            <div class="rsvp-kicker"><?= $escape($kicker) ?></div>
+            <h1 class="rsvp-title"><?= $escape((string) ($state['login_title'] ?? rsvp_trans('rsvp.frontend.login.title', 'Accesso RSVP'))) ?></h1>
             <div class="rsvp-text"><?= nl2br($escape((string) ($state['login_text'] ?? ''))) ?></div>
 
             <?php if (($session['id'] ?? 0) > 0) { ?>
                 <div class="rsvp-note">
-                    <?= $escape((string) ($loginContent['session_text'] ?? 'Sessione attiva con codice')) ?>
+                    <?= $escape($sessionText) ?>
                     <strong><?= $escape((string) ($session['code'] ?? '')) ?></strong>.
                 </div>
                 <div class="rsvp-actions">
-                    <a class="rsvp-btn" href="<?=$escape($homeUrl)?>"><?= $escape((string) ($loginContent['home_button'] ?? 'Vai al form RSVP')) ?></a>
-                    <button type="button" class="rsvp-btn rsvp-btn-light" id="rsvp-logout"><?= $escape((string) ($loginContent['logout_button'] ?? 'Esci')) ?></button>
+                    <a class="rsvp-btn" href="<?=$escape($homeUrl)?>"><?= $escape($homeButton) ?></a>
+                    <button type="button" class="rsvp-btn rsvp-btn-light" id="rsvp-logout"><?= $escape($logoutButton) ?></button>
                 </div>
             <?php } elseif ($requiresInviteCode) { ?>
                 <form id="rsvp-login-form" class="rsvp-form-grid">
@@ -77,16 +85,16 @@
                         class="rsvp-input"
                         type="text"
                         name="code"
-                        placeholder="<?=$escape((string) ($loginContent['code_placeholder'] ?? 'Inserisci il codice invito'))?>"
+                        placeholder="<?=$escape($codePlaceholder)?>"
                         required
                         autocomplete="off"
                     >
-                    <button class="rsvp-btn" type="submit"><?= $escape((string) ($loginContent['login_button'] ?? 'Accedi')) ?></button>
+                    <button class="rsvp-btn" type="submit"><?= $escape($loginButton) ?></button>
                 </form>
             <?php } else { ?>
-                <div class="rsvp-note"><?= $escape((string) ($loginContent['free_text'] ?? 'Questo RSVP è libero: puoi entrare direttamente nella pagina di conferma.')) ?></div>
+                <div class="rsvp-note"><?= $escape($freeText) ?></div>
                 <div class="rsvp-actions">
-                    <a class="rsvp-btn" href="<?=$escape($homeUrl)?>"><?= $escape((string) ($loginContent['home_button'] ?? 'Vai al form RSVP')) ?></a>
+                    <a class="rsvp-btn" href="<?=$escape($homeUrl)?>"><?= $escape($homeButton) ?></a>
                 </div>
             <?php } ?>
 
@@ -100,8 +108,8 @@
         const loginForm = document.getElementById('rsvp-login-form');
         const logoutButton = document.getElementById('rsvp-logout');
         const feedback = document.getElementById('rsvp-login-feedback');
-        const loadingText = <?=json_encode((string) ($loginContent['loading_text'] ?? 'Accesso in corso...'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-        const errorText = <?=json_encode((string) ($loginContent['error_text'] ?? 'Accesso non riuscito.'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+        const loadingText = <?=json_encode($loadingText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+        const errorText = <?=json_encode($errorText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
 
         if (loginForm) {
             loginForm.addEventListener('submit', async (event) => {

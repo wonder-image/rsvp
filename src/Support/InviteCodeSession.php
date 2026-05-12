@@ -26,7 +26,7 @@ final class InviteCodeSession
         };
 
         if ($code === '') {
-            throw $rejected('Codice invito mancante.');
+            throw $rejected(rsvp_trans('rsvp.api.login.missing_code', 'Codice invito mancante.'));
         }
 
         $rows = InviteCode::query()->Select(InviteCode::$table, [
@@ -35,19 +35,22 @@ final class InviteCodeSession
         ], 1);
 
         if (!$rows->success || !$rows->exists) {
-            throw $rejected('Codice invito non valido.');
+            throw $rejected(rsvp_trans('rsvp.api.login.invalid_code', 'Codice invito non valido.'));
         }
 
         $record = $rows->row;
 
         if (($record['active'] ?? 'false') !== 'true') {
-            throw $rejected('Codice invito disattivato.');
+            throw $rejected(rsvp_trans('rsvp.api.login.inactive_code', 'Codice invito disattivato.'));
         }
 
         $groupCode = self::groupCode((int) ($record['invite_group_id'] ?? 0));
 
         if ($allowedGroups !== [] && !in_array($groupCode, $allowedGroups, true)) {
-            throw $rejected('Codice invito non autorizzato per questa area.');
+            throw $rejected(rsvp_trans(
+                'rsvp.api.login.unauthorized_group',
+                'Codice invito non autorizzato per questa area.'
+            ));
         }
 
         $_SESSION[self::SESSION_KEY] = (int) $record['id'];
@@ -111,11 +114,14 @@ final class InviteCodeSession
         $current = self::current();
 
         if ($current === []) {
-            throw new RuntimeException('Sessione RSVP non attiva.');
+            throw new RuntimeException(rsvp_trans('rsvp.api.session.not_active', 'Sessione RSVP non attiva.'));
         }
 
         if ($allowedGroups !== [] && !in_array($current['invite_group_code'], $allowedGroups, true)) {
-            throw new RuntimeException('Sessione RSVP non autorizzata per questa area.');
+            throw new RuntimeException(rsvp_trans(
+                'rsvp.api.session.unauthorized_group',
+                'Sessione RSVP non autorizzata per questa area.'
+            ));
         }
 
         return $current;

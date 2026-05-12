@@ -375,14 +375,32 @@ if (!function_exists('rsvpBooleanText')) {
         }
 
         if (is_bool($value)) {
-            return $value ? 'Accettato' : 'Rifiutato';
+            return $value
+                ? rsvp_trans('rsvp.common.accepted', 'Accettato')
+                : rsvp_trans('rsvp.common.rejected', 'Rifiutato');
         }
 
         $value = strtolower(trim((string) $value));
 
         return in_array($value, ['1', 'true', 'yes', 'on'], true)
-            ? 'Accettato'
-            : 'Rifiutato';
+            ? rsvp_trans('rsvp.common.accepted', 'Accettato')
+            : rsvp_trans('rsvp.common.rejected', 'Rifiutato');
+    }
+}
+
+if (!function_exists('rsvpLegalDocumentLabel')) {
+    function rsvpLegalDocumentLabel(string $docType): string
+    {
+        $docType = trim($docType);
+
+        if ($docType === '') {
+            return '';
+        }
+
+        return rsvp_trans(
+            'rsvp.legal_documents.'.$docType,
+            ucwords(str_replace(['_', '-'], ' ', $docType))
+        );
     }
 }
 

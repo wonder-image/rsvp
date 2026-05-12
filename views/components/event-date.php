@@ -24,25 +24,19 @@
     $dateRaw = trim((string) ($args['date'] ?? ($event['date'] ?? '')));
     $locationName = trim((string) ($args['location'] ?? ($event['location_name'] ?? '')));
     $locationAddress = trim((string) ($args['address'] ?? ($event['location_address'] ?? '')));
-    $eyebrow = (string) ($args['eyebrow'] ?? '');
-    $timePrefix = (string) ($args['time_prefix'] ?? '');
+    $eyebrow = (string) ($args['eyebrow'] ?? rsvp_trans('rsvp.frontend.event_date.eyebrow', 'Ti aspettiamo'));
+    $timePrefix = (string) ($args['time_prefix'] ?? rsvp_trans('rsvp.frontend.event_date.time_prefix', 'dalle ore'));
 
     if ($dateRaw === '' && $locationName === '') {
         return;
     }
 
     $ts = $dateRaw !== '' ? strtotime($dateRaw) : false;
-    $italianMonths = [
-        1 => 'GENNAIO', 2 => 'FEBBRAIO', 3 => 'MARZO', 4 => 'APRILE',
-        5 => 'MAGGIO', 6 => 'GIUGNO', 7 => 'LUGLIO', 8 => 'AGOSTO',
-        9 => 'SETTEMBRE', 10 => 'OTTOBRE', 11 => 'NOVEMBRE', 12 => 'DICEMBRE',
-    ];
-
     if ($ts !== false) {
-        $dateDay = date('d', $ts);
-        $dateMonth = $italianMonths[(int) date('n', $ts)] ?? mb_strtoupper(date('F', $ts));
+        $dateDay = rsvpDatePart($dateRaw, 'day_number');
+        $dateMonth = mb_strtoupper(rsvpDatePart($dateRaw, 'month'));
         $dateYear = date('Y', $ts);
-        $dateTime = date('H.i', $ts);
+        $dateTime = rsvpDatePart($dateRaw, 'time');
     } else {
         $dateDay = $dateMonth = $dateYear = $dateTime = '';
     }

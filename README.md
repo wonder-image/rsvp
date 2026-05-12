@@ -333,16 +333,21 @@ Dopo aver aggiunto o modificato i custom field dell’estensione, esegui l’upd
 
 ## Multilingua
 
-Il modulo è pronto per essere adattato al multilingua:
+Il modulo usa `__t()` per i testi frontend di default, per i messaggi email di default e per i messaggi API mostrati all’utente.
 
 - route frontend traducibili via `lang/{locale}/urls.json`
-- testi di default nel frontend già strutturati con fallback IT/EN nel codice
+- testi frontend del modulo in `lang/{locale}/rsvp.json`
+- testi email del modulo in `lang/{locale}/emails.json`
 - le view override del consumer possono usare `__l()`, `__t()` e `__r()` come qualsiasi altra pagina del progetto
 
-File URL inclusi:
+File lingua inclusi:
 
 - [lang/it/urls.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/it/urls.json)
 - [lang/en/urls.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/en/urls.json)
+- [lang/it/rsvp.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/it/rsvp.json)
+- [lang/en/rsvp.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/en/rsvp.json)
+- [lang/it/emails.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/it/emails.json)
+- [lang/en/emails.json](/Users/andreamarinoni/Desktop/PROGETTI/template/rsvp/lang/en/emails.json)
 
 ## Payload RSVP supportato
 
