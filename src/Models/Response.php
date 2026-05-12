@@ -98,7 +98,12 @@ final class Response extends Model
      */
     public static function customFieldDefinitions(): array
     {
-        $fields = ExtensionRegistry::fields();
+        // SUPER-SET di tutti i campi possibili: usato per definire le
+        // colonne `meta_<key>` sulla tabella. La versione session-aware
+        // (ExtensionRegistry::fields()) si userebbe per rendering, ma
+        // qui dobbiamo materializzare TUTTE le colonne anche se al
+        // momento della migrazione non c'è una sessione attiva.
+        $fields = ExtensionRegistry::allFields();
         $definitions = [];
 
         foreach ($fields as $key => $field) {

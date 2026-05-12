@@ -48,11 +48,34 @@ final class ExtensionRegistry
     }
 
     /**
+     * Field DEL contesto corrente (sessione/locale/ruolo). Usato dalla
+     * view per il rendering del form e da submit.php per validazione.
+     *
      * @return array<string, array<string, mixed>>
      */
     public static function fields(): array
     {
-        $raw = self::get()->fields();
+        return self::normalize(self::get()->fields());
+    }
+
+    /**
+     * SUPER-SET di tutti i campi possibili, indipendente dalla sessione.
+     * Usato dallo schema sync (Response::tableSchema) per creare tutte
+     * le colonne `meta_<key>` necessarie.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function allFields(): array
+    {
+        return self::normalize(self::get()->allFields());
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $raw
+     * @return array<string, array<string, mixed>>
+     */
+    private static function normalize(array $raw): array
+    {
         $normalized = [];
 
         foreach ($raw as $key => $def) {

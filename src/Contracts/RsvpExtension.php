@@ -23,7 +23,10 @@ namespace Wonder\Plugin\Rsvp\Contracts;
 interface RsvpExtension
 {
     /**
-     * Custom field da aggiungere al form RSVP (oltre ai campi standard).
+     * Custom field da renderizzare nel form RSVP per la SESSIONE corrente.
+     *
+     * Può ritornare un sottoinsieme di allFields() in base alla logica del
+     * consumer (es. solo per certi codici invito).
      *
      * Formato:
      *     [
@@ -39,6 +42,24 @@ interface RsvpExtension
      * @return array<string, array<string, mixed>>
      */
     public function fields(): array;
+
+    /**
+     * SUPER-SET di TUTTI i custom field possibili che l'estensione può
+     * mai dichiarare, indipendentemente da sessione, ruolo, ecc. È
+     * letto dallo schema sync (UpdateRunner) per creare le colonne
+     * `meta_<key>` sulla tabella `rsvp_response`.
+     *
+     * Senza questo metodo, una fields() session-aware risulterebbe
+     * vuota in fase di deploy (niente sessione), nessuna colonna verrebbe
+     * creata, e l'INSERT a runtime farebbe `Unknown column meta_<key>`.
+     *
+     * Default in AbstractRsvpExtension: ritorna $this->fields() (per
+     * compatibilità con estensioni che non hanno gating per sessione).
+     * Override se fields() è session-aware.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function allFields(): array;
 
     /**
      * Mutator del payload prima della persistenza. Tornare l'array

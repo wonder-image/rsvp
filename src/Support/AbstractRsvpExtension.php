@@ -15,6 +15,14 @@ abstract class AbstractRsvpExtension implements RsvpExtension
         return [];
     }
 
+    public function allFields(): array
+    {
+        // Default backward-compat: stesso set di fields(). Override se
+        // fields() filtra per sessione/ruolo: ritorna qui SEMPRE l'unione
+        // di tutti i campi possibili, così lo schema sync crea le colonne.
+        return $this->fields();
+    }
+
     public function beforeSubmit(array $payload): array
     {
         return $payload;
