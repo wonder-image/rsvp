@@ -1,4 +1,6 @@
 <?php
+    use Wonder\Plugin\Rsvp\Support\CustomFieldRenderer;
+
     /**
      * Componente: form RSVP completo.
      *
@@ -64,23 +66,6 @@
         $partecipantiOptions[(string) $i] = (string) $i;
     }
 
-    $renderCustomField = static function (string $key, array $def): string {
-        $type = (string) ($def['type'] ?? 'text');
-        $label = (string) ($def['label'] ?? $key);
-        $value = $def['value'] ?? null;
-        $attr = !empty($def['required']) ? 'required' : '';
-        $options = is_array($def['options'] ?? null) ? $def['options'] : [];
-
-        return match ($type) {
-            'email' => email($label, $key, $value, $attr),
-            'phone' => phone($label, $key, $value, $attr),
-            'number' => number($label, $key, $value, $attr),
-            'textarea' => textarea($label, $key, $value, $attr),
-            'select' => select($label, $key, $options, $value, $attr),
-            'checkbox' => checkbox($label, $key, $options),
-            default => text($label, $key, $value, $attr),
-        };
-    };
 ?>
 
 <?php if (!$canAccessForm) { ?>
@@ -127,7 +112,7 @@
 
     <?php foreach ($customFields as $customKey => $customDef) { ?>
         <div data-rsvp-custom-field="<?=$escape($customKey)?>">
-            <?= $renderCustomField($customKey, $customDef) ?>
+            <?= CustomFieldRenderer::renderFrontend($customKey, $customDef) ?>
         </div>
     <?php } ?>
 
@@ -267,9 +252,18 @@
                 custom[key] = Array.from(multi).map((el) => el.value);
                 return;
             }
+            const checkedRadio = wrap.querySelector(`input[type="radio"][name="${key}"]:checked`);
+            if (checkedRadio) {
+                custom[key] = checkedRadio.value || '';
+                return;
+            }
             const el = wrap.querySelector(`[name="${key}"]`);
             if (!el) return;
-            if (el.type === 'checkbox' || el.type === 'radio') {
+            if (el.type === 'radio') {
+                custom[key] = '';
+                return;
+            }
+            if (el.type === 'checkbox') {
                 custom[key] = el.checked ? (el.value || 'true') : '';
                 return;
             }

@@ -42,7 +42,7 @@ final class InviteCode extends Model
     public static function dataSchema(): array
     {
         return [
-            Field::key('code')->text()->required()->codeUpper(),
+            Field::key('code')->text()->required(),
             Field::key('usage_mode')->text()->required(),
             Field::key('authorization_id')->number()->decimals(0),
             Field::key('invite_group_id')->number()->decimals(0),

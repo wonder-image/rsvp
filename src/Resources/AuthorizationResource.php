@@ -81,11 +81,11 @@ final class AuthorizationResource extends Resource
     public static function tableSchema(): array
     {
         return [
-            TableColumn::key('name')->text()->link('edit'),
-            TableColumn::key('code')->text()->size('little'),
+            TableColumn::key('code')->text()->link('edit'),
+            TableColumn::key('name')->text(),
             TableColumn::key('visible_event_keys_json')->text()->function('rsvpJsonPrettyList', 'visible_event_keys_json')->size('medium'),
-            TableColumn::key('max_participants')->text()->size('little'),
-            TableColumn::key('max_children')->text()->size('little'),
+            TableColumn::key('max_participants')->text()->size('medium'),
+            TableColumn::key('max_children')->text()->size('medium'),
             TableColumn::key('actions')->button()->actions(['edit', 'delete']),
         ];
     }

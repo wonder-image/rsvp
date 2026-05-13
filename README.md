@@ -331,6 +331,77 @@ I valori dei custom field vengono risolti prima della persistenza e i `meta_*` v
 
 Dopo aver aggiunto o modificato i custom field dell’estensione, esegui l’update del progetto consumer per sincronizzare lo schema della tabella risposte.
 
+### Nuovo modo consigliato: `FormInput`
+
+Il modo consigliato per definire i custom field è usare direttamente `FormInput`, così il consumer non deve più costruire manualmente gli array schema legacy.
+
+Esempio:
+
+```php
+<?php
+
+namespace App\Rsvp;
+
+use Wonder\App\ResourceSchema\FormInput;
+use Wonder\Plugin\Rsvp\Support\AbstractRsvpExtension;
+
+final class WeddingExtension extends AbstractRsvpExtension
+{
+    public function formInputs(): array
+    {
+        return [
+            FormInput::key('society_name')
+                ->text()
+                ->label('Sei un ristoratore o enotecario? Indica il nome della tua attività')
+                ->required(),
+            FormInput::key('bus')
+                ->radio([
+                    'no' => 'No, non usufruisco del servizio bus',
+                    'famagosta' => 'Famagosta - 16:45',
+                    'porta-venezia' => 'Porta Venezia - 17:00',
+                ])
+                ->label('Vuoi usufruire del servizio bus privato da/per Milano?')
+                ->required()
+                ->value('no'),
+        ];
+    }
+
+    public function allFormInputs(): array
+    {
+        return [
+            ...$this->formInputs(),
+        ];
+    }
+}
+```
+
+Usa `formInputs()` per i field visibili nel contesto corrente e `allFormInputs()` per il super-set completo che serve allo schema sync per creare tutte le colonne `meta_*`.
+
+I field `radio` definiti in questo modo vengono preservati correttamente in tutto il modulo:
+
+- rendering frontend come `radio`
+- persistenza invariata su `meta_<key>`
+- backend show, export ed email summary con label umane delle opzioni
+
+### Backward compatibility
+
+Le estensioni esistenti che usano `fields()` e `allFields()` nel formato array legacy continuano a funzionare senza modifiche.
+
+Formato legacy ancora supportato:
+
+```php
+public function fields(): array
+{
+    return [
+        'society_name' => [
+            'type' => 'text',
+            'label' => 'Sei un ristoratore o enotecario? Indica il nome della tua attività',
+            'required' => true,
+        ],
+    ];
+}
+```
+
 ## Multilingua
 
 Il modulo usa `__t()` per i testi frontend di default, per i messaggi email di default e per i messaggi API mostrati all’utente.

@@ -2,13 +2,15 @@
 
 namespace Wonder\Plugin\Rsvp\Support;
 
+use Wonder\App\ResourceSchema\FormInput;
 use Wonder\Plugin\Rsvp\Contracts\RsvpExtension;
+use Wonder\Plugin\Rsvp\Contracts\SupportsFormInputs;
 
 /**
  * Implementazione di default di RsvpExtension. Il consumer estende questa
  * classe e override solo i metodi che gli servono.
  */
-abstract class AbstractRsvpExtension implements RsvpExtension
+abstract class AbstractRsvpExtension implements RsvpExtension, SupportsFormInputs
 {
     public function fields(): array
     {
@@ -21,6 +23,25 @@ abstract class AbstractRsvpExtension implements RsvpExtension
         // fields() filtra per sessione/ruolo: ritorna qui SEMPRE l'unione
         // di tutti i campi possibili, così lo schema sync crea le colonne.
         return $this->fields();
+    }
+
+    /**
+     * @return array<int, FormInput>
+     */
+    public function formInputs(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return array<int, FormInput>
+     */
+    public function allFormInputs(): array
+    {
+        // Default backward-compat con la modalità FormInput: stesso set di
+        // formInputs(). Override se il rendering è session-aware ma lo schema
+        // deve conoscere l'unione completa dei field possibili.
+        return $this->formInputs();
     }
 
     public function beforeSubmit(array $payload): array

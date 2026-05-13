@@ -65,8 +65,8 @@ final class InviteGroupResource extends Resource
     public static function tableSchema(): array
     {
         return [
-            TableColumn::key('name')->text()->link('edit'),
-            TableColumn::key('code')->text()->size('little'),
+            TableColumn::key('code')->text()->size('little')->link('edit'),
+            TableColumn::key('name')->text(),
             TableColumn::key('invite_codes')->text()->function('rsvpInviteGroupCodes', 'id')->size('little'),
             TableColumn::key('actions')->button()->actions(['edit', 'delete']),
         ];

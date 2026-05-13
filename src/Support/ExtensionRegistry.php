@@ -55,7 +55,7 @@ final class ExtensionRegistry
      */
     public static function fields(): array
     {
-        return self::normalize(self::get()->fields());
+        return CustomFieldRegistry::visibleDefinitions(self::get());
     }
 
     /**
@@ -67,35 +67,6 @@ final class ExtensionRegistry
      */
     public static function allFields(): array
     {
-        return self::normalize(self::get()->allFields());
-    }
-
-    /**
-     * @param array<string, array<string, mixed>> $raw
-     * @return array<string, array<string, mixed>>
-     */
-    private static function normalize(array $raw): array
-    {
-        $normalized = [];
-
-        foreach ($raw as $key => $def) {
-            $key = trim((string) $key);
-
-            if ($key === '' || !is_array($def)) {
-                continue;
-            }
-
-            $type = strtolower(trim((string) ($def['type'] ?? 'text')));
-
-            $normalized[$key] = [
-                'type' => in_array($type, ['text', 'email', 'phone', 'number', 'textarea', 'select', 'checkbox'], true) ? $type : 'text',
-                'label' => (string) ($def['label'] ?? $key),
-                'options' => is_array($def['options'] ?? null) ? $def['options'] : [],
-                'required' => (bool) ($def['required'] ?? false),
-                'value' => $def['value'] ?? '',
-            ];
-        }
-
-        return $normalized;
+        return CustomFieldRegistry::allDefinitions(self::get());
     }
 }

@@ -99,7 +99,7 @@ final class Response extends Model
     }
 
     /**
-     * @return array<string, array{key:string,label:string,type:string,column:string}>
+     * @return array<string, array{key:string,label:string,type:string,column:string,options:array<string,string>,required:bool,value:mixed}>
      */
     public static function customFieldDefinitions(): array
     {
@@ -117,6 +117,9 @@ final class Response extends Model
                 'label' => (string) ($field['label'] ?? $key),
                 'type' => (string) ($field['type'] ?? 'text'),
                 'column' => rsvpCustomFieldColumn((string) $key),
+                'options' => is_array($field['options'] ?? null) ? $field['options'] : [],
+                'required' => (bool) ($field['required'] ?? false),
+                'value' => $field['value'] ?? '',
             ];
         }
 

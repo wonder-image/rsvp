@@ -515,7 +515,7 @@ if (!function_exists('rsvpRenderCustomFieldValue')) {
             return '';
         }
 
-        if (in_array($type, ['select', 'checkbox'], true)) {
+        if (in_array($type, ['select', 'checkbox', 'radio'], true)) {
             $rendered = array_map(
                 static function (string $item) use ($normalizedOptions): string {
                     if (isset($normalizedOptions[$item])) {

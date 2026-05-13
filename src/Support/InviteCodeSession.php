@@ -14,7 +14,7 @@ final class InviteCodeSession
 
     public static function login(string $code, array $allowedGroups = []): array
     {
-        $code = strtoupper(trim($code));
+        $code = self::normalizeCode($code);
 
         // Codice 905 = "Password errata" nelle traduzioni framework
         // (resources/lang/<lang>/notifications.json). Lato client il
@@ -29,16 +29,11 @@ final class InviteCodeSession
             throw $rejected(rsvp_trans('rsvp.api.login.missing_code', 'Codice invito mancante.'));
         }
 
-        $rows = InviteCode::query()->Select(InviteCode::$table, [
-            'code' => $code,
-            'deleted' => 'false',
-        ], 1);
+        $record = self::findByCode($code);
 
-        if (!$rows->success || !$rows->exists) {
+        if ($record === null) {
             throw $rejected(rsvp_trans('rsvp.api.login.invalid_code', 'Codice invito non valido.'));
         }
-
-        $record = $rows->row;
 
         if (($record['active'] ?? 'false') !== 'true') {
             throw $rejected(rsvp_trans('rsvp.api.login.inactive_code', 'Codice invito disattivato.'));
@@ -135,6 +130,49 @@ final class InviteCodeSession
         ]);
 
         return (int) ($result->Nrow ?? 0);
+    }
+
+    private static function findByCode(string $normalizedCode): ?array
+    {
+        $exact = InviteCode::query()->Select(InviteCode::$table, [
+            'code' => $normalizedCode,
+            'deleted' => 'false',
+        ], 1);
+
+        if ($exact->success && $exact->exists && is_array($exact->row ?? null)) {
+            return $exact->row;
+        }
+
+        $rows = InviteCode::query()->Select(InviteCode::$table, [
+            'deleted' => 'false',
+        ]);
+
+        foreach ((array) ($rows->row ?? []) as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            if (self::normalizeCode((string) ($row['code'] ?? '')) !== $normalizedCode) {
+                continue;
+            }
+
+            return $row;
+        }
+
+        return null;
+    }
+
+    private static function normalizeCode(string $code): string
+    {
+        $code = trim($code);
+
+        if ($code === '') {
+            return '';
+        }
+
+        return function_exists('mb_strtoupper')
+            ? mb_strtoupper($code, 'UTF-8')
+            : strtoupper($code);
     }
 
     private static function groupCode(int $inviteGroupId): string

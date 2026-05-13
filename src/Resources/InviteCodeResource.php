@@ -85,11 +85,11 @@ final class InviteCodeResource extends Resource
     {
         return [
             TableColumn::key('code')->text()->link('edit'),
-            TableColumn::key('authorization_id')->text()->function('rsvpAuthorizationLabel', 'authorization_id')->size('little'),
-            TableColumn::key('invite_group_id')->text()->function('rsvpInviteGroupLabel', 'invite_group_id')->size('little'),
-            TableColumn::key('usage_mode')->badge()->function('rsvpInviteUsageMode', 'usage_mode', 'automaticResize')->size('little'),
+            TableColumn::key('authorization_id')->text()->function('rsvpAuthorizationLabel', 'authorization_id')->size('medium'),
+            TableColumn::key('invite_group_id')->text()->function('rsvpInviteGroupLabel', 'invite_group_id')->size('medium'),
+            TableColumn::key('usage_mode')->badge()->function('rsvpInviteUsageMode', 'usage_mode', 'automaticResize'),
             TableColumn::key('used_count')->text()->function('rsvpInviteCodeResponses', 'id')->size('little'),
-            TableColumn::key('active')->badge()->function('active', 'id', 'automaticResize')->size('little'),
+            TableColumn::key('active')->badge()->function('active', 'id', 'automaticResize'),
             TableColumn::key('actions')->button()->actions(['edit', 'delete']),
         ];
     }

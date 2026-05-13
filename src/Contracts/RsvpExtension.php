@@ -19,6 +19,11 @@ namespace Wonder\Plugin\Rsvp\Contracts;
  * I custom field vengono materializzati in colonne dedicate della tabella
  * `rsvp_response` con prefisso `meta_`. Dopo aver aggiunto o modificato i
  * campi dell'estensione serve aggiornare lo schema del consumer.
+ *
+ * Per dichiarare i custom field come `FormInput` usa il contratto opzionale
+ * `Wonder\Plugin\Rsvp\Contracts\SupportsFormInputs` oppure estendi
+ * `Wonder\Plugin\Rsvp\Support\AbstractRsvpExtension` e override
+ * `formInputs()` / `allFormInputs()`.
  */
 interface RsvpExtension
 {
