@@ -20,13 +20,43 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
 
     $normalized = SubmissionNormalizer::fromPayload($call->parameters);
     $state = FrontendContext::state();
+    $attendanceStatus = rsvpAttendanceStatusValue($normalized['attendance_status'] ?? null);
+
+    $requireField = static function (string $key, string $label) use ($normalized): void {
+        $value = trim((string) ($normalized[$key] ?? ''));
+
+        if ($value !== '') {
+            return;
+        }
+
+        throw new RuntimeException(rsvp_trans(
+            'rsvp.api.submit.required_field_missing',
+            'Campo obbligatorio mancante: {{field}}.',
+            ['field' => $label]
+        ));
+    };
 
     if (trim((string) ($normalized['contact_email'] ?? '')) === '') {
         throw new RuntimeException(rsvp_trans('rsvp.api.submit.missing_email', 'Email mancante.'));
     }
 
-    if ((int) ($normalized['participants_count'] ?? 0) <= 0) {
+    if ($attendanceStatus === 'confirmed' && (int) ($normalized['participants_count'] ?? 0) <= 0) {
         throw new RuntimeException(rsvp_trans('rsvp.api.submit.missing_participants', 'Partecipanti mancanti.'));
+    }
+
+    if ($attendanceStatus === 'declined') {
+        $requireField(
+            'contact_name',
+            rsvp_trans('rsvp.frontend.form.contact_name_label', 'Nome referente')
+        );
+        $requireField(
+            'contact_surname',
+            rsvp_trans('rsvp.frontend.form.contact_surname_label', 'Cognome referente')
+        );
+        $requireField(
+            'contact_phone',
+            rsvp_trans('rsvp.frontend.form.contact_phone_label', 'Cellulare')
+        );
     }
 
     $session = InviteCodeSession::current();
@@ -51,7 +81,11 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
         throw new RuntimeException(rsvp_trans('rsvp.api.submit.privacy_required', 'È necessario accettare la privacy.'));
     }
 
-    if (($state['require_image_release'] ?? false) && empty($consents['photo'])) {
+    if (
+        $attendanceStatus === 'confirmed'
+        && ($state['require_image_release'] ?? false)
+        && empty($consents['photo'])
+    ) {
         throw new RuntimeException(rsvp_trans(
             'rsvp.api.submit.image_release_required',
             'È necessario accettare la liberatoria immagini.'
@@ -65,6 +99,10 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
         : [];
 
     foreach ($customFieldsSchema as $key => $def) {
+        if ($attendanceStatus === 'declined') {
+            continue;
+        }
+
         if (empty($def['required'])) {
             continue;
         }

@@ -1,5 +1,7 @@
 {
     "common": {
+        "confirmed": "Confermato",
+        "declined": "Declinato",
         "accepted": "Accettato",
         "rejected": "Rifiutato"
     },
@@ -30,6 +32,9 @@
         "form": {
             "invite_required_text": "Per compilare questo RSVP serve un codice invito.",
             "invite_required_button": "Vai al login",
+            "attendance_status_label": "Partecipazione",
+            "attendance_confirmed_label": "Partecipo",
+            "attendance_declined_label": "Non partecipo",
             "events_label": "Eventi",
             "events_required_text": "Seleziona almeno un evento.",
             "contact_name_label": "Nome referente",
@@ -46,10 +51,10 @@
             "notes_label": "Richieste aggiuntive",
             "privacy_fallback_text": "Acconsento al trattamento dei dati personali.",
             "image_release_fallback_text": "Acconsento alla raccolta e all’utilizzo di immagini fotografiche e video.",
-            "submit_label": "Invia conferma",
+            "submit_label": "Invia risposta",
             "sending_text": "Invio in corso...",
-            "success_text": "La tua partecipazione è stata confermata!",
-            "error_text": "Non è stato possibile inviare la tua conferma. Riprova.",
+            "success_text": "La tua risposta è stata registrata!",
+            "error_text": "Non è stato possibile inviare la tua risposta. Riprova.",
             "success_button_label": "Torna al sito",
             "error_button_label": "Riprova",
             "manage_invite_button": "Gestisci codice invito"
@@ -72,6 +77,7 @@
     },
     "email_summary": {
         "name": "Nome",
+        "attendance_status": "Conferma",
         "email": "Email",
         "phone": "Telefono",
         "participants": "Partecipanti",

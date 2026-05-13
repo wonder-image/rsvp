@@ -44,13 +44,18 @@
         : '';
     $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
 
-    $submitLabel = (string) ($args['submit_label'] ?? rsvp_trans('rsvp.frontend.form.submit_label', 'Invia conferma'));
-    $successText = (string) ($args['success_text'] ?? rsvp_trans('rsvp.frontend.form.success_text', 'La tua partecipazione è stata confermata!'));
-    $errorText   = (string) ($args['error_text'] ?? rsvp_trans('rsvp.frontend.form.error_text', 'Non è stato possibile inviare la tua conferma. Riprova.'));
+    $submitLabel = (string) ($args['submit_label'] ?? rsvp_trans('rsvp.frontend.form.submit_label', 'Invia risposta'));
+    $successText = (string) ($args['success_text'] ?? rsvp_trans('rsvp.frontend.form.success_text', 'La tua risposta è stata registrata!'));
+    $errorText   = (string) ($args['error_text'] ?? rsvp_trans('rsvp.frontend.form.error_text', 'Non è stato possibile inviare la tua risposta. Riprova.'));
     $successButton = (string) ($args['success_button_label'] ?? rsvp_trans('rsvp.frontend.form.success_button_label', 'Torna al sito'));
     $errorButton   = (string) ($args['error_button_label'] ?? rsvp_trans('rsvp.frontend.form.error_button_label', 'Riprova'));
     $inviteRequiredText = rsvp_trans('rsvp.frontend.form.invite_required_text', 'Per compilare questo RSVP serve un codice invito.');
     $inviteRequiredButton = rsvp_trans('rsvp.frontend.form.invite_required_button', 'Vai al login');
+    $attendanceStatusLabel = rsvp_trans('rsvp.frontend.form.attendance_status_label', 'Partecipazione');
+    $attendanceConfirmedLabel = rsvp_trans('rsvp.frontend.form.attendance_confirmed_label', 'Partecipo');
+    $attendanceDeclinedLabel = rsvp_trans('rsvp.frontend.form.attendance_declined_label', 'Non partecipo');
+    $contactNameLabel = rsvp_trans('rsvp.frontend.form.contact_name_label', 'Nome referente');
+    $contactSurnameLabel = rsvp_trans('rsvp.frontend.form.contact_surname_label', 'Cognome referente');
     $participantsLabel = rsvp_trans('rsvp.frontend.form.participants_count_label', 'Partecipanti');
     $participantLabel = rsvp_trans('rsvp.frontend.form.participant_label', 'Ospite');
     $participantNameLabel = rsvp_trans('rsvp.frontend.form.participant_name_label', 'Nome');
@@ -88,10 +93,33 @@
         <input type="hidden" name="event_key" value="<?=$escape((string) $singleKey)?>">
     <?php } ?>
 
-    <?= select($participantsLabel, 'participants_count', $partecipantiOptions, '1', 'required') ?>
+    <div class="rsvp-attendance-choice">
+        <div class="mb-2"><?=$escape($attendanceStatusLabel)?></div>
+        <div class="d-flex flex-wrap gap-3">
+            <label class="d-inline-flex align-items-center gap-2">
+                <input type="radio" name="attendance_status" value="confirmed" checked>
+                <span><?=$escape($attendanceConfirmedLabel)?></span>
+            </label>
+            <label class="d-inline-flex align-items-center gap-2">
+                <input type="radio" name="attendance_status" value="declined">
+                <span><?=$escape($attendanceDeclinedLabel)?></span>
+            </label>
+        </div>
+    </div>
 
-    <!-- Container per i blocchi ospite dinamici -->
-    <div id="rsvp-participants" class="rsvp-participants"></div>
+    <div id="rsvp-attending-fields">
+        <?= select($participantsLabel, 'participants_count', $partecipantiOptions, '1', 'required') ?>
+
+        <!-- Container per i blocchi ospite dinamici -->
+        <div id="rsvp-participants" class="rsvp-participants"></div>
+    </div>
+
+    <div id="rsvp-decline-contact" style="display:none;">
+        <div class="rsvp-guest-row">
+            <div><?= text($contactNameLabel, 'contact_name', null, "data-decline-contact='true'") ?></div>
+            <div><?= text($contactSurnameLabel, 'contact_surname', null, "data-decline-contact='true'") ?></div>
+        </div>
+    </div>
 
     <template id="rsvp-guest-template">
         <div class="rsvp-guest" data-participant-block data-index="__INDEX__" data-is-child="false">
@@ -120,8 +148,10 @@
         <?= inputAcceptDocument('privacy_policy', 'required') ?>
     </div>
 
-    <?php if (!empty($STATE['require_image_release'])) { ?>
-        <?=inputAcceptDocument('image_release', 'required')?>
+    <?php if (!empty($state['require_image_release'])) { ?>
+        <div id="rsvp-image-release-wrap">
+            <?=inputAcceptDocument('image_release', 'required')?>
+        </div>
     <?php } ?>
 
     <div class="rsvp-form-actions">
@@ -141,12 +171,31 @@
     const participantsCount = form.elements.participants_count;
     const guestTemplate = document.getElementById('rsvp-guest-template');
     const feedback = document.getElementById('rsvp-feedback');
+    const attendingFields = document.getElementById('rsvp-attending-fields');
+    const declineContact = document.getElementById('rsvp-decline-contact');
+    const attendanceInputs = Array.from(form.querySelectorAll('input[name="attendance_status"]'));
+    const imageReleaseWrap = document.getElementById('rsvp-image-release-wrap');
 
     const SUCCESS_TEXT = <?=json_encode($successText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const ERROR_TEXT = <?=json_encode($errorText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const SUCCESS_BUTTON = <?=json_encode($successButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const ERROR_BUTTON = <?=json_encode($errorButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const PARTICIPANT_LABEL = <?=json_encode($participantLabel, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+
+    function attendanceStatus() {
+        const selected = form.querySelector('input[name="attendance_status"]:checked');
+        return selected ? selected.value : 'confirmed';
+    }
+
+    function setDisabled(scope, disabled) {
+        if (!scope) return;
+        scope.querySelectorAll('input, select, textarea').forEach((el) => {
+            if (disabled && (el.type === 'checkbox' || el.type === 'radio')) {
+                el.checked = false;
+            }
+            el.disabled = disabled;
+        });
+    }
 
     // Gli helper framework (text/textarea/select) generano id randomici
     // condivisi nel <template>: quando cloniamo gli id si duplicano e i
@@ -201,6 +250,11 @@
     }
 
     function renderGuests() {
+        if (attendanceStatus() !== 'confirmed') {
+            participantsBox.innerHTML = '';
+            return;
+        }
+
         const n = parseInt(participantsCount ? participantsCount.value : '1', 10) || 1;
         let html = '';
         for (let i = 0; i < n; i++) html += guestHTML(i);
@@ -209,6 +263,10 @@
     }
 
     function collectGuests() {
+        if (attendanceStatus() !== 'confirmed') {
+            return [];
+        }
+
         const grouped = {};
         participantsBox.querySelectorAll('[data-index][data-field]').forEach((el) => {
             const idx = el.getAttribute('data-index');
@@ -227,6 +285,7 @@
     function collectConsents(payload) {
         // 1) Documenti legali: accept_<doc> (checkbox) + <doc>_id (hidden).
         form.querySelectorAll('input[name^="accept_"], input[name$="_id"]').forEach((el) => {
+            if (el.disabled) return;
             if (el.type === 'checkbox') {
                 if (el.checked) payload[el.name] = el.value || 'true';
                 return;
@@ -238,7 +297,7 @@
             const checked = form.querySelector(
                 `input[name="${key}[]"]:checked, input[name="${key}"]:checked`
             );
-            if (checked) payload[key] = checked.value || 'true';
+            if (checked && !checked.disabled) payload[key] = checked.value || 'true';
         });
     }
 
@@ -272,6 +331,20 @@
         payload.custom_fields = custom;
     }
 
+    function syncAttendanceUI() {
+        const declined = attendanceStatus() === 'declined';
+
+        if (attendingFields) attendingFields.style.display = declined ? 'none' : '';
+        if (declineContact) declineContact.style.display = declined ? '' : 'none';
+
+        setDisabled(attendingFields, declined);
+        setDisabled(declineContact, !declined);
+        setDisabled(imageReleaseWrap, declined);
+
+        renderGuests();
+        if (declineContact) rebindWiInputs(declineContact);
+    }
+
     function renderResultIntoSpinner(success, message) {
         const container = document.querySelector('#loading-spinner .center');
         if (!container) {
@@ -296,9 +369,18 @@
 
     window.rsvpSubmit = async function (theForm) {
         const guests = collectGuests();
-        const referente = guests[0] || { name: '', surname: '' };
+        const declined = attendanceStatus() === 'declined';
+        const declineName = theForm.elements.contact_name;
+        const declineSurname = theForm.elements.contact_surname;
+        const referente = declined
+            ? {
+                name: declineName ? (declineName.value || '').trim() : '',
+                surname: declineSurname ? (declineSurname.value || '').trim() : '',
+            }
+            : (guests[0] || { name: '', surname: '' });
 
         const payload = {
+            attendance_status: attendanceStatus(),
             invite_code_id: theForm.elements.invite_code_id.value || '',
             locale: theForm.elements.locale.value || '',
             contact_name: referente.name || '',
@@ -326,7 +408,7 @@
             // viene serializzato come application/json.
             await API_CLIENT.post('/rsvp/', payload);
             theForm.reset();
-            renderGuests();
+            syncAttendanceUI();
             renderResultIntoSpinner(true, SUCCESS_TEXT);
         } catch (err) {
             const message = (err && (err.response || err.message)) || ERROR_TEXT;
@@ -334,7 +416,11 @@
         }
     };
 
-    renderGuests();
+    attendanceInputs.forEach((input) => {
+        input.addEventListener('change', syncAttendanceUI);
+    });
+
+    syncAttendanceUI();
     if (participantsCount) {
         // Il widget wi-select del framework NON dispatcha l'evento `change`:
         // fa solo `selElmnt.value = ...`. All'init copia però la property

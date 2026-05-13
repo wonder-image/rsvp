@@ -57,6 +57,46 @@ if (!function_exists('rsvpInviteUsageMode')) {
     }
 }
 
+if (!function_exists('rsvpAttendanceStatusValue')) {
+    function rsvpAttendanceStatusValue(mixed $value): string
+    {
+        $normalized = strtolower(trim((string) $value));
+
+        return match ($normalized) {
+            'declined', 'rejected', 'reject', 'no', 'false', '0' => 'declined',
+            default => 'confirmed',
+        };
+    }
+}
+
+if (!function_exists('rsvpAttendanceStatusText')) {
+    function rsvpAttendanceStatusText(mixed $value): string
+    {
+        return rsvpAttendanceStatusValue($value) === 'declined'
+            ? rsvp_trans('rsvp.common.declined', 'Declinato')
+            : rsvp_trans('rsvp.common.confirmed', 'Confermato');
+    }
+}
+
+if (!function_exists('rsvpResponseAttendanceStatus')) {
+    function rsvpResponseAttendanceStatus(mixed $value): object
+    {
+        $status = rsvpAttendanceStatusValue($value);
+        $label = rsvpAttendanceStatusText($status);
+        $color = $status === 'declined' ? 'danger' : 'success';
+        $icon = $status === 'declined'
+            ? '<i class="bi bi-x-circle"></i> '
+            : '<i class="bi bi-check2-circle"></i> ';
+
+        return (object) [
+            'text' => $label,
+            'icon' => $icon,
+            'bootstrapColor' => $color,
+            'automaticResize' => '<span class="badge text-bg-'.$color.'">'.$icon.'<span class="phone-none">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</span></span>',
+        ];
+    }
+}
+
 if (!function_exists('rsvpInviteGroupLabel')) {
     function rsvpInviteGroupLabel(mixed $groupId): string
     {

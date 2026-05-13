@@ -4,11 +4,14 @@ namespace Wonder\Plugin\Rsvp\Resources;
 
 use Wonder\App\Resource;
 use Wonder\App\ResourceSchema\ApiSchema;
+use Wonder\App\ResourceSchema\FormInput;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
 use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\ResourceSchema\TableLayoutSchema;
+use Wonder\Elements\Components\Card;
+use Wonder\Elements\Form\Form;
 use Wonder\Http\Route;
 use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Rsvp;
@@ -34,6 +37,7 @@ final class ResponseResource extends Resource
     public static function labelSchema(): array
     {
         $labels = [
+            'attendance_status' => 'Conferma',
             'booking_code' => 'Codice prenotazione',
             'contact_name' => 'Nome',
             'contact_surname' => 'Cognome',
@@ -57,16 +61,36 @@ final class ResponseResource extends Resource
         return $labels;
     }
 
+    public static function formSchema(): array
+    {
+        return [
+            FormInput::key('attendance_status')->select([
+                'confirmed' => 'Confermato',
+                'declined' => 'Declinato',
+            ])->required()->value('confirmed'),
+        ];
+    }
+
+    public static function formLayoutSchema(): ?Form
+    {
+        return (new Form)->components([
+            (new Card)->components([
+                static::getInput('attendance_status')->columnSpan(12),
+            ])->columns(12)->columnSpan(12),
+        ])->columns(12);
+    }
+
     public static function tableSchema(): array
     {
         return [
             TableColumn::key('booking_code')->text()->size('little')->link('view'),
+            TableColumn::key('attendance_status')->badge()->function('rsvpResponseAttendanceStatus', 'attendance_status', 'automaticResize')->size('little'),
             TableColumn::key('contact_name')->text()->columns(['contact_name', 'contact_surname']),
             TableColumn::key('contact_email')->text()->link('mailto'),
             TableColumn::key('participants_count')->text()->size('little'),
             TableColumn::key('event_key')->text()->size('little'),
             TableColumn::key('creation')->datetime()->sortable(),
-            TableColumn::key('actions')->button()->actions(['view', 'delete']),
+            TableColumn::key('actions')->button()->actions(['view', 'edit', 'delete']),
         ];
     }
 
@@ -83,10 +107,11 @@ final class ResponseResource extends Resource
     public static function pageSchema(): PageSchema
     {
         return PageSchema::for(static::class)
-            ->only(['list', 'view', 'delete'])
+            ->only(['list', 'view', 'edit', 'update', 'delete'])
             ->view('list', Rsvp::viewPath('backend/response/list.php'))
             ->view('show', Rsvp::viewPath('backend/response/show.php'))
-            ->title('view', 'Dettaglio risposta RSVP');
+            ->title('view', 'Dettaglio risposta RSVP')
+            ->title('edit', 'Modifica stato RSVP');
     }
 
     public static function apiSchema(): ApiSchema
@@ -98,6 +123,7 @@ final class ResponseResource extends Resource
     {
         return PermissionSchema::for(static::class)
             ->backend(['list', 'view'], ['admin', 'rsvp_response_viewer'])
+            ->backend(['edit', 'update'], ['admin'])
             ->backend('delete', ['admin']);
     }
 
@@ -118,5 +144,26 @@ final class ResponseResource extends Resource
         ])->name('export')
             ->permit(['admin', 'rsvp_response_viewer'])
             ->where('format', '(csv|xls)');
+    }
+
+    public static function mutateRequestValues(
+        array $values,
+        string $action,
+        string $context = 'backend',
+        ?array $oldValues = null
+    ): array {
+        $values['attendance_status'] = rsvpAttendanceStatusValue($values['attendance_status'] ?? null);
+
+        return $values;
+    }
+
+    public static function mutateFormValues(
+        array $values,
+        string $mode,
+        string $context = 'backend'
+    ): array {
+        $values['attendance_status'] = rsvpAttendanceStatusValue($values['attendance_status'] ?? null);
+
+        return $values;
     }
 }

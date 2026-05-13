@@ -12,7 +12,10 @@ final class SubmissionNormalizer
     public static function fromPayload(array $payload): array
     {
         $payload = self::normalizePayload($payload);
-        $participants = self::participants($payload);
+        $attendanceStatus = self::attendanceStatus($payload);
+        $participants = $attendanceStatus === 'declined'
+            ? []
+            : self::participants($payload);
         $session = InviteCodeSession::current();
         $inviteCodeId = (int) ($payload['invite_code_id'] ?? $payload['password_id'] ?? $session['id'] ?? 0);
         $inviteGroupCode = self::inviteGroupCode($inviteCodeId);
@@ -29,6 +32,7 @@ final class SubmissionNormalizer
         $customFieldColumns = self::customFieldColumns($payload);
 
         return array_merge([
+            'attendance_status' => $attendanceStatus,
             'invite_code_id' => $inviteCodeId > 0 ? $inviteCodeId : null,
             'invite_code' => $session['code'] ?? null,
             'invite_group_code' => $inviteGroupCode !== '' ? $inviteGroupCode : null,
@@ -299,6 +303,7 @@ final class SubmissionNormalizer
             'events',
             'event',
             'event_key',
+            'attendance_status',
             'locale',
             'lang',
             'privacy',
@@ -333,6 +338,16 @@ final class SubmissionNormalizer
         }
 
         return $metadata;
+    }
+
+    private static function attendanceStatus(array $payload): string
+    {
+        return rsvpAttendanceStatusValue(
+            $payload['attendance_status']
+            ?? $payload['status']
+            ?? $payload['attending']
+            ?? null
+        );
     }
 
     private static function customFieldColumns(array $payload): array

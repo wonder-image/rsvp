@@ -16,6 +16,7 @@ final class Response extends Model
     public static function tableSchema(): array
     {
         $schema = [
+            Column::key('attendance_status')->length(20)->default('confirmed'),
             Column::key('booking_code')->length(20)->null(),
             Column::key('invite_code_id')->int()->null()->foreign(InviteCode::$table),
             Column::key('invite_code')->length(120)->null(),
@@ -69,6 +70,7 @@ final class Response extends Model
     public static function dataSchema(): array
     {
         $schema = [
+            Field::key('attendance_status')->text()->required(),
             Field::key('booking_code')->text()->sanitize(false),
             Field::key('invite_code_id')->number()->decimals(0),
             Field::key('invite_code')->text()->sanitize(false),

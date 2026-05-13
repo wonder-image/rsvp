@@ -1,5 +1,7 @@
 {
     "common": {
+        "confirmed": "Confirmed",
+        "declined": "Declined",
         "accepted": "Accepted",
         "rejected": "Rejected"
     },
@@ -30,6 +32,9 @@
         "form": {
             "invite_required_text": "A valid invite code is required to complete this RSVP.",
             "invite_required_button": "Go to login",
+            "attendance_status_label": "Attendance",
+            "attendance_confirmed_label": "I will attend",
+            "attendance_declined_label": "I will not attend",
             "events_label": "Events",
             "events_required_text": "Select at least one event.",
             "contact_name_label": "Contact first name",
@@ -46,10 +51,10 @@
             "notes_label": "Additional notes",
             "privacy_fallback_text": "I consent to the processing of personal data.",
             "image_release_fallback_text": "I consent to the collection and use of photos and videos.",
-            "submit_label": "Send RSVP",
+            "submit_label": "Send response",
             "sending_text": "Sending RSVP...",
-            "success_text": "Your attendance has been confirmed!",
-            "error_text": "We could not send your RSVP. Please try again.",
+            "success_text": "Your response has been recorded!",
+            "error_text": "We could not send your response. Please try again.",
             "success_button_label": "Back to site",
             "error_button_label": "Try again",
             "manage_invite_button": "Manage invite code"
@@ -72,6 +77,7 @@
     },
     "email_summary": {
         "name": "Name",
+        "attendance_status": "Attendance",
         "email": "Email",
         "phone": "Phone",
         "participants": "Participants",

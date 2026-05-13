@@ -42,6 +42,7 @@ final class ResponseExporter
         $header = [
             'Codice prenotazione',
             'Creato il',
+            'Conferma',
             'Nome',
             'Cognome',
             'Tipo',
@@ -90,6 +91,7 @@ final class ResponseExporter
                 $exportRow = [
                     $bookingCode,
                     (string) ($row['creation'] ?? ''),
+                    rsvpAttendanceStatusText($row['attendance_status'] ?? null),
                     (string) ($participant['name'] ?? ''),
                     (string) ($participant['surname'] ?? ''),
                     !empty($participant['is_child']) ? 'Bambino' : 'Adulto',
