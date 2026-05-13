@@ -12,7 +12,7 @@ final class SubmissionNormalizer
     public static function fromPayload(array $payload): array
     {
         $payload = self::normalizePayload($payload);
-        $attendanceStatus = self::attendanceStatus($payload);
+        $attendanceStatus = self::attendanceStatus($payload, SubmissionNotifier::settings());
         $participants = $attendanceStatus === 'declined'
             ? []
             : self::participants($payload);
@@ -340,8 +340,12 @@ final class SubmissionNormalizer
         return $metadata;
     }
 
-    private static function attendanceStatus(array $payload): string
+    private static function attendanceStatus(array $payload, array $settings): string
     {
+        if (!rsvpAttendanceStatusEnabled($settings)) {
+            return 'confirmed';
+        }
+
         return rsvpAttendanceStatusValue(
             $payload['attendance_status']
             ?? $payload['status']

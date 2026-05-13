@@ -69,6 +69,17 @@ if (!function_exists('rsvpAttendanceStatusValue')) {
     }
 }
 
+if (!function_exists('rsvpAttendanceStatusEnabled')) {
+    function rsvpAttendanceStatusEnabled(array $settings): bool
+    {
+        return in_array(
+            strtolower(trim((string) ($settings['enable_attendance_status'] ?? 'false'))),
+            ['1', 'true', 'yes', 'on'],
+            true
+        );
+    }
+}
+
 if (!function_exists('rsvpAttendanceStatusText')) {
     function rsvpAttendanceStatusText(mixed $value): string
     {

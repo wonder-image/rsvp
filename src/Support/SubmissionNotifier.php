@@ -155,12 +155,15 @@ final class SubmissionNotifier
         $consents = SubmissionNormalizer::consents($normalized);
         $documents = SubmissionNormalizer::legalDocumentsFromNormalized($normalized);
         $event = self::eventFromNormalized($normalized);
+        $showAttendanceStatus = rsvpAttendanceStatusEnabled(self::settings());
         $lines = [];
 
         $lines[] = rsvp_trans('rsvp.email_summary.name', 'Nome')
             .': <strong>'.htmlspecialchars(trim(((string) ($normalized['contact_name'] ?? '')).' '.((string) ($normalized['contact_surname'] ?? ''))), ENT_QUOTES, 'UTF-8').'</strong>';
-        $lines[] = rsvp_trans('rsvp.email_summary.attendance_status', 'Conferma')
-            .': <strong>'.htmlspecialchars(rsvpAttendanceStatusText($normalized['attendance_status'] ?? null), ENT_QUOTES, 'UTF-8').'</strong>';
+        if ($showAttendanceStatus) {
+            $lines[] = rsvp_trans('rsvp.email_summary.attendance_status', 'Conferma')
+                .': <strong>'.htmlspecialchars(rsvpAttendanceStatusText($normalized['attendance_status'] ?? null), ENT_QUOTES, 'UTF-8').'</strong>';
+        }
         $lines[] = rsvp_trans('rsvp.email_summary.email', 'Email')
             .': <strong>'.htmlspecialchars((string) ($normalized['contact_email'] ?? ''), ENT_QUOTES, 'UTF-8').'</strong>';
         $lines[] = rsvp_trans('rsvp.email_summary.phone', 'Telefono')

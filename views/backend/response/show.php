@@ -13,6 +13,7 @@
     $hasCustomFieldValues = false;
     $bookingCode = Response::resolveBookingCode($item);
     $attendanceStatus = rsvpResponseAttendanceStatus($item['attendance_status'] ?? null);
+    $showAttendanceStatus = rsvpAttendanceStatusEnabled(\Wonder\Plugin\Rsvp\Support\SubmissionNotifier::settings());
 
     foreach ($customFields as $field) {
         if (trim((string) ($item[$field['column']] ?? '')) !== '') {
@@ -96,7 +97,9 @@
                 <div class="col-12">
                     <h6>Dettagli</h6>
                     <div class="w-100 mt-2">
+                        <?php if ($showAttendanceStatus) { ?>
                         Conferma: <?=$attendanceStatus->automaticResize?><br>
+                        <?php } ?>
                         Codice prenotazione: <strong><?=htmlspecialchars($bookingCode !== '' ? $bookingCode : '--', ENT_QUOTES, 'UTF-8')?></strong><br>
                         Creazione: <strong><?=htmlspecialchars((string) ($item['creation'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
                         Lingua: <strong><?=htmlspecialchars((string) ($item['locale'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>

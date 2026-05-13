@@ -32,6 +32,7 @@ final class FrontendContext
             'allow_children' => $limits['allow_children'],
             'max_participants' => $limits['max_participants'],
             'max_children' => $limits['max_children'],
+            'enable_attendance_status' => rsvpAttendanceStatusEnabled($settings),
             'require_image_release' => self::isTrue($settings['require_image_release'] ?? 'false'),
             'custom_fields' => ExtensionRegistry::fields(),
             'login_title' => trim((string) ($settings['login_title'] ?? '')) !== ''

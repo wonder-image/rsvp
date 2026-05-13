@@ -15,6 +15,7 @@ use Wonder\Elements\Form\Form;
 use Wonder\Http\Route;
 use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Rsvp;
+use Wonder\Plugin\Rsvp\Support\SubmissionNotifier;
 
 final class ResponseResource extends Resource
 {
@@ -63,6 +64,10 @@ final class ResponseResource extends Resource
 
     public static function formSchema(): array
     {
+        if (!self::attendanceStatusEnabled()) {
+            return [];
+        }
+
         return [
             FormInput::key('attendance_status')->select([
                 'confirmed' => 'Confermato',
@@ -73,6 +78,10 @@ final class ResponseResource extends Resource
 
     public static function formLayoutSchema(): ?Form
     {
+        if (!self::attendanceStatusEnabled()) {
+            return null;
+        }
+
         return (new Form)->components([
             (new Card)->components([
                 static::getInput('attendance_status')->columnSpan(12),
@@ -82,16 +91,26 @@ final class ResponseResource extends Resource
 
     public static function tableSchema(): array
     {
-        return [
+        $columns = [
             TableColumn::key('booking_code')->text()->size('little')->link('view'),
-            TableColumn::key('attendance_status')->badge()->function('rsvpResponseAttendanceStatus', 'attendance_status', 'automaticResize')->size('little'),
             TableColumn::key('contact_name')->text()->columns(['contact_name', 'contact_surname']),
             TableColumn::key('contact_email')->text()->link('mailto'),
             TableColumn::key('participants_count')->text()->size('little'),
             TableColumn::key('event_key')->text()->size('little'),
             TableColumn::key('creation')->datetime()->sortable(),
-            TableColumn::key('actions')->button()->actions(['view', 'edit', 'delete']),
         ];
+
+        if (self::attendanceStatusEnabled()) {
+            array_splice($columns, 1, 0, [
+                TableColumn::key('attendance_status')->badge()->function('rsvpResponseAttendanceStatus', 'attendance_status', 'automaticResize')->size('little'),
+            ]);
+        }
+
+        $columns[] = TableColumn::key('actions')->button()->actions(
+            self::attendanceStatusEnabled() ? ['view', 'edit', 'delete'] : ['view', 'delete']
+        );
+
+        return $columns;
     }
 
     public static function tableLayoutSchema(): TableLayoutSchema
@@ -107,7 +126,7 @@ final class ResponseResource extends Resource
     public static function pageSchema(): PageSchema
     {
         return PageSchema::for(static::class)
-            ->only(['list', 'view', 'edit', 'update', 'delete'])
+            ->only(self::attendanceStatusEnabled() ? ['list', 'view', 'edit', 'update', 'delete'] : ['list', 'view', 'delete'])
             ->view('list', Rsvp::viewPath('backend/response/list.php'))
             ->view('show', Rsvp::viewPath('backend/response/show.php'))
             ->title('view', 'Dettaglio risposta RSVP')
@@ -152,6 +171,12 @@ final class ResponseResource extends Resource
         string $context = 'backend',
         ?array $oldValues = null
     ): array {
+        if (!self::attendanceStatusEnabled()) {
+            unset($values['attendance_status']);
+
+            return $values;
+        }
+
         $values['attendance_status'] = rsvpAttendanceStatusValue($values['attendance_status'] ?? null);
 
         return $values;
@@ -162,8 +187,17 @@ final class ResponseResource extends Resource
         string $mode,
         string $context = 'backend'
     ): array {
+        if (!self::attendanceStatusEnabled()) {
+            return $values;
+        }
+
         $values['attendance_status'] = rsvpAttendanceStatusValue($values['attendance_status'] ?? null);
 
         return $values;
+    }
+
+    private static function attendanceStatusEnabled(): bool
+    {
+        return rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
     }
 }

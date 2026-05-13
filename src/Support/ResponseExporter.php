@@ -32,6 +32,7 @@ final class ResponseExporter
     public static function rows(?string $eventKey = null): array
     {
         $customFields = Response::customFieldDefinitions();
+        $showAttendanceStatus = rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
         $filters = ['deleted' => 'false'];
 
         if ($eventKey !== null && trim($eventKey) !== '') {
@@ -42,7 +43,6 @@ final class ResponseExporter
         $header = [
             'Codice prenotazione',
             'Creato il',
-            'Conferma',
             'Nome',
             'Cognome',
             'Tipo',
@@ -61,6 +61,10 @@ final class ResponseExporter
             'Lingua',
             'URL origine',
         ];
+
+        if ($showAttendanceStatus) {
+            array_splice($header, 2, 0, ['Conferma']);
+        }
 
         foreach ($customFields as $fieldKey => $field) {
             $header[] = rsvpCustomFieldLabel($field, (string) $fieldKey);
@@ -91,7 +95,6 @@ final class ResponseExporter
                 $exportRow = [
                     $bookingCode,
                     (string) ($row['creation'] ?? ''),
-                    rsvpAttendanceStatusText($row['attendance_status'] ?? null),
                     (string) ($participant['name'] ?? ''),
                     (string) ($participant['surname'] ?? ''),
                     !empty($participant['is_child']) ? 'Bambino' : 'Adulto',
@@ -110,6 +113,12 @@ final class ResponseExporter
                     (string) ($row['locale'] ?? ''),
                     (string) ($row['source_url'] ?? ''),
                 ];
+
+                if ($showAttendanceStatus) {
+                    array_splice($exportRow, 2, 0, [
+                        rsvpAttendanceStatusText($row['attendance_status'] ?? null),
+                    ]);
+                }
 
                 foreach ($customFields as $field) {
                     $exportRow[] = rsvpRenderCustomFieldValue(

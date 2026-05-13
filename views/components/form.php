@@ -38,6 +38,7 @@
     $canAccessForm = !$requiresInviteCode || $hasSession;
     $locale = (string) ($state['locale'] ?? (function_exists('__l') ? __l() : 'it'));
     $maxParticipants = max(1, (int) ($state['max_participants'] ?? 1));
+    $enableAttendanceStatus = !empty($state['enable_attendance_status']);
     $loginUrl = function_exists('__r') ? __r('rsvp.login') : '/rsvp/login/';
     $privacyField = function_exists('inputAcceptDocument')
         ? inputAcceptDocument('privacy_policy', 'required')
@@ -93,6 +94,7 @@
         <input type="hidden" name="event_key" value="<?=$escape((string) $singleKey)?>">
     <?php } ?>
 
+    <?php if ($enableAttendanceStatus) { ?>
     <div class="rsvp-attendance-choice">
         <div class="mb-2"><?=$escape($attendanceStatusLabel)?></div>
         <div class="d-flex flex-wrap gap-3">
@@ -106,6 +108,7 @@
             </label>
         </div>
     </div>
+    <?php } ?>
 
     <div id="rsvp-attending-fields">
         <?= select($participantsLabel, 'participants_count', $partecipantiOptions, '1', 'required') ?>
@@ -183,6 +186,7 @@
     const PARTICIPANT_LABEL = <?=json_encode($participantLabel, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
 
     function attendanceStatus() {
+        if (attendanceInputs.length === 0) return 'confirmed';
         const selected = form.querySelector('input[name="attendance_status"]:checked');
         return selected ? selected.value : 'confirmed';
     }
