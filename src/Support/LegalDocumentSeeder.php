@@ -70,10 +70,10 @@ final class LegalDocumentSeeder
      */
     private static function languages(): array
     {
-        $languages = function_exists('__ls') ? array_keys((array) __ls()) : [];
+        $languages = rsvp_locales('it');
 
         if ($languages === []) {
-            $languages[] = function_exists('__l') ? (string) __l() : 'it';
+            $languages[] = rsvp_locale('it');
         }
 
         $normalized = [];

@@ -12,7 +12,7 @@ final class FrontendContext
         $settings = SubmissionNotifier::settings();
         $session = is_array($session) ? $session : InviteCodeSession::current();
         $authorization = self::authorization($session);
-        $locale = function_exists('__l') ? __l() : 'it';
+        $locale = rsvp_locale('it');
         $eventCatalog = self::eventCatalog($locale);
         $visibleEvents = self::visibleEvents($eventCatalog, $authorization);
         $limits = self::limits($settings, $authorization);

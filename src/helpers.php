@@ -8,7 +8,15 @@ use Wonder\Plugin\Rsvp\Models\Response;
 if (!function_exists('rsvp_trans')) {
     function rsvp_trans(string $key, string $fallback, array $replacements = []): string
     {
-        $value = function_exists('__t') ? __t($key, $replacements) : $key;
+        $value = $key;
+
+        if (function_exists('__t')) {
+            try {
+                $value = __t($key, $replacements);
+            } catch (\Throwable) {
+                $value = $key;
+            }
+        }
 
         if (!is_string($value) || trim($value) === '' || $value === $key) {
             foreach ($replacements as $replacementKey => $replacementValue) {
@@ -23,6 +31,55 @@ if (!function_exists('rsvp_trans')) {
         }
 
         return $value;
+    }
+}
+
+if (!function_exists('rsvp_locale')) {
+    function rsvp_locale(string $fallback = 'it'): string
+    {
+        if (!function_exists('__l')) {
+            return $fallback;
+        }
+
+        try {
+            $locale = __l();
+        } catch (\Throwable) {
+            return $fallback;
+        }
+
+        $locale = trim((string) $locale);
+
+        return $locale !== '' ? $locale : $fallback;
+    }
+}
+
+if (!function_exists('rsvp_locales')) {
+    /**
+     * @return string[]
+     */
+    function rsvp_locales(string $fallback = 'it'): array
+    {
+        if (!function_exists('__ls')) {
+            return [$fallback];
+        }
+
+        try {
+            $locales = array_keys((array) __ls());
+        } catch (\Throwable) {
+            return [$fallback];
+        }
+
+        $normalized = [];
+
+        foreach ($locales as $locale) {
+            $locale = strtolower(trim((string) $locale));
+
+            if ($locale !== '') {
+                $normalized[] = $locale;
+            }
+        }
+
+        return $normalized !== [] ? array_values(array_unique($normalized)) : [$fallback];
     }
 }
 
@@ -243,7 +300,7 @@ if (!function_exists('rsvpResolveLocalizedValue')) {
     {
         $locale = $locale !== null && trim($locale) !== ''
             ? trim($locale)
-            : (function_exists('__l') ? __l() : $fallbackLocale);
+            : rsvp_locale($fallbackLocale);
 
         if (!is_array($value)) {
             return $value;
