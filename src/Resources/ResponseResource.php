@@ -101,7 +101,7 @@ final class ResponseResource extends Resource
         ];
 
         if (self::attendanceStatusEnabled()) {
-            array_splice($columns, 1, 0, [
+            array_splice($columns, 5, 0, [
                 TableColumn::key('attendance_status')->badge()->function('rsvpResponseAttendanceStatus', 'attendance_status', 'automaticResize')->size('little'),
             ]);
         }
