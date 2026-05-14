@@ -111,33 +111,39 @@ if (!function_exists('rsvp_locales')) {
 }
 
 if (!function_exists('rsvpInviteUsageMode')) {
-    function rsvpInviteUsageMode(string $mode): object
+    function rsvpInviteUsageMode(mixed $mode = null): array|object
     {
-        $labels = [
-            'single_use' => 'Monouso',
-            'multiple_use' => 'Multiuso',
-        ];
+        $details = rsvpArrayDetail(
+            rsvpInviteUsageModeDictionary(),
+            is_scalar($mode) ? strtolower(trim((string) $mode)) : null
+        );
 
-        $colors = [
-            'single_use' => 'warning',
-            'multiple_use' => 'success',
-        ];
+        if (is_object($details) && $details->text === '') {
+            $fallbackName = is_scalar($mode) ? trim((string) $mode) : '';
+            $escapedText = htmlspecialchars($fallbackName !== '' ? ucfirst(str_replace('_', ' ', $fallbackName)) : '', ENT_QUOTES, 'UTF-8');
 
-        $icons = [
-            'single_use' => '<i class="bi bi-1-circle"></i> ',
-            'multiple_use' => '<i class="bi bi-people"></i> ',
-        ];
+            $details->color = 'secondary';
+            $details->bootstrapColor = 'secondary';
+            $details->name = $fallbackName !== '' ? ucfirst(str_replace('_', ' ', $fallbackName)) : '';
+            $details->text = $details->name;
+            $details->classIcon = 'bi bi-ticket-perforated';
+            $details->icon = "<i class='{$details->classIcon}'></i>";
+            $details->tooltip = $details->text !== ''
+                ? "<i class='{$details->classIcon}' data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='{$escapedText}'></i>"
+                : '';
+            $details->badge = $details->name !== ''
+                ? "<span class='badge text-bg-{$details->color}'>".strtoupper($details->name)."</span>"
+                : '';
+            $details->badgeTooltip = $details->text !== ''
+                ? "<span class='badge text-bg-{$details->color}' data-bs-toggle='tooltip' data-bs-placement='top' data-bs-title='{$escapedText}'>{$details->icon}</span>"
+                : '';
+            $details->badgeIcon = $details->badgeTooltip;
+            $details->automaticResize = $details->name !== ''
+                ? "<span class='badge text-bg-{$details->color}'><span class='pc-none'>{$details->icon}</span><span class='phone-none'>".strtoupper($details->name)."</span></span>"
+                : '';
+        }
 
-        $label = $labels[$mode] ?? ucfirst(str_replace('_', ' ', $mode));
-        $color = $colors[$mode] ?? 'secondary';
-        $icon = $icons[$mode] ?? '<i class="bi bi-ticket-perforated"></i> ';
-
-        return (object) [
-            'text' => $label,
-            'icon' => $icon,
-            'bootstrapColor' => $color,
-            'automaticResize' => '<span class="badge text-bg-'.$color.'">'.$icon.'<span class="phone-none">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</span></span>',
-        ];
+        return $details;
     }
 }
 
@@ -174,20 +180,69 @@ if (!function_exists('rsvpAttendanceStatusText')) {
 }
 
 if (!function_exists('rsvpResponseAttendanceStatus')) {
-    function rsvpResponseAttendanceStatus(mixed $value): object
+    function rsvpResponseAttendanceStatus(mixed $value = null): array|object
     {
         $status = rsvpAttendanceStatusValue($value);
-        $label = rsvpAttendanceStatusText($status);
-        $color = $status === 'declined' ? 'danger' : 'success';
-        $icon = $status === 'declined'
-            ? '<i class="bi bi-x-circle"></i> '
-            : '<i class="bi bi-check2-circle"></i> ';
 
-        return (object) [
-            'text' => $label,
-            'icon' => $icon,
-            'bootstrapColor' => $color,
-            'automaticResize' => '<span class="badge text-bg-'.$color.'">'.$icon.'<span class="phone-none">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</span></span>',
+        $dictionary = rsvpAttendanceStatusDictionary();
+        $dictionary['confirmed']['text'] = rsvpAttendanceStatusText('confirmed');
+        $dictionary['declined']['text'] = rsvpAttendanceStatusText('declined');
+
+        return rsvpArrayDetail($dictionary, $status);
+    }
+}
+
+if (!function_exists('rsvpArrayDetail')) {
+    function rsvpArrayDetail(array $items, mixed $key = null): array|object
+    {
+        $details = arrayDetails($items, $key);
+
+        if (!is_object($details)) {
+            return $details;
+        }
+
+        $details->bootstrapColor = (string) ($details->color ?? '');
+
+        return $details;
+    }
+}
+
+if (!function_exists('rsvpInviteUsageModeDictionary')) {
+    function rsvpInviteUsageModeDictionary(): array
+    {
+        return [
+            'single_use' => [
+                'name' => 'Monouso',
+                'text' => 'Monouso',
+                'icon' => 'bi bi-1-circle',
+                'color' => 'warning',
+            ],
+            'multiple_use' => [
+                'name' => 'Multiuso',
+                'text' => 'Multiuso',
+                'icon' => 'bi bi-people',
+                'color' => 'success',
+            ],
+        ];
+    }
+}
+
+if (!function_exists('rsvpAttendanceStatusDictionary')) {
+    function rsvpAttendanceStatusDictionary(): array
+    {
+        return [
+            'confirmed' => [
+                'name' => rsvp_trans('rsvp.common.confirmed', 'Confermato'),
+                'text' => rsvp_trans('rsvp.common.confirmed', 'Confermato'),
+                'icon' => 'bi bi-check2-circle',
+                'color' => 'success',
+            ],
+            'declined' => [
+                'name' => rsvp_trans('rsvp.common.declined', 'Declinato'),
+                'text' => rsvp_trans('rsvp.common.declined', 'Declinato'),
+                'icon' => 'bi bi-x-circle',
+                'color' => 'danger',
+            ],
         ];
     }
 }
