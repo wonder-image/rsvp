@@ -11,6 +11,8 @@ if (!function_exists('rsvp_trans')) {
         $value = $key;
 
         if (function_exists('__t')) {
+            rsvp_boot_translations();
+
             try {
                 $value = __t($key, $replacements);
             } catch (\Throwable) {
@@ -31,6 +33,31 @@ if (!function_exists('rsvp_trans')) {
         }
 
         return $value;
+    }
+}
+
+if (!function_exists('rsvp_boot_translations')) {
+    function rsvp_boot_translations(): void
+    {
+        static $booted = false;
+
+        if ($booted) {
+            return;
+        }
+
+        $booted = true;
+
+        if (!class_exists(\Wonder\Localization\TranslationProvider::class)) {
+            return;
+        }
+
+        try {
+            \Wonder\Localization\TranslationProvider::init();
+        } catch (\Throwable) {
+            // Best-effort only: in bootstrap/update phases il provider può
+            // non avere ancora contesto completo. In quel caso useremo i
+            // fallback hardcoded del modulo.
+        }
     }
 }
 

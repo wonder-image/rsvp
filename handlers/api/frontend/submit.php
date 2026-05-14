@@ -14,7 +14,10 @@ Handler::run('/api/rsvp/', 'POST', ['api_internal_user', 'api_public_access'], f
         verifyRecaptcha($call->parameters);
 
         if (!empty($GLOBALS['ALERT'])) {
-            throw new RuntimeException((string) __t('notifications.'.$GLOBALS['ALERT'].'.text'), (int) $GLOBALS['ALERT']);
+            throw new RuntimeException(
+                rsvp_trans('notifications.'.$GLOBALS['ALERT'].'.text', 'Validazione non riuscita.'),
+                (int) $GLOBALS['ALERT']
+            );
         }
     }
 

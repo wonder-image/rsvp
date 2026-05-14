@@ -14,21 +14,27 @@ final class CustomFieldRegistry
      */
     public static function visibleDefinitions(RsvpExtension $extension): array
     {
-        if (self::hasCustomFormInputs($extension, 'formInputs')) {
-            /** @var array<int, FormInput> $formInputs */
-            $formInputs = $extension->formInputs();
+        rsvp_boot_translations();
 
-            return self::normalizeFormInputs($formInputs);
+        try {
+            if (self::hasCustomFormInputs($extension, 'formInputs')) {
+                /** @var array<int, FormInput> $formInputs */
+                $formInputs = $extension->formInputs();
+
+                return self::normalizeFormInputs($formInputs);
+            }
+
+            if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
+                /** @var array<int, FormInput> $formInputs */
+                $formInputs = $extension->allFormInputs();
+
+                return self::normalizeFormInputs($formInputs);
+            }
+
+            return self::normalizeLegacyDefinitions($extension->fields());
+        } catch (\Throwable) {
+            return [];
         }
-
-        if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
-            /** @var array<int, FormInput> $formInputs */
-            $formInputs = $extension->allFormInputs();
-
-            return self::normalizeFormInputs($formInputs);
-        }
-
-        return self::normalizeLegacyDefinitions($extension->fields());
     }
 
     /**
@@ -36,21 +42,27 @@ final class CustomFieldRegistry
      */
     public static function allDefinitions(RsvpExtension $extension): array
     {
-        if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
-            /** @var array<int, FormInput> $formInputs */
-            $formInputs = $extension->allFormInputs();
+        rsvp_boot_translations();
 
-            return self::normalizeFormInputs($formInputs);
+        try {
+            if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
+                /** @var array<int, FormInput> $formInputs */
+                $formInputs = $extension->allFormInputs();
+
+                return self::normalizeFormInputs($formInputs);
+            }
+
+            if (self::hasCustomFormInputs($extension, 'formInputs')) {
+                /** @var array<int, FormInput> $formInputs */
+                $formInputs = $extension->formInputs();
+
+                return self::normalizeFormInputs($formInputs);
+            }
+
+            return self::normalizeLegacyDefinitions($extension->allFields());
+        } catch (\Throwable) {
+            return [];
         }
-
-        if (self::hasCustomFormInputs($extension, 'formInputs')) {
-            /** @var array<int, FormInput> $formInputs */
-            $formInputs = $extension->formInputs();
-
-            return self::normalizeFormInputs($formInputs);
-        }
-
-        return self::normalizeLegacyDefinitions($extension->allFields());
     }
 
     /**

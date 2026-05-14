@@ -65,7 +65,7 @@ final class FrontendPage
 
         ?>
         <!DOCTYPE html>
-        <html lang="<?=htmlspecialchars((string) __l(), ENT_QUOTES, 'UTF-8')?>">
+        <html lang="<?=htmlspecialchars(rsvp_locale('it'), ENT_QUOTES, 'UTF-8')?>">
         <head>
             <?php include $ROOT_APP.'/utility/frontend/head.php'; ?>
         </head>
