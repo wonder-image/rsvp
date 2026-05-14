@@ -95,8 +95,8 @@ final class ResponseResource extends Resource
             TableColumn::key('booking_code')->text()->size('little')->link('view'),
             TableColumn::key('contact_name')->text()->columns(['contact_name', 'contact_surname']),
             TableColumn::key('contact_email')->text()->link('mailto'),
+            TableColumn::key('event_key')->text(),
             TableColumn::key('participants_count')->text()->size('little'),
-            TableColumn::key('event_key')->text()->size('little'),
             TableColumn::key('creation')->datetime()->sortable(),
         ];
 
