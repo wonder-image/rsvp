@@ -3,4 +3,4 @@
 .claude/
 vendor/
 tests/
-skill-lock.json
+skills-lock.json

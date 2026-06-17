@@ -71,7 +71,13 @@ final class SubmissionNotifier
 
     public static function settings(): array
     {
-        $settings = Settings::find(['id' => 1], 1);
+        try {
+            $settings = Settings::find(['id' => 1], 1);
+        } catch (\Throwable) {
+            // Primo avvio del consumer: la tabella può non essere ancora
+            // materializzata finché non gira `php forge update --local`.
+            $settings = [];
+        }
 
         return is_array($settings) ? $settings : [];
     }

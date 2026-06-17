@@ -2,6 +2,11 @@
 
 ## 2.0.0
 
+- **Fix**: `SubmissionNotifier::settings()` ora gestisce il caso in cui
+  `rsvp_settings` non sia ancora stata creata sul sito consumer, evitando il
+  fatal in bootstrap/primo accesso e ripiegando sui default finché non viene
+  eseguito `php forge update --local`.
+
 - testi lang separati secondo la convenzione `wonder-image/app`: eliminato
   `lang/{locale}/rsvp.json`; contenuto smistato in `pages.json`
   (`pages.rsvp.{home,login,form,countdown,event_date,location,common,api}`),
