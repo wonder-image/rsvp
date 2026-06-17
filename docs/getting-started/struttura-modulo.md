@@ -19,8 +19,8 @@ wonder-image/rsvp/
 │   ├── module.php          # config di default + boot del modulo
 │   ├── permissions.php     # permessi backend registrati dal modulo
 │   └── routes/            # route frontend / backend / api
-├── handlers/              # handler delle route (frontend/backend/api)
-├── views/                 # view frontend + componenti + view backend
+├── http/                  # handler delle route (frontend/backend/api)
+├── view/                  # page view + componenti + view backend
 ├── lang/                  # traduzioni it/en (pages, components, emails, legal, urls)
 ├── resources/assets/      # asset statici del modulo
 └── tests/                 # smoke test standalone
@@ -35,8 +35,6 @@ orchestrazione, side-effect):
 
 | Classe | Ruolo |
 | --- | --- |
-| `FrontendContext` | costruisce lo stato (`$STATE`) della pagina RSVP |
-| `FrontendPage` | renderizza la view dentro il layout frontend del sito |
 | `InviteCodeSession` | gestisce login/logout e sessione del codice invito |
 | `SubmissionNormalizer` | normalizza il payload del form in una row `rsvp_response` |
 | `SubmissionNotifier` | invia le email ad admin e ospite |
@@ -62,12 +60,12 @@ mantengono il namespace.
 ## Entrypoint `Rsvp`
 
 `Wonder\Plugin\Rsvp\Rsvp` implementa `Wonder\App\Module\Contracts\ModuleInterface`
-ed espone i path del modulo (`handlerPath()`, `viewPath()`, `langPath()`,
+ed espone i path del modulo (`httpPath()`, `handlerPath()`, `viewPath()`, `langPath()`,
 `assetPath()`). Aggiunge due helper utili nelle view del sito:
 
 * `Rsvp::component(string $name, array $args = [])` — include un componente
-  riutilizzabile da `views/components/` (override dal sito in
-  `custom/modules/rsvp/views/components/`).
+  riutilizzabile da `view/components/` (override dal sito in
+  `custom/modules/rsvp/view/components/`).
 * `Rsvp::renderPage(array $config)` — scaffold per pagine RSVP-gated aggiuntive
   del sito (gestisce stato, redirect al login, hook SEO e layout).
 

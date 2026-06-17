@@ -26,26 +26,23 @@ final class InviteCodeSession
         };
 
         if ($code === '') {
-            throw $rejected(rsvp_trans('pages.rsvp.api.login.missing_code', 'Codice invito mancante.'));
+            throw $rejected(__t('pages.rsvp.api.login.missing_code'));
         }
 
         $record = self::findByCode($code);
 
         if ($record === null) {
-            throw $rejected(rsvp_trans('pages.rsvp.api.login.invalid_code', 'Codice invito non valido.'));
+            throw $rejected(__t('pages.rsvp.api.login.invalid_code'));
         }
 
         if (($record['active'] ?? 'false') !== 'true') {
-            throw $rejected(rsvp_trans('pages.rsvp.api.login.inactive_code', 'Codice invito disattivato.'));
+            throw $rejected(__t('pages.rsvp.api.login.inactive_code'));
         }
 
         $groupCode = self::groupCode((int) ($record['invite_group_id'] ?? 0));
 
         if ($allowedGroups !== [] && !in_array($groupCode, $allowedGroups, true)) {
-            throw $rejected(rsvp_trans(
-                'pages.rsvp.api.login.unauthorized_group',
-                'Codice invito non autorizzato per questa area.'
-            ));
+            throw $rejected(__t('pages.rsvp.api.login.unauthorized_group'));
         }
 
         $_SESSION[self::SESSION_KEY] = (int) $record['id'];
@@ -109,14 +106,11 @@ final class InviteCodeSession
         $current = self::current();
 
         if ($current === []) {
-            throw new RuntimeException(rsvp_trans('pages.rsvp.api.session.not_active', 'Sessione RSVP non attiva.'));
+            throw new RuntimeException(__t('pages.rsvp.api.session.not_active'));
         }
 
         if ($allowedGroups !== [] && !in_array($current['invite_group_code'], $allowedGroups, true)) {
-            throw new RuntimeException(rsvp_trans(
-                'pages.rsvp.api.session.unauthorized_group',
-                'Sessione RSVP non autorizzata per questa area.'
-            ));
+            throw new RuntimeException(__t('pages.rsvp.api.session.unauthorized_group'));
         }
 
         return $current;

@@ -14,7 +14,6 @@ $events = json_decode((string) ($item['events_json'] ?? '[]'), true) ?: [];
 $documents = json_decode((string) ($item['legal_documents_json'] ?? '[]'), true) ?: [];
 $metadata = json_decode((string) ($item['metadata_json'] ?? '[]'), true) ?: [];
 $customFields = Response::customFieldDefinitions();
-// Valori derivati forniti da Response::decorate() sulla riga letta.
 $bookingCode = (string) ($item['booking_code'] ?? '');
 $showAttendanceStatus = rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
 
@@ -27,8 +26,6 @@ $fullName = trim(((string) ($item['contact_name'] ?? '')).' '.((string) ($item['
     'SUBTITLE' => 'Prenotazione '.($bookingCode !== '' ? $bookingCode : '--')
         .' del '.((string) ($item['creation'] ?? '--')),
 ]);
-
-// --- Colonna principale -----------------------------------------------------
 
 $participantsHtml = 'Totale: <b>'.count($participants).'</b><br>'
     .'Bambini: <b>'.$e($item['children_count'] ?? '0').'</b><br>';
@@ -99,8 +96,6 @@ if ($metadata !== []) {
     ]);
 }
 
-// --- Colonna laterale -------------------------------------------------------
-
 $detailsHtml = '';
 if ($showAttendanceStatus) {
     $detailsHtml .= 'Conferma: <b>'.$e($item['pretty_attendance_status'] ?? '').'</b><br>';
@@ -122,8 +117,8 @@ $sideCards = [
     (new Card)->components([
         (new SectionTitle)->text('Consensi'),
         (new RichText(
-            'Privacy: <b>'.$e($item['pretty_privacy'] ?? '').'</b><br>'
-            .'Foto: <b>'.$e($item['pretty_photo'] ?? '').'</b>'
+            'Privacy: <b>'.$e($item['pretty_accept_privacy_policy'] ?? '').'</b><br>'
+            .'Foto: <b>'.$e($item['pretty_accept_image_release'] ?? '').'</b>'
         )),
     ]),
 ];
@@ -147,11 +142,11 @@ if ($events !== []) {
     ]);
 }
 
-if (!empty($item['source_url'])) {
+if (!empty($item['request_url'])) {
     $sideCards[] = (new Card)->components([
         (new SectionTitle)->text('Origine'),
-        (new RichText((string) (new Link((string) $item['source_url']))
-            ->label((string) $item['source_url'])
+        (new RichText((string) (new Link((string) $item['request_url']))
+            ->label((string) $item['request_url'])
             ->blank())),
     ]);
 }

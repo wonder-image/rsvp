@@ -90,7 +90,7 @@ interface RsvpExtension
      * Chiavi assenti → fallback ai default del modulo.
      *
      * @param string $page  'home' | 'login'
-     * @param array<string, mixed> $state  Output di FrontendContext::state()
+     * @param array<string, mixed> $state  Output di `http/frontend/context.php`
      * @return array{title?:string, description?:string, image?:string}
      */
     public function seo(string $page, array $state): array;

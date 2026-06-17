@@ -9,9 +9,9 @@ view.
 Se nel sito crei questi file, il modulo li userà al posto delle view del package:
 
 ```text
-custom/modules/rsvp/views/frontend/home.php
-custom/modules/rsvp/views/frontend/login.php
-custom/modules/rsvp/views/components/<nome>.php
+custom/modules/rsvp/view/pages/frontend/home.php
+custom/modules/rsvp/view/pages/frontend/login.php
+custom/modules/rsvp/view/components/<nome>.php
 ```
 
 È la meccanica corretta per cambiare HTML, struttura, sezioni, stile e logica
@@ -19,8 +19,8 @@ presentazionale. Le view del modulo restano come fallback.
 
 ## Contesto disponibile: `$STATE`
 
-Le view ricevono `$STATE` (output di `FrontendContext::state()`). Chiavi
-principali:
+Le view ricevono `$STATE`, preparato dall'handler HTTP del modulo tramite
+`http/frontend/context.php`. Chiavi principali:
 
 | Chiave | Contenuto |
 | --- | --- |
@@ -42,7 +42,7 @@ altra pagina.
 
 ## Componenti riutilizzabili
 
-Il modulo include componenti in `views/components/` (es. `countdown`,
+Il modulo include componenti in `view/components/` (es. `countdown`,
 `event-date`, `form`). Richiamali dalle view con l'entrypoint:
 
 ```php
@@ -57,7 +57,7 @@ framework e `$STATE` restano disponibili nello scope del componente.
 ## Pagine RSVP aggiuntive
 
 Per creare nuove pagine RSVP-gated del sito (es. una wishlist), registra una
-route in `custom/routes/route.frontend.php`, punta a un file in `custom/pages/...`
+route in `custom/routes/route.frontend.php`, punta a un file in `custom/http/...`
 e usa `Rsvp::renderPage()`:
 
 ```php
@@ -67,7 +67,7 @@ use Wonder\Plugin\Rsvp\Rsvp;
 
 Rsvp::renderPage([
     'key'             => 'wishlist',                 // diventa $PAGE_KEY = 'rsvp.wishlist'
-    'view'            => __DIR__ . '/views/wishlist.php',
+    'view'            => $ROOT . '/custom/view/pages/frontend/wishlist.php',
     'title'           => 'Lista regali',
     'require_session' => true,                        // redirect a login se serve il codice
     'data'            => ['extra' => '...'],          // variabili extra per la view ($STATE è automatico)
@@ -75,5 +75,8 @@ Rsvp::renderPage([
 ```
 
 `renderPage()` carica lo stato, gestisce il redirect al login quando serve,
-applica l'hook SEO dell'estensione e include la view dentro lo scaffold del
-layout frontend.
+applica l'hook SEO dell'estensione e renderizza la view nel layout
+`frontend.main`.
+
+La view passata in `view` deve contenere solo il body della pagina: non deve
+richiamare di nuovo `View::layout()` o impostare manualmente il layout.

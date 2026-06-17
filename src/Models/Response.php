@@ -32,6 +32,10 @@ final class Response extends Model
             Column::key('participants_count')->type('INT')->default('1'),
             Column::key('children_count')->type('INT')->default('0'),
             Column::key('notes')->type('LONGTEXT')->null(),
+            Column::key('events_json')->type('LONGTEXT')->null(),
+            Column::key('consents_json')->type('LONGTEXT')->null(),
+            Column::key('legal_documents_json')->type('LONGTEXT')->null(),
+            Column::key('metadata_json')->type('LONGTEXT')->null(),
             Column::key('request_url')->type('TEXT')->null(),
             Column::key('accept_privacy_policy')->type('TEXT')->null(false),
             Column::key('accept_image_release')->type('TEXT')->null(false),
@@ -84,6 +88,8 @@ final class Response extends Model
             Field::key('participants_count')->number()->required()->decimals(0),
             Field::key('children_count')->number()->required()->decimals(0),
             Field::key('notes')->text()->sanitize(false),
+            Field::key('events_json')->text()->json()->sanitize(false),
+            Field::key('consents_json')->text()->json()->sanitize(false),
             Field::key('legal_documents_json')->text()->json()->sanitize(false),
             Field::key('metadata_json')->text()->json()->sanitize(false),
             Field::key('request_url')->text(),
@@ -139,12 +145,12 @@ final class Response extends Model
 
     public static function decorate(array $row): array
     {
-
         $row['pretty_attendance_status'] = rsvpAttendanceStatusText($row['attendance_status'] ?? null);
         $row['pretty_accept_privacy_policy'] = rsvpBooleanText($row['accept_privacy_policy'] ?? false);
         $row['pretty_accept_image_release'] = rsvpBooleanText($row['accept_image_release'] ?? false);
+        $row['pretty_privacy'] = $row['pretty_accept_privacy_policy'];
+        $row['pretty_photo'] = $row['pretty_accept_image_release'];
 
         return $row;
-
     }
 }

@@ -9,8 +9,6 @@ del modulo.
 | Campo | Tipo | Descrizione |
 | --- | --- | --- |
 | `require_invite_code` | bool | se `true`, l'accesso al form richiede un codice invito valido |
-| `login_title` | testo | titolo della pagina di login (override del default tradotto) |
-| `login_text` | testo | testo introduttivo della pagina di login |
 | `enable_attendance_status` | bool | abilita la scelta esplicita "Confermato / Declinato" |
 | `max_participants` | numero | numero massimo di adulti per risposta |
 | `allow_children` | bool | consente di indicare bambini |

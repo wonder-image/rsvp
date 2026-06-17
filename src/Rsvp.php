@@ -4,8 +4,7 @@ namespace Wonder\Plugin\Rsvp;
 
 use Wonder\App\Module\Contracts\ModuleInterface;
 use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
-use Wonder\Plugin\Rsvp\Services\FrontendContext;
-use Wonder\Plugin\Rsvp\Services\FrontendPage;
+use Wonder\View\View;
 
 final class Rsvp implements ModuleInterface
 {
@@ -19,9 +18,14 @@ final class Rsvp implements ModuleInterface
         return self::root().'/module.json';
     }
 
+    public static function httpPath(string $path): string
+    {
+        return self::root().'/http/'.ltrim($path, '/');
+    }
+
     public static function handlerPath(string $path): string
     {
-        return self::root().'/handlers/'.ltrim($path, '/');
+        return self::httpPath($path);
     }
 
     public static function viewPath(string $path): string
@@ -29,22 +33,22 @@ final class Rsvp implements ModuleInterface
         $path = ltrim($path, '/');
         $root = (string) ($GLOBALS['ROOT'] ?? $_SERVER['DOCUMENT_ROOT'] ?? '');
         $override = $root !== ''
-            ? $root.'/custom/modules/rsvp/views/'.$path
+            ? $root.'/custom/modules/rsvp/view/'.$path
             : '';
 
         if ($override !== '' && file_exists($override)) {
             return $override;
         }
 
-        return self::root().'/views/'.$path;
+        return self::root().'/view/'.$path;
     }
 
     /**
      * Include un componente RSVP riutilizzabile.
      *
-     * I componenti vivono in `views/components/<name>.php` del modulo e
+     * I componenti vivono in `view/components/<name>.php` del modulo e
      * sono overrideabili dal consumer in
-     * `custom/modules/rsvp/views/components/<name>.php`.
+     * `custom/modules/rsvp/view/components/<name>.php`.
      *
      * Gli `$args` vengono esposti al componente come variabile `$args`.
      * Tutte le variabili globali (es. $STATE, $PATH, $SOCIETY) restano
@@ -68,10 +72,9 @@ final class Rsvp implements ModuleInterface
         }
 
         // I componenti si aspettano i legacy-globals del framework (SEO,
-        // SOCIETY, PATH, PAGE_KEY, DB, ANALYTICS, ...) e l'output di
-        // FrontendContext::state() in $STATE. Quando component() è
-        // invocato come metodo statico, quelli sono globals che non
-        // entrerebbero nello scope dell'include: importiamoli by-ref qui.
+        // SOCIETY, PATH, PAGE_KEY, DB, ANALYTICS, ...) e $STATE. Quando
+        // component() è invocato come metodo statico, quelli sono globals
+        // che non entrerebbero nello scope dell'include: importiamoli by-ref qui.
         if (class_exists(\Wonder\App\LegacyGlobals::class)) {
             foreach (\Wonder\App\LegacyGlobals::names() as $__legacyKey) {
                 if (array_key_exists($__legacyKey, $GLOBALS)) {
@@ -91,12 +94,11 @@ final class Rsvp implements ModuleInterface
      *
      * Il consumer registra la route nel proprio
      * `custom/routes/route.frontend.php`, punta a un file handler in
-     * `custom/pages/rsvp/<page>.php`, e quel file chiama Rsvp::renderPage()
+     * `custom/http/frontend/<page>.php`, e quel file chiama Rsvp::renderPage()
      * con le sue opzioni. Il modulo gestisce: caricamento state,
      * redirect a /rsvp/login/ se serve codice invito, hook SEO
-     * `RsvpExtension::seo($pageKey, $state)`, e include della view
-     * dentro l'HTML scaffold di FrontendPage (head/body-start/header/
-     * view/footer/body-end).
+     * `RsvpExtension::seo($pageKey, $state)`, e render della pagina
+     * tramite `View::make(...)->render()` dentro `frontend.main`.
      *
      * Config array:
      *   - 'key'           string   chiave logica della pagina, passata a
@@ -129,14 +131,13 @@ final class Rsvp implements ModuleInterface
         }
 
         $requireSession = (bool) ($config['require_session'] ?? true);
-        $state = FrontendContext::state();
+        $state = require self::httpPath('frontend/context.php');
 
         if ($requireSession
             && !empty($state['requires_invite_code'])
             && (int) (($state['session'] ?? [])['id'] ?? 0) <= 0
         ) {
-            $loginUrl = function_exists('__r') ? __r('rsvp.login') : '/rsvp/login/';
-            header('Location: '.$loginUrl, true, 302);
+            header('Location: '.__r('rsvp.login'), true, 302);
             exit();
         }
 
@@ -159,8 +160,30 @@ final class Rsvp implements ModuleInterface
 
         $data = is_array($config['data'] ?? null) ? $config['data'] : [];
         $data['STATE'] = $state;
+        foreach ($data as $dataKey => $dataValue) {
+            if (is_string($dataKey) && $dataKey !== '') {
+                $GLOBALS[$dataKey] = $dataValue;
+            }
+        }
 
-        FrontendPage::render($pageKey, $title, $description, $url, $viewPath, $data);
+        $seo = $GLOBALS['SEO'] ?? (object) [];
+        $seo->title = $title;
+        $seo->description = $description;
+        $seo->url = $url;
+        $seo->breadcrumb = [$url => 'RSVP'];
+        $GLOBALS['SEO'] = $seo;
+        $GLOBALS['PAGE_KEY'] = $pageKey;
+
+        View::make(self::viewPath('pages/frontend/render.php'), array_merge($data, [
+            'PAGE_KEY' => $pageKey,
+            'SEO_TITLE' => $title,
+            'SEO_DESCRIPTION' => $description,
+            'SEO_URL' => $url,
+            'SEO_BREADCRUMB' => [$url => 'RSVP'],
+            'SEO_IMAGE' => trim((string) ($seo->image ?? '')),
+            'VIEW_PATH' => $viewPath,
+            'GLOBALS_DATA' => $data,
+        ]))->render();
     }
 
     public static function langPath(): string

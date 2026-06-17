@@ -59,7 +59,7 @@ final class SubmissionNormalizer
                 ? json_encode($legalDocuments, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
                 : null,
             'metadata_json' => json_encode(self::metadata($payload), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'source_url' => self::string($payload, ['source_url', 'request_url']),
+            'request_url' => self::string($payload, ['request_url', 'source_url']),
         ], $customFieldColumns);
     }
 
@@ -218,7 +218,7 @@ final class SubmissionNormalizer
 
     private static function events(array $payload): array
     {
-        $value = $payload['events'] ?? ($payload['event'] ?? []);
+        $value = $payload['events'] ?? ($payload['event'] ?? ($payload['event_key'] ?? []));
 
         if (!is_array($value)) {
             $value = [$value];

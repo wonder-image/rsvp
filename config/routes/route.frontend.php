@@ -8,10 +8,10 @@ Route::area('frontend')
         Route::name('rsvp.')
             ->prefix('/rsvp')
             ->group(function () {
-                Route::get('/', Rsvp::handlerPath('frontend/home.php'))
+                Route::get('/', Rsvp::httpPath('frontend/home.php'))
                     ->name('home');
 
-                Route::get('/login/', Rsvp::handlerPath('frontend/login.php'))
+                Route::get('/login/', Rsvp::httpPath('frontend/login.php'))
                     ->name('login');
             });
     });

@@ -9,7 +9,7 @@
      * la rotta resource `api.resource.rsvp-responses.store` (normalizzazione,
      * validazione e notifiche in `ResponseResource`).
      *
-     * Override consumer: `custom/modules/rsvp/views/components/form.php`.
+     * Override consumer: `custom/modules/rsvp/view/components/form.php`.
      */
 
     use Wonder\Plugin\Rsvp\Resources\ResponseResource;

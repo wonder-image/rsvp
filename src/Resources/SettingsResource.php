@@ -32,8 +32,6 @@ final class SettingsResource extends SingletonResource
     {
         return [
             'require_invite_code' => 'Accesso con codice',
-            'login_title' => 'Titolo login',
-            'login_text' => 'Testo login',
             'enable_attendance_status' => 'Abilita partecipo/non partecipo',
             'max_participants' => 'Max adulti',
             'allow_children' => 'Bambini',
@@ -56,8 +54,6 @@ final class SettingsResource extends SingletonResource
                 'false' => 'Libero',
                 'true' => 'Richiede codice',
             ])->value('false'),
-            FormField::key('login_title')->text(),
-            FormField::key('login_text')->textarea(),
             FormField::key('enable_attendance_status')->select([
                 'false' => 'No',
                 'true' => 'Sì',
@@ -92,8 +88,6 @@ final class SettingsResource extends SingletonResource
     {
         return (new Form)->components([
             (new Card)->components([
-                static::getInput('login_title')->columnSpan(12),
-                static::getInput('login_text')->columnSpan(12),
                 static::getInput('customer_subject')->columnSpan(12),
                 static::getInput('customer_message')->columnSpan(12),
                 static::getInput('admin_subject')->columnSpan(12),

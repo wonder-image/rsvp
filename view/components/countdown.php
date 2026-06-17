@@ -3,7 +3,7 @@
      * Componente: countdown live verso una data target.
      *
      * Override consumer:
-     *     custom/modules/rsvp/views/components/countdown.php
+     *     custom/modules/rsvp/view/components/countdown.php
      *
      * Args attesi in $args:
      *   - 'target_date' string  ISO date / strtotime-parsable. Obbligatorio.
@@ -23,10 +23,10 @@
 
     $labels = is_array($args['labels'] ?? null) ? $args['labels'] : [];
     $labels = array_merge([
-        'days' => rsvp_trans('pages.rsvp.countdown.days', 'Giorni'),
-        'hours' => rsvp_trans('pages.rsvp.countdown.hours', 'Ore'),
-        'minutes' => rsvp_trans('pages.rsvp.countdown.minutes', 'Minuti'),
-        'seconds' => rsvp_trans('pages.rsvp.countdown.seconds', 'Secondi'),
+        'days' => __t('pages.rsvp.countdown.days'),
+        'hours' => __t('pages.rsvp.countdown.hours'),
+        'minutes' => __t('pages.rsvp.countdown.minutes'),
+        'seconds' => __t('pages.rsvp.countdown.seconds'),
     ], $labels);
 
     $ts = $targetDate !== '' ? strtotime($targetDate) : false;

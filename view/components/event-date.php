@@ -3,7 +3,7 @@
      * Componente: data + ora + location dell'evento.
      *
      * Override consumer:
-     *     custom/modules/rsvp/views/components/event-date.php
+     *     custom/modules/rsvp/view/components/event-date.php
      *
      * Args attesi in $args (tutti opzionali):
      *   - 'event'     array  Featured event (default: $STATE['featured_event'])
@@ -24,8 +24,8 @@
     $dateRaw = trim((string) ($args['date'] ?? ($event['date'] ?? '')));
     $locationName = trim((string) ($args['location'] ?? ($event['location_name'] ?? '')));
     $locationAddress = trim((string) ($args['address'] ?? ($event['location_address'] ?? '')));
-    $eyebrow = (string) ($args['eyebrow'] ?? rsvp_trans('pages.rsvp.event_date.eyebrow', 'Ti aspettiamo'));
-    $timePrefix = (string) ($args['time_prefix'] ?? rsvp_trans('pages.rsvp.event_date.time_prefix', 'dalle ore'));
+    $eyebrow = (string) ($args['eyebrow'] ?? __t('pages.rsvp.event_date.eyebrow'));
+    $timePrefix = (string) ($args['time_prefix'] ?? __t('pages.rsvp.event_date.time_prefix'));
 
     if ($dateRaw === '' && $locationName === '') {
         return;

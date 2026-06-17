@@ -85,30 +85,16 @@ final class SubmissionNotifier
     public static function defaults(): array
     {
         return [
-            'customer_subject' => rsvp_trans('emails.rsvp_request_customer.subject', 'Conferma ricevuta'),
-            'customer_message' => rsvp_trans(
-                'emails.rsvp_request_customer.text',
-                'Ciao {{contact_name}},<br>abbiamo ricevuto correttamente la tua risposta.'
-                .' per <strong>{{event_name}}</strong> il {{event_starts_at}}.'
-            ),
-            'admin_subject' => rsvp_trans(
-                'emails.rsvp_request_admin.subject',
-                'Nuova risposta per {{event_name}} - {{contact_name}} {{contact_surname}}'
-            ),
-            'admin_message' => rsvp_trans(
-                'emails.rsvp_request_admin.text',
-                'È arrivata una nuova risposta per <strong>{{event_name}}</strong>.'
-                .'<br><br>{{summary_html}}'
-                .'<br><br><a href="{{response_url}}">Apri il dettaglio in backend</a>'
-            ),
+            'customer_subject' => __t('emails.rsvp_request_customer.subject'),
+            'customer_message' => __t('emails.rsvp_request_customer.text'),
+            'admin_subject' => __t('emails.rsvp_request_admin.subject'),
+            'admin_message' => __t('emails.rsvp_request_admin.text'),
         ];
     }
 
     private static function responseUrl(int $responseId): string
     {
-        return function_exists('__r')
-            ? __r('backend.resource.'.ResponseResource::slug().'.view', ['id' => $responseId])
-            : '';
+        return __r('backend.resource.'.ResponseResource::slug().'.view', ['id' => $responseId]);
     }
 
     private static function eventFromNormalized(array $normalized): array
@@ -122,7 +108,7 @@ final class SubmissionNotifier
 
         if ($eventKey === '') {
             return [
-                'name' => rsvp_trans('pages.rsvp.home.title', 'RSVP'),
+                'name' => __t('pages.rsvp.home.title'),
                 'starts_at' => '',
             ];
         }
@@ -152,7 +138,7 @@ final class SubmissionNotifier
             return $configured;
         }
 
-        return rsvp_trans($key, $fallback, $replacements);
+        return __t($key, $replacements);
     }
 
     private static function summaryHtml(array $normalized): string
@@ -164,38 +150,38 @@ final class SubmissionNotifier
         $showAttendanceStatus = rsvpAttendanceStatusEnabled(self::settings());
         $lines = [];
 
-        $lines[] = rsvp_trans('emails.summary.name', 'Nome')
+        $lines[] = __t('emails.summary.name')
             .': <strong>'.htmlspecialchars(trim(((string) ($normalized['contact_name'] ?? '')).' '.((string) ($normalized['contact_surname'] ?? ''))), ENT_QUOTES, 'UTF-8').'</strong>';
         if ($showAttendanceStatus) {
-            $lines[] = rsvp_trans('emails.summary.attendance_status', 'Conferma')
+            $lines[] = __t('emails.summary.attendance_status')
                 .': <strong>'.htmlspecialchars(rsvpAttendanceStatusText($normalized['attendance_status'] ?? null), ENT_QUOTES, 'UTF-8').'</strong>';
         }
-        $lines[] = rsvp_trans('emails.summary.email', 'Email')
+        $lines[] = __t('emails.summary.email')
             .': <strong>'.htmlspecialchars((string) ($normalized['contact_email'] ?? ''), ENT_QUOTES, 'UTF-8').'</strong>';
-        $lines[] = rsvp_trans('emails.summary.phone', 'Telefono')
+        $lines[] = __t('emails.summary.phone')
             .': <strong>'.htmlspecialchars((string) ($normalized['contact_phone'] ?? '--'), ENT_QUOTES, 'UTF-8').'</strong>';
-        $lines[] = rsvp_trans('emails.summary.participants', 'Partecipanti')
+        $lines[] = __t('emails.summary.participants')
             .': <strong>'.(int) ($normalized['participants_count'] ?? 0).'</strong>';
-        $lines[] = rsvp_trans('emails.summary.children', 'Bambini')
+        $lines[] = __t('emails.summary.children')
             .': <strong>'.(int) ($normalized['children_count'] ?? 0).'</strong>';
 
         if (!empty($normalized['event_key'])) {
-            $lines[] = rsvp_trans('emails.summary.primary_event', 'Evento principale')
+            $lines[] = __t('emails.summary.primary_event')
                 .': <strong>'.htmlspecialchars((string) ($event['name'] ?? $normalized['event_key']), ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['invite_code'] ?? '') !== '') {
-            $lines[] = rsvp_trans('emails.summary.invite_code', 'Codice invito')
+            $lines[] = __t('emails.summary.invite_code')
                 .': <strong>'.htmlspecialchars((string) $normalized['invite_code'], ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['authorization_code'] ?? '') !== '') {
-            $lines[] = rsvp_trans('emails.summary.authorization', 'Autorizzazione')
+            $lines[] = __t('emails.summary.authorization')
                 .': <strong>'.htmlspecialchars((string) $normalized['authorization_code'], ENT_QUOTES, 'UTF-8').'</strong>';
         }
 
         if (($normalized['notes'] ?? '') !== '') {
-            $lines[] = rsvp_trans('emails.summary.notes', 'Richieste')
+            $lines[] = __t('emails.summary.notes')
                 .': <strong>'.nl2br(htmlspecialchars((string) $normalized['notes'], ENT_QUOTES, 'UTF-8')).'</strong>';
         }
 
@@ -215,7 +201,7 @@ final class SubmissionNotifier
         foreach ($participants as $participant) {
             $label = trim(((string) ($participant['name'] ?? '')).' '.((string) ($participant['surname'] ?? '')));
             $suffix = !empty($participant['is_child'])
-                ? ' ('.rsvp_trans('emails.summary.child_suffix', 'bambino').')'
+                ? ' ('.__t('emails.summary.child_suffix').')'
                 : '';
             $dietary = trim((string) ($participant['dietary_requirements'] ?? ''));
             $item = htmlspecialchars($label.$suffix, ENT_QUOTES, 'UTF-8');
@@ -230,7 +216,7 @@ final class SubmissionNotifier
         }
 
         if ($participantList !== []) {
-            $lines[] = rsvp_trans('emails.summary.participant_list', 'Elenco partecipanti')
+            $lines[] = __t('emails.summary.participant_list')
                 .':<ul>'.implode('', $participantList).'</ul>';
         }
 
@@ -241,13 +227,13 @@ final class SubmissionNotifier
                 .': <strong>'.rsvpBooleanText($document['accepted'] ?? false).'</strong>';
         }
 
-        $lines[] = rsvp_trans('emails.summary.privacy', 'Privacy')
+        $lines[] = __t('emails.summary.privacy')
             .': <strong>'.rsvpBooleanText($consents['privacy'] ?? false).'</strong>';
-        $lines[] = rsvp_trans('emails.summary.photo', 'Foto')
+        $lines[] = __t('emails.summary.photo')
             .': <strong>'.rsvpBooleanText($consents['photo'] ?? false).'</strong>';
 
         if ($documentLines !== []) {
-            $lines[] = rsvp_trans('emails.summary.documents', 'Documenti')
+            $lines[] = __t('emails.summary.documents')
                 .': '.implode('<br>', $documentLines);
         }
 

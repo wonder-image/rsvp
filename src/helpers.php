@@ -5,62 +5,6 @@ use Wonder\Plugin\Rsvp\Models\InviteCode;
 use Wonder\Plugin\Rsvp\Models\InviteGroup;
 use Wonder\Plugin\Rsvp\Models\Response;
 
-if (!function_exists('rsvp_trans')) {
-    function rsvp_trans(string $key, string $fallback, array $replacements = []): string
-    {
-        $value = $key;
-
-        if (function_exists('__t')) {
-            rsvp_boot_translations();
-
-            try {
-                $value = __t($key, $replacements);
-            } catch (\Throwable) {
-                $value = $key;
-            }
-        }
-
-        if (!is_string($value) || trim($value) === '' || $value === $key) {
-            foreach ($replacements as $replacementKey => $replacementValue) {
-                $fallback = str_replace(
-                    '{{'.$replacementKey.'}}',
-                    is_scalar($replacementValue) ? (string) $replacementValue : '',
-                    $fallback
-                );
-            }
-
-            return $fallback;
-        }
-
-        return $value;
-    }
-}
-
-if (!function_exists('rsvp_boot_translations')) {
-    function rsvp_boot_translations(): void
-    {
-        static $booted = false;
-
-        if ($booted) {
-            return;
-        }
-
-        $booted = true;
-
-        if (!class_exists(\Wonder\Localization\TranslationProvider::class)) {
-            return;
-        }
-
-        try {
-            \Wonder\Localization\TranslationProvider::init();
-        } catch (\Throwable) {
-            // Best-effort only: in bootstrap/update phases il provider può
-            // non avere ancora contesto completo. In quel caso useremo i
-            // fallback hardcoded del modulo.
-        }
-    }
-}
-
 if (!function_exists('rsvp_locale')) {
     function rsvp_locale(string $fallback = 'it'): string
     {
@@ -174,8 +118,8 @@ if (!function_exists('rsvpAttendanceStatusText')) {
     function rsvpAttendanceStatusText(mixed $value): string
     {
         return rsvpAttendanceStatusValue($value) === 'declined'
-            ? rsvp_trans('pages.rsvp.common.declined', 'Declinato')
-            : rsvp_trans('pages.rsvp.common.confirmed', 'Confermato');
+            ? __t('pages.rsvp.common.declined')
+            : __t('pages.rsvp.common.confirmed');
     }
 }
 
@@ -232,14 +176,14 @@ if (!function_exists('rsvpAttendanceStatusDictionary')) {
     {
         return [
             'confirmed' => [
-                'name' => rsvp_trans('pages.rsvp.common.confirmed', 'Confermato'),
-                'text' => rsvp_trans('pages.rsvp.common.confirmed', 'Confermato'),
+                'name' => __t('pages.rsvp.common.confirmed'),
+                'text' => __t('pages.rsvp.common.confirmed'),
                 'icon' => 'bi bi-check2-circle',
                 'color' => 'success',
             ],
             'declined' => [
-                'name' => rsvp_trans('pages.rsvp.common.declined', 'Declinato'),
-                'text' => rsvp_trans('pages.rsvp.common.declined', 'Declinato'),
+                'name' => __t('pages.rsvp.common.declined'),
+                'text' => __t('pages.rsvp.common.declined'),
                 'icon' => 'bi bi-x-circle',
                 'color' => 'danger',
             ],
@@ -566,15 +510,15 @@ if (!function_exists('rsvpBooleanText')) {
 
         if (is_bool($value)) {
             return $value
-                ? rsvp_trans('pages.rsvp.common.accepted', 'Accettato')
-                : rsvp_trans('pages.rsvp.common.rejected', 'Rifiutato');
+                ? __t('pages.rsvp.common.accepted')
+                : __t('pages.rsvp.common.rejected');
         }
 
         $value = strtolower(trim((string) $value));
 
         return in_array($value, ['1', 'true', 'yes', 'on'], true)
-            ? rsvp_trans('pages.rsvp.common.accepted', 'Accettato')
-            : rsvp_trans('pages.rsvp.common.rejected', 'Rifiutato');
+            ? __t('pages.rsvp.common.accepted')
+            : __t('pages.rsvp.common.rejected');
     }
 }
 
@@ -587,10 +531,7 @@ if (!function_exists('rsvpLegalDocumentLabel')) {
             return '';
         }
 
-        return rsvp_trans(
-            'legal.'.$docType.'.label',
-            ucwords(str_replace(['_', '-'], ' ', $docType))
-        );
+        return __t('legal.'.$docType.'.label');
     }
 }
 

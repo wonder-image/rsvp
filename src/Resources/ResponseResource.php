@@ -15,7 +15,6 @@ use Wonder\Elements\Components\Card;
 use Wonder\Elements\Form\Form;
 use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Rsvp;
-use Wonder\Plugin\Rsvp\Services\FrontendContext;
 use Wonder\Plugin\Rsvp\Services\InviteCodeSession;
 use Wonder\Plugin\Rsvp\Services\SubmissionNormalizer;
 use Wonder\Plugin\Rsvp\Services\SubmissionNotifier;
@@ -26,7 +25,7 @@ use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
  *
  * - Backend: lista, dettaglio, modifica stato (solo attendance), export.
  * - Frontend: rotta di submission `api.resource.rsvp-responses.store`. Il form
- *   è renderizzato da `views/components/form.php`; normalizzazione, validazione
+ *   è renderizzato da `view/components/form.php`; normalizzazione, validazione
  *   e notifiche vivono in `mutateRequestValues()` / `afterStore()`.
  */
 final class ResponseResource extends Resource
@@ -64,7 +63,7 @@ final class ResponseResource extends Resource
             'authorization_code' => 'Autorizzazione',
             'locale' => 'Lingua',
             'notes' => 'Richieste',
-            'source_url' => 'URL origine',
+            'request_url' => 'URL origine',
         ];
 
         foreach (Response::customFieldDefinitions() as $field) {
@@ -75,35 +74,21 @@ final class ResponseResource extends Resource
     }
 
     /**
-     * Form backend: modifica del solo stato di partecipazione. Il form
-     * frontend è renderizzato dal componente `views/components/form.php` con
-     * gli helper di input; la submission entra dalla rotta store.
+     * Sorgente canonica degli input usati dal form RSVP frontend.
+     *
+     * Quando l'attendance status è attivo, lo stesso schema viene riusato
+     * anche dal backend per la pagina di modifica stato.
      */
     public static function formSchema(): array
     {
-        if (!self::attendanceStatusEnabled()) {
-            return [];
-        }
-
-        return [
-
+        $schema = [
             FormField::key('invite_code_id')->hidden()->required(),
             FormField::key('locale')->hidden()->required(),
             FormField::key('request_url')->hidden(),
-
-            FormField::key('attendance_status')->radio([
-                    'confirmed' => __t('pages.rsvp.form.attendance_confirmed_label'),
-                    'declined' => __t('pages.rsvp.form.attendance_declined_label'),
-                ])
-                ->label(__t('components.forms.fields.attendance_status.label'))
-                ->required()->value('confirmed'),
-            
             FormField::key('event_key')->radio()->required(),
 
             /**
-             * 
-             * Dati di contatto principali 
-             * 
+             * Dati di contatto principali.
              */
             FormField::key('contact_name')->text()
                 ->autocomplete()
@@ -122,9 +107,7 @@ final class ResponseResource extends Resource
                 ->label(__t('components.forms.fields.contact_email.label')),
 
             /**
-             * 
-             * Dati di contatto altri partecupanti 
-             * 
+             * Dati di contatto altri partecipanti.
              */
             FormField::key('participants_count')->select()
                 ->value('1')->required()
@@ -143,14 +126,24 @@ final class ResponseResource extends Resource
                 ->value('false'),
 
             /**
-             * 
-             * Dati policy
-             * 
+             * Dati consensi.
              */
             FormField::key('accept_privacy_policy')->acceptDocument('privacy_policy')->required(),
-            FormField::key('accept_image_release')->acceptDocument('image_release')->required()
-
+            FormField::key('accept_image_release')->acceptDocument('image_release')->required(),
         ];
+
+        if (self::attendanceStatusEnabled()) {
+            array_splice($schema, 3, 0, [
+                FormField::key('attendance_status')->radio([
+                        'confirmed' => __t('pages.rsvp.form.attendance_confirmed_label'),
+                        'declined' => __t('pages.rsvp.form.attendance_declined_label'),
+                    ])
+                    ->label(__t('components.forms.fields.attendance_status.label'))
+                    ->required()->value('confirmed'),
+            ]);
+        }
+
+        return $schema;
     }
 
     public static function tableSchema(): array
@@ -197,7 +190,6 @@ final class ResponseResource extends Resource
      */
     private static function downloadColumnsSchema(): array
     {
-        
         $columns = [
             ['label' => 'Codice prenotazione', 'value' => 'booking_code'],
             ['label' => 'Creato il', 'value' => 'creation'],
@@ -220,10 +212,10 @@ final class ResponseResource extends Resource
             ['label' => 'Gruppo invito', 'value' => 'invite_group_code'],
             ['label' => 'Autorizzazione', 'value' => 'authorization_code'],
             ['label' => 'Richieste', 'value' => 'notes'],
-            ['label' => 'Privacy', 'value' => 'pretty_privacy'],
-            ['label' => 'Foto', 'value' => 'pretty_photo'],
+            ['label' => 'Privacy', 'value' => 'pretty_accept_privacy_policy'],
+            ['label' => 'Foto', 'value' => 'pretty_accept_image_release'],
             ['label' => 'Lingua', 'value' => 'locale'],
-            ['label' => 'URL origine', 'value' => 'source_url'],
+            ['label' => 'URL origine', 'value' => 'request_url'],
         ]);
 
         foreach (Response::customFieldDefinitions() as $field) {
@@ -276,7 +268,7 @@ final class ResponseResource extends Resource
     {
         return PageSchema::for(static::class)
             ->only(self::attendanceStatusEnabled() ? ['list', 'view', 'edit', 'update', 'delete'] : ['list', 'view', 'delete'])
-            ->view('show', Rsvp::viewPath('backend/response/show.php'))
+            ->view('show', Rsvp::viewPath('pages/backend/response/show.php'))
             ->title('view', 'Dettaglio risposta RSVP')
             ->title('edit', 'Modifica stato RSVP');
     }
@@ -373,14 +365,14 @@ final class ResponseResource extends Resource
 
             if (!empty($GLOBALS['ALERT'])) {
                 throw new EndpointException(
-                    rsvp_trans('notifications.'.$GLOBALS['ALERT'].'.text', 'Validazione non riuscita.'),
+                    __t('notifications.'.$GLOBALS['ALERT'].'.text'),
                     422
                 );
             }
         }
 
         $normalized = SubmissionNormalizer::fromPayload($payload);
-        $state = FrontendContext::state();
+        $state = require Rsvp::httpPath('frontend/context.php');
         $attendanceStatus = rsvpAttendanceStatusValue($normalized['attendance_status'] ?? null);
 
         self::assertSubmission($normalized, $attendanceStatus, $state, $payload);
@@ -414,7 +406,7 @@ final class ResponseResource extends Resource
         array $payload
     ): void {
         $fail = static function (string $key, string $fallback, array $replacements = []): never {
-            throw new EndpointException(rsvp_trans($key, $fallback, $replacements), 422);
+            throw new EndpointException(__t($key, $replacements), 422);
         };
 
         $requireField = static function (string $value, string $label) use ($fail): void {

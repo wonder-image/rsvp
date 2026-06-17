@@ -22,8 +22,6 @@ final class Settings extends Model
     {
         return [
             Column::key('require_invite_code')->length(10)->default('false'),
-            Column::key('login_title')->length(255)->null(),
-            Column::key('login_text')->type('LONGTEXT')->null(),
             Column::key('enable_attendance_status')->length(10)->default('false'),
             Column::key('max_participants')->type('INT')->default('1'),
             Column::key('allow_children')->length(10)->default('false'),
@@ -43,8 +41,6 @@ final class Settings extends Model
     {
         return [
             Field::key('require_invite_code')->text(),
-            Field::key('login_title')->text()->sanitize(false),
-            Field::key('login_text')->text()->sanitize(false),
             Field::key('enable_attendance_status')->text(),
             Field::key('max_participants')->number()->decimals(0),
             Field::key('allow_children')->text(),

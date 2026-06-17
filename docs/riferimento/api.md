@@ -41,7 +41,7 @@ Campi supportati direttamente:
 * `accept_privacy_policy` + `privacy_policy_id`
 * `accept_image_release` + `image_release_id`
 * `invite_code_id`
-* `source_url`
+* `request_url` (accetta anche l'alias legacy `source_url`)
 * i custom field dell'estensione (per chiave, anche annidati in `custom_fields`)
 
 Il normalizzatore accetta anche varianti legacy dei nomi campo (`name`,
