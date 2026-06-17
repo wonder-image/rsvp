@@ -1,4 +1,7 @@
 {
-    "rsvp": "rsvp",
-    "rsvp/login": "rsvp/accedi"
+    "rsvp": "it/rsvp",
+    "rsvp/login": "it/rsvp/accedi",
+    "legal/privacy-policy": "it/legale/privacy-policy",
+    "legal/cookie-policy": "it/legale/cookie-policy",
+    "legal/terms-conditions": "it/legale/termini-e-condizioni"
 }
