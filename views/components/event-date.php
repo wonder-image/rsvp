@@ -24,8 +24,8 @@
     $dateRaw = trim((string) ($args['date'] ?? ($event['date'] ?? '')));
     $locationName = trim((string) ($args['location'] ?? ($event['location_name'] ?? '')));
     $locationAddress = trim((string) ($args['address'] ?? ($event['location_address'] ?? '')));
-    $eyebrow = (string) ($args['eyebrow'] ?? rsvp_trans('rsvp.frontend.event_date.eyebrow', 'Ti aspettiamo'));
-    $timePrefix = (string) ($args['time_prefix'] ?? rsvp_trans('rsvp.frontend.event_date.time_prefix', 'dalle ore'));
+    $eyebrow = (string) ($args['eyebrow'] ?? rsvp_trans('pages.rsvp.event_date.eyebrow', 'Ti aspettiamo'));
+    $timePrefix = (string) ($args['time_prefix'] ?? rsvp_trans('pages.rsvp.event_date.time_prefix', 'dalle ore'));
 
     if ($dateRaw === '' && $locationName === '') {
         return;
@@ -41,29 +41,26 @@
         $dateDay = $dateMonth = $dateYear = $dateTime = '';
     }
 
-    $escape = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 ?>
 
-<div class="rsvp-event-date">
+<div class="w-100 a-c">
     <?php if ($eyebrow !== '') { ?>
-        <div class="rsvp-event-date-eyebrow"><?=$escape($eyebrow)?></div>
+        <div class="text-small tx-upper"><?=e($eyebrow)?></div>
     <?php } ?>
 
     <?php if ($ts !== false) { ?>
-        <div class="rsvp-event-date-date">
-            <?=$escape($dateDay)?>
-            <span class="rsvp-event-date-month"><?=$escape($dateMonth)?></span>
-            <?=$escape($dateYear)?>
+        <div class="title-big fw-700 mt-2">
+            <?=e($dateDay)?> <?=e($dateMonth)?> <?=e($dateYear)?>
         </div>
-        <div class="rsvp-event-date-time">
-            <?=$timePrefix !== '' ? $escape($timePrefix).' ' : ''?><?=$escape($dateTime)?>
+        <div class="text mt-1">
+            <?=$timePrefix !== '' ? e($timePrefix).' ' : ''?><?=e($dateTime)?>
         </div>
     <?php } ?>
 
     <?php if ($locationName !== '') { ?>
-        <div class="rsvp-event-date-venue"><?=$escape($locationName)?></div>
+        <div class="subtitle fw-500 mt-4"><?=e($locationName)?></div>
     <?php } ?>
     <?php if ($locationAddress !== '') { ?>
-        <div class="rsvp-event-date-address"><?=$escape($locationAddress)?></div>
+        <div class="text mt-1"><?=e($locationAddress)?></div>
     <?php } ?>
 </div>

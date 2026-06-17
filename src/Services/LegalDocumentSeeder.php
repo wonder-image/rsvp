@@ -1,6 +1,6 @@
 <?php
 
-namespace Wonder\Plugin\Rsvp\Support;
+namespace Wonder\Plugin\Rsvp\Services;
 
 use Throwable;
 use Wonder\App\Models\Config\LegalDocument;

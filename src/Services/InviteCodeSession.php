@@ -1,6 +1,6 @@
 <?php
 
-namespace Wonder\Plugin\Rsvp\Support;
+namespace Wonder\Plugin\Rsvp\Services;
 
 use RuntimeException;
 use Wonder\Plugin\Rsvp\Models\Authorization;
@@ -26,24 +26,24 @@ final class InviteCodeSession
         };
 
         if ($code === '') {
-            throw $rejected(rsvp_trans('rsvp.api.login.missing_code', 'Codice invito mancante.'));
+            throw $rejected(rsvp_trans('pages.rsvp.api.login.missing_code', 'Codice invito mancante.'));
         }
 
         $record = self::findByCode($code);
 
         if ($record === null) {
-            throw $rejected(rsvp_trans('rsvp.api.login.invalid_code', 'Codice invito non valido.'));
+            throw $rejected(rsvp_trans('pages.rsvp.api.login.invalid_code', 'Codice invito non valido.'));
         }
 
         if (($record['active'] ?? 'false') !== 'true') {
-            throw $rejected(rsvp_trans('rsvp.api.login.inactive_code', 'Codice invito disattivato.'));
+            throw $rejected(rsvp_trans('pages.rsvp.api.login.inactive_code', 'Codice invito disattivato.'));
         }
 
         $groupCode = self::groupCode((int) ($record['invite_group_id'] ?? 0));
 
         if ($allowedGroups !== [] && !in_array($groupCode, $allowedGroups, true)) {
             throw $rejected(rsvp_trans(
-                'rsvp.api.login.unauthorized_group',
+                'pages.rsvp.api.login.unauthorized_group',
                 'Codice invito non autorizzato per questa area.'
             ));
         }
@@ -109,12 +109,12 @@ final class InviteCodeSession
         $current = self::current();
 
         if ($current === []) {
-            throw new RuntimeException(rsvp_trans('rsvp.api.session.not_active', 'Sessione RSVP non attiva.'));
+            throw new RuntimeException(rsvp_trans('pages.rsvp.api.session.not_active', 'Sessione RSVP non attiva.'));
         }
 
         if ($allowedGroups !== [] && !in_array($current['invite_group_code'], $allowedGroups, true)) {
             throw new RuntimeException(rsvp_trans(
-                'rsvp.api.session.unauthorized_group',
+                'pages.rsvp.api.session.unauthorized_group',
                 'Sessione RSVP non autorizzata per questa area.'
             ));
         }

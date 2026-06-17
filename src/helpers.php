@@ -174,8 +174,8 @@ if (!function_exists('rsvpAttendanceStatusText')) {
     function rsvpAttendanceStatusText(mixed $value): string
     {
         return rsvpAttendanceStatusValue($value) === 'declined'
-            ? rsvp_trans('rsvp.common.declined', 'Declinato')
-            : rsvp_trans('rsvp.common.confirmed', 'Confermato');
+            ? rsvp_trans('pages.rsvp.common.declined', 'Declinato')
+            : rsvp_trans('pages.rsvp.common.confirmed', 'Confermato');
     }
 }
 
@@ -232,14 +232,14 @@ if (!function_exists('rsvpAttendanceStatusDictionary')) {
     {
         return [
             'confirmed' => [
-                'name' => rsvp_trans('rsvp.common.confirmed', 'Confermato'),
-                'text' => rsvp_trans('rsvp.common.confirmed', 'Confermato'),
+                'name' => rsvp_trans('pages.rsvp.common.confirmed', 'Confermato'),
+                'text' => rsvp_trans('pages.rsvp.common.confirmed', 'Confermato'),
                 'icon' => 'bi bi-check2-circle',
                 'color' => 'success',
             ],
             'declined' => [
-                'name' => rsvp_trans('rsvp.common.declined', 'Declinato'),
-                'text' => rsvp_trans('rsvp.common.declined', 'Declinato'),
+                'name' => rsvp_trans('pages.rsvp.common.declined', 'Declinato'),
+                'text' => rsvp_trans('pages.rsvp.common.declined', 'Declinato'),
                 'icon' => 'bi bi-x-circle',
                 'color' => 'danger',
             ],
@@ -566,15 +566,15 @@ if (!function_exists('rsvpBooleanText')) {
 
         if (is_bool($value)) {
             return $value
-                ? rsvp_trans('rsvp.common.accepted', 'Accettato')
-                : rsvp_trans('rsvp.common.rejected', 'Rifiutato');
+                ? rsvp_trans('pages.rsvp.common.accepted', 'Accettato')
+                : rsvp_trans('pages.rsvp.common.rejected', 'Rifiutato');
         }
 
         $value = strtolower(trim((string) $value));
 
         return in_array($value, ['1', 'true', 'yes', 'on'], true)
-            ? rsvp_trans('rsvp.common.accepted', 'Accettato')
-            : rsvp_trans('rsvp.common.rejected', 'Rifiutato');
+            ? rsvp_trans('pages.rsvp.common.accepted', 'Accettato')
+            : rsvp_trans('pages.rsvp.common.rejected', 'Rifiutato');
     }
 }
 
@@ -588,7 +588,7 @@ if (!function_exists('rsvpLegalDocumentLabel')) {
         }
 
         return rsvp_trans(
-            'rsvp.legal_documents.'.$docType,
+            'legal.'.$docType.'.label',
             ucwords(str_replace(['_', '-'], ' ', $docType))
         );
     }

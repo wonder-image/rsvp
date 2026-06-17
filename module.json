@@ -1,8 +1,8 @@
 {
     "name": "Wonder RSVP",
     "slug": "rsvp",
-    "version": "1.0.0",
-    "description": "Modulo RSVP con frontend, backend e API per wonder-image/app.",
+    "version": "2.0.0",
+    "description": "Modulo RSVP con frontend, backend e API per wonder-image/app, pronto per wonder-image/new-site.",
     "namespace": "Wonder\\Plugin\\Rsvp\\",
     "entrypoint": "Wonder\\Plugin\\Rsvp\\Rsvp",
     "author": {
@@ -21,7 +21,8 @@
         "handlers": "handlers",
         "views": "views",
         "assets": "resources/assets",
-        "lang": "lang"
+        "lang": "lang",
+        "tests": "tests"
     },
     "routes": {
         "frontend": "config/routes/route.frontend.php",

@@ -32,11 +32,9 @@ final class Response extends Model
             Column::key('participants_count')->type('INT')->default('1'),
             Column::key('children_count')->type('INT')->default('0'),
             Column::key('notes')->type('LONGTEXT')->null(),
-            Column::key('events_json')->json()->null(),
-            Column::key('consents_json')->json()->null(),
-            Column::key('legal_documents_json')->json()->null(),
-            Column::key('metadata_json')->type('LONGTEXT')->null(),
-            Column::key('source_url')->type('TEXT')->null(),
+            Column::key('request_url')->type('TEXT')->null(),
+            Column::key('accept_privacy_policy')->type('TEXT')->null(false),
+            Column::key('accept_image_release')->type('TEXT')->null(false),
         ];
 
         foreach (self::customFieldDefinitions() as $field) {
@@ -70,8 +68,8 @@ final class Response extends Model
     public static function dataSchema(): array
     {
         $schema = [
+            Field::key('booking_code')->text()->uniqueCode('pre_'),
             Field::key('attendance_status')->text()->required(),
-            Field::key('booking_code')->text()->sanitize(false),
             Field::key('invite_code_id')->number()->decimals(0),
             Field::key('invite_code')->text()->sanitize(false),
             Field::key('invite_group_code')->text()->sanitize(false),
@@ -81,16 +79,16 @@ final class Response extends Model
             Field::key('contact_name')->text()->required()->sanitizeFirst(),
             Field::key('contact_surname')->text()->sanitizeFirst(),
             Field::key('contact_phone')->text(),
-            Field::key('contact_email')->email()->required(),
+            Field::key('contact_email')->text()->lower()->required(),
             Field::key('participants_json')->text()->required()->json()->sanitize(false),
             Field::key('participants_count')->number()->required()->decimals(0),
             Field::key('children_count')->number()->required()->decimals(0),
             Field::key('notes')->text()->sanitize(false),
-            Field::key('events_json')->text()->json()->sanitize(false),
-            Field::key('consents_json')->text()->json()->sanitize(false),
             Field::key('legal_documents_json')->text()->json()->sanitize(false),
             Field::key('metadata_json')->text()->json()->sanitize(false),
-            Field::key('source_url')->text()->sanitize(false),
+            Field::key('request_url')->text(),
+            Field::key('accept_privacy_policy')->text(),
+            Field::key('accept_image_release')->text(),
         ];
 
         foreach (self::customFieldDefinitions() as $field) {
@@ -139,61 +137,14 @@ final class Response extends Model
         ));
     }
 
-    public static function bookingCodeFromId(int|string|null $id): string
+    public static function decorate(array $row): array
     {
-        $id = (int) $id;
 
-        if ($id <= 0) {
-            return '';
-        }
+        $row['pretty_attendance_status'] = rsvpAttendanceStatusText($row['attendance_status'] ?? null);
+        $row['pretty_accept_privacy_policy'] = rsvpBooleanText($row['accept_privacy_policy'] ?? false);
+        $row['pretty_accept_image_release'] = rsvpBooleanText($row['accept_image_release'] ?? false);
 
-        return 'pre_'.str_pad((string) $id, 7, '0', STR_PAD_LEFT);
-    }
+        return $row;
 
-    public static function persistBookingCode(int|string|null $id): string
-    {
-        $id = (int) $id;
-
-        if ($id <= 0) {
-            return '';
-        }
-
-        $bookingCode = self::bookingCodeFromId($id);
-
-        if ($bookingCode === '') {
-            return '';
-        }
-
-        self::query()->Update(
-            self::$table,
-            ['booking_code' => $bookingCode],
-            'id',
-            $id
-        );
-
-        return $bookingCode;
-    }
-
-    public static function resolveBookingCode(array $row, bool $persistIfMissing = true): string
-    {
-        $bookingCode = trim((string) ($row['booking_code'] ?? ''));
-
-        if ($bookingCode !== '') {
-            return $bookingCode;
-        }
-
-        $id = (int) ($row['id'] ?? 0);
-        $bookingCode = self::bookingCodeFromId($id);
-
-        if ($persistIfMissing && $bookingCode !== '' && $id > 0) {
-            self::query()->Update(
-                self::$table,
-                ['booking_code' => $bookingCode],
-                'id',
-                $id
-            );
-        }
-
-        return $bookingCode;
     }
 }

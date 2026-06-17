@@ -2,8 +2,8 @@
 
 use Wonder\Api\Endpoint;
 use Wonder\Api\Handler;
-use Wonder\Plugin\Rsvp\Support\FrontendContext;
-use Wonder\Plugin\Rsvp\Support\InviteCodeSession;
+use Wonder\Plugin\Rsvp\Services\FrontendContext;
+use Wonder\Plugin\Rsvp\Services\InviteCodeSession;
 
 Handler::run('/api/rsvp/login/', 'POST', ['api_internal_user', 'api_public_access'], function (Endpoint $call) {
     $allowedGroups = $call->parameters['allowed_groups'] ?? [];

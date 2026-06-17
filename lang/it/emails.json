@@ -6,5 +6,22 @@
     "rsvp_request_admin": {
         "subject": "Nuova risposta per {{event_name}} - {{contact_name}} {{contact_surname}}",
         "text": "È arrivata una nuova risposta per <strong>{{event_name}}</strong>.<br><br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Apri il dettaglio in backend</a>"
+    },
+    "summary": {
+        "name": "Nome",
+        "attendance_status": "Conferma",
+        "email": "Email",
+        "phone": "Telefono",
+        "participants": "Partecipanti",
+        "children": "Bambini",
+        "primary_event": "Evento principale",
+        "invite_code": "Codice invito",
+        "authorization": "Autorizzazione",
+        "notes": "Richieste",
+        "participant_list": "Elenco partecipanti",
+        "child_suffix": "bambino",
+        "privacy": "Privacy",
+        "photo": "Foto",
+        "documents": "Documenti"
     }
 }

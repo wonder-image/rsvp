@@ -4,7 +4,7 @@ namespace Wonder\Plugin\Rsvp\Resources;
 
 use Wonder\App\Resource;
 use Wonder\App\ResourceSchema\ApiSchema;
-use Wonder\App\ResourceSchema\FormInput;
+use Wonder\App\ResourceSchema\FormField;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
@@ -45,9 +45,9 @@ final class InviteGroupResource extends Resource
     public static function formSchema(): array
     {
         return [
-            FormInput::key('code')->text()->required(),
-            FormInput::key('name')->text()->required(),
-            FormInput::key('description')->textarea(),
+            FormField::key('code')->text()->required(),
+            FormField::key('name')->text()->required(),
+            FormField::key('description')->textarea(),
         ];
     }
 

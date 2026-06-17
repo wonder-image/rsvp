@@ -4,7 +4,7 @@ namespace Wonder\Plugin\Rsvp\Resources;
 
 use Wonder\App\Resource;
 use Wonder\App\ResourceSchema\ApiSchema;
-use Wonder\App\ResourceSchema\FormInput;
+use Wonder\App\ResourceSchema\FormField;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
@@ -50,18 +50,18 @@ final class InviteCodeResource extends Resource
     public static function formSchema(): array
     {
         return [
-            FormInput::key('code')->textGenerator()->required(),
-            FormInput::key('authorization_id')->select(static::authorizationOptions()),
-            FormInput::key('invite_group_id')->select(static::groupOptions()),
-            FormInput::key('usage_mode')->select([
+            FormField::key('code')->textGenerator()->required(),
+            FormField::key('authorization_id')->select(static::authorizationOptions()),
+            FormField::key('invite_group_id')->select(static::groupOptions()),
+            FormField::key('usage_mode')->select([
                 'single_use' => 'Monouso',
                 'multiple_use' => 'Multiuso',
             ])->required()->value('multiple_use'),
-            FormInput::key('active')->select([
+            FormField::key('active')->select([
                 'true' => 'Attivo',
                 'false' => 'Disattivato',
             ])->required()->value('true'),
-            FormInput::key('notes')->textarea(),
+            FormField::key('notes')->textarea(),
         ];
     }
 

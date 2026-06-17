@@ -9,8 +9,9 @@ Route::area('api')
         Route::name('api.rsvp.')
             ->prefix('/rsvp')
             ->group(function () {
-                Route::post('/', Rsvp::handlerPath('api/frontend/submit.php'))
-                    ->name('submit');
+                // La submission del form RSVP usa la rotta resource standard
+                // `api.resource.rsvp-responses.store` (vedi ResponseResource):
+                // normalizzazione, validazione RSVP e notifiche vivono lì.
 
                 Route::post('/login/', Rsvp::handlerPath('api/frontend/login.php'))
                     ->name('login');

@@ -1,0 +1,51 @@
+{
+    "forms": {
+        "fields": {
+            "attendance_status": {
+                "label": "Parteciperai all'evento?"
+            },
+            "participants_count": {
+                "label": "Partecipanti"
+            },
+            "contact_name": {
+                "label": "Nome referente"
+            },
+            "contact_surname": {
+                "label": "Cognome referente"
+            },
+            "contact_phone": {
+                "label": "Cellulare"
+            },
+            "contact_email": {
+                "label": "Email"
+            },
+            "name": {
+                "label": "Nome"
+            },
+            "surname": {
+                "label": "Cognome"
+            },
+            "dietary_requirements": {
+                "label": "Intolleranze o allergie"
+            },
+            "society_name": {
+                "label": "Indica il nome della tua attività"
+            },
+            "bus": {
+                "label": "Vuoi usufruire del servizio bus privato da/per Milano?",
+                "options": {
+                    "no": "No, non usufruisco del servizio bus",
+                    "famagosta": "Famagosta - {{time}}",
+                    "porta_venezia": "Porta Venezia - {{time}}"
+                }
+            },
+            "hotel": {
+                "label": "Desideri essere nostro ospite in hotel per la notte tra il 29 e il 30 giugno?",
+                "options": {
+                    "no": "No, non pernotto",
+                    "yes": "Sì, accetto il pernottamento"
+                }
+            }
+        }
+    }
+}

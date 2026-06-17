@@ -1,0 +1,51 @@
+{
+    "forms": {
+        "fields": {
+            "attendance_status": {
+                "label": "Will you attend the event?"
+            },
+            "participants_count": {
+                "label": "Guests"
+            },
+            "contact_name": {
+                "label": "Contact first name"
+            },
+            "contact_surname": {
+                "label": "Contact last name"
+            },
+            "contact_phone": {
+                "label": "Mobile"
+            },
+            "contact_email": {
+                "label": "Email"
+            },
+            "name": {
+                "label": "First name"
+            },
+            "surname": {
+                "label": "Last name"
+            },
+            "dietary_requirements": {
+                "label": "Dietary requirements or allergies"
+            },
+            "society_name": {
+                "label": "Enter your business name"
+            },
+            "bus": {
+                "label": "Do you want to use the private bus service to/from Milan?",
+                "options": {
+                    "no": "No, I will not use the bus service",
+                    "famagosta": "Famagosta - {{time}}",
+                    "porta_venezia": "Porta Venezia - {{time}}"
+                }
+            },
+            "hotel": {
+                "label": "Would you like to be our guest at the hotel for the night between June 29 and 30?",
+                "options": {
+                    "no": "No, I will not stay overnight",
+                    "yes": "Yes, I accept the overnight stay"
+                }
+            }
+        }
+    }
+}

@@ -23,10 +23,10 @@
 
     $labels = is_array($args['labels'] ?? null) ? $args['labels'] : [];
     $labels = array_merge([
-        'days' => rsvp_trans('rsvp.frontend.countdown.days', 'Giorni'),
-        'hours' => rsvp_trans('rsvp.frontend.countdown.hours', 'Ore'),
-        'minutes' => rsvp_trans('rsvp.frontend.countdown.minutes', 'Minuti'),
-        'seconds' => rsvp_trans('rsvp.frontend.countdown.seconds', 'Secondi'),
+        'days' => rsvp_trans('pages.rsvp.countdown.days', 'Giorni'),
+        'hours' => rsvp_trans('pages.rsvp.countdown.hours', 'Ore'),
+        'minutes' => rsvp_trans('pages.rsvp.countdown.minutes', 'Minuti'),
+        'seconds' => rsvp_trans('pages.rsvp.countdown.seconds', 'Secondi'),
     ], $labels);
 
     $ts = $targetDate !== '' ? strtotime($targetDate) : false;
@@ -35,14 +35,13 @@
     }
 
     $iso = date('c', $ts);
-    $escape = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 ?>
 
-<div class="rsvp-countdown" data-rsvp-countdown="<?=$escape($iso)?>">
+<div class="w-100 d-grid col-4 gap-5 a-c" data-rsvp-countdown="<?=e($iso)?>">
     <?php foreach (['days', 'hours', 'minutes', 'seconds'] as $unit) { ?>
-        <div class="rsvp-countdown-cell">
-            <div class="rsvp-countdown-num" data-unit="<?=$escape($unit)?>">00</div>
-            <div class="rsvp-countdown-label"><?=$escape((string) $labels[$unit])?></div>
+        <div class="w-100">
+            <div class="title-big fw-700" data-unit="<?=e($unit)?>">00</div>
+            <div class="text-small tx-upper"><?=e((string) $labels[$unit])?></div>
         </div>
     <?php } ?>
 </div>

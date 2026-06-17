@@ -1,15 +1,33 @@
 {
-    "common": {
-        "confirmed": "Confirmed",
-        "declined": "Declined",
-        "accepted": "Accepted",
-        "rejected": "Rejected"
-    },
-    "legal_documents": {
-        "privacy_policy": "Privacy policy",
-        "image_release": "Image release"
-    },
-    "frontend": {
+    "rsvp": {
+        "common": {
+            "confirmed": "Confirmed",
+            "declined": "Declined",
+            "accepted": "Accepted",
+            "rejected": "Rejected"
+        },
+        "api": {
+            "login": {
+                "missing_code": "Invite code is missing.",
+                "invalid_code": "Invite code is invalid.",
+                "inactive_code": "Invite code is disabled.",
+                "unauthorized_group": "Invite code is not authorized for this area."
+            },
+            "session": {
+                "not_active": "RSVP session is not active.",
+                "unauthorized_group": "RSVP session is not authorized for this area."
+            },
+            "submit": {
+                "missing_email": "Email is required.",
+                "missing_participants": "Participants are required.",
+                "invite_code_required": "A valid invite code is required for this RSVP.",
+                "invite_code_exhausted": "This invite code has no submissions left.",
+                "privacy_required": "Privacy consent is required.",
+                "image_release_required": "Image release consent is required.",
+                "required_field_missing": "Required field missing: {{field}}.",
+                "save_failed": "Unable to save the RSVP."
+            }
+        },
         "home": {
             "title": "RSVP",
             "section_title": "Confirm your attendance",
@@ -30,11 +48,11 @@
             "eyebrow": "Location"
         },
         "form": {
-            "invite_required_text": "A valid invite code is required to complete this RSVP.",
+            "invite_required_text": "An invite code is required to fill in this RSVP.",
             "invite_required_button": "Go to login",
             "attendance_status_label": "Attendance",
             "attendance_confirmed_label": "I will attend",
-            "attendance_declined_label": "I will not attend",
+            "attendance_declined_label": "No, I will not attend",
             "events_label": "Events",
             "events_required_text": "Select at least one event.",
             "contact_name_label": "Contact first name",
@@ -53,11 +71,17 @@
             "image_release_fallback_text": "I consent to the collection and use of photos and videos.",
             "submit_label": "Send response",
             "sending_text": "Sending RSVP...",
-            "success_text": "Your response has been recorded!",
-            "error_text": "We could not send your response. Please try again.",
+            "success_text": "Your attendance has been registered!",
+            "error_text": "We could not send your reply. Please try again.",
             "success_button_label": "Back to site",
-            "error_button_label": "Try again",
-            "manage_invite_button": "Manage invite code"
+            "error_button_label": "Retry",
+            "manage_invite_button": "Manage invite code",
+            "intro": "It is time to tell us if you will join us!",
+            "title": "Fill in the fields below carefully",
+            "subtitle": "Every detail is precious to welcome you",
+            "contacts_label": "Contacts",
+            "company_section_label": "Are you a restaurateur or wine merchant?",
+            "concierge_label": "Concierge:"
         },
         "login": {
             "kicker": "RSVP",
@@ -72,46 +96,8 @@
             "login_button": "Sign in",
             "free_text": "This RSVP is open: you can go directly to the confirmation page.",
             "loading_text": "Signing in...",
-            "error_text": "Login failed."
-        }
-    },
-    "email_summary": {
-        "name": "Name",
-        "attendance_status": "Attendance",
-        "email": "Email",
-        "phone": "Phone",
-        "participants": "Participants",
-        "children": "Children",
-        "primary_event": "Main event",
-        "invite_code": "Invite code",
-        "authorization": "Authorization",
-        "notes": "Notes",
-        "participant_list": "Participants list",
-        "child_suffix": "child",
-        "privacy": "Privacy",
-        "photo": "Photo",
-        "documents": "Documents"
-    },
-    "api": {
-        "login": {
-            "missing_code": "Invite code is missing.",
-            "invalid_code": "Invite code is invalid.",
-            "inactive_code": "Invite code is disabled.",
-            "unauthorized_group": "Invite code is not authorized for this area."
-        },
-        "session": {
-            "not_active": "RSVP session is not active.",
-            "unauthorized_group": "RSVP session is not authorized for this area."
-        },
-        "submit": {
-            "missing_email": "Email is required.",
-            "missing_participants": "Participants are required.",
-            "invite_code_required": "A valid invite code is required for this RSVP.",
-            "invite_code_exhausted": "This invite code has no submissions left.",
-            "privacy_required": "Privacy consent is required.",
-            "image_release_required": "Image release consent is required.",
-            "required_field_missing": "Required field missing: {{field}}.",
-            "save_failed": "Unable to save the RSVP."
+            "error_text": "Login failed.",
+            "logo_alt": "{{society_name}} logo"
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Wonder\Plugin\Rsvp\Support;
 
-use Wonder\App\ResourceSchema\FormInput;
+use Wonder\App\ResourceSchema\FormField;
 use Wonder\Plugin\Rsvp\Contracts\RsvpExtension;
 use Wonder\Plugin\Rsvp\Contracts\SupportsFormInputs;
 
@@ -26,7 +26,7 @@ abstract class AbstractRsvpExtension implements RsvpExtension, SupportsFormInput
     }
 
     /**
-     * @return array<int, FormInput>
+     * @return array<int, FormField>
      */
     public function formInputs(): array
     {
@@ -34,11 +34,11 @@ abstract class AbstractRsvpExtension implements RsvpExtension, SupportsFormInput
     }
 
     /**
-     * @return array<int, FormInput>
+     * @return array<int, FormField>
      */
     public function allFormInputs(): array
     {
-        // Default backward-compat con la modalità FormInput: stesso set di
+        // Default backward-compat con la modalità FormField: stesso set di
         // formInputs(). Override se il rendering è session-aware ma lo schema
         // deve conoscere l'unione completa dei field possibili.
         return $this->formInputs();

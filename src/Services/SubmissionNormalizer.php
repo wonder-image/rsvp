@@ -1,6 +1,6 @@
 <?php
 
-namespace Wonder\Plugin\Rsvp\Support;
+namespace Wonder\Plugin\Rsvp\Services;
 
 use Wonder\Plugin\Rsvp\Models\Authorization;
 use Wonder\Plugin\Rsvp\Models\InviteCode;

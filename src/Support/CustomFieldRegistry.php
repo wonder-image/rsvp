@@ -4,7 +4,7 @@ namespace Wonder\Plugin\Rsvp\Support;
 
 use ReflectionException;
 use ReflectionMethod;
-use Wonder\App\ResourceSchema\FormInput;
+use Wonder\App\ResourceSchema\FormField;
 use Wonder\Plugin\Rsvp\Contracts\RsvpExtension;
 
 final class CustomFieldRegistry
@@ -18,14 +18,14 @@ final class CustomFieldRegistry
 
         try {
             if (self::hasCustomFormInputs($extension, 'formInputs')) {
-                /** @var array<int, FormInput> $formInputs */
+                /** @var array<int, FormField> $formInputs */
                 $formInputs = $extension->formInputs();
 
                 return self::normalizeFormInputs($formInputs);
             }
 
             if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
-                /** @var array<int, FormInput> $formInputs */
+                /** @var array<int, FormField> $formInputs */
                 $formInputs = $extension->allFormInputs();
 
                 return self::normalizeFormInputs($formInputs);
@@ -46,14 +46,14 @@ final class CustomFieldRegistry
 
         try {
             if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
-                /** @var array<int, FormInput> $formInputs */
+                /** @var array<int, FormField> $formInputs */
                 $formInputs = $extension->allFormInputs();
 
                 return self::normalizeFormInputs($formInputs);
             }
 
             if (self::hasCustomFormInputs($extension, 'formInputs')) {
-                /** @var array<int, FormInput> $formInputs */
+                /** @var array<int, FormField> $formInputs */
                 $formInputs = $extension->formInputs();
 
                 return self::normalizeFormInputs($formInputs);
@@ -63,6 +63,101 @@ final class CustomFieldRegistry
         } catch (\Throwable) {
             return [];
         }
+    }
+
+    /**
+     * Custom field del contesto corrente come `FormField` pronti al render
+     * (`$input->render()`). È la sorgente del form frontend: gli input si
+     * renderizzano da soli col tema attivo, senza un renderer dedicato.
+     *
+     * @return array<int, FormField>
+     */
+    public static function visibleInputs(RsvpExtension $extension): array
+    {
+        rsvp_boot_translations();
+
+        try {
+            if (self::hasCustomFormInputs($extension, 'formInputs')) {
+                return self::onlyFormFields($extension->formInputs());
+            }
+
+            if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
+                return self::onlyFormFields($extension->allFormInputs());
+            }
+
+            // Estensioni legacy con fields() array: costruiamo i FormField.
+            return self::inputsFromDefinitions(self::normalizeLegacyDefinitions($extension->fields()));
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $inputs
+     * @return array<int, FormField>
+     */
+    private static function onlyFormFields(array $inputs): array
+    {
+        return array_values(array_filter(
+            $inputs,
+            static fn ($input): bool => $input instanceof FormField
+        ));
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $definitions
+     * @return array<int, FormField>
+     */
+    private static function inputsFromDefinitions(array $definitions): array
+    {
+        $inputs = [];
+
+        foreach ($definitions as $key => $definition) {
+            if (is_array($definition)) {
+                $inputs[] = self::buildInput((string) $key, $definition);
+            }
+        }
+
+        return $inputs;
+    }
+
+    /**
+     * @param array<string, mixed> $definition
+     */
+    private static function buildInput(string $key, array $definition): FormField
+    {
+        $input = FormField::key($key);
+        $options = is_array($definition['options'] ?? null) ? $definition['options'] : [];
+
+        match ((string) ($definition['type'] ?? 'text')) {
+            'email' => $input->email(),
+            'phone' => $input->phone(),
+            'number' => $input->number(),
+            'url' => $input->url(),
+            'textarea' => $input->textarea(),
+            'select' => $input->select($options),
+            'radio' => $input->radio($options),
+            'checkbox' => $input->checkbox(),
+            default => $input->text(),
+        };
+
+        $label = trim((string) ($definition['label'] ?? ''));
+
+        if ($label !== '') {
+            $input->label($label);
+        }
+
+        if (!empty($definition['required'])) {
+            $input->required();
+        }
+
+        $value = $definition['value'] ?? '';
+
+        if ($value !== '' && $value !== null && $value !== []) {
+            $input->value($value);
+        }
+
+        return $input;
     }
 
     /**
@@ -92,7 +187,7 @@ final class CustomFieldRegistry
     }
 
     /**
-     * @param array<int, FormInput> $inputs
+     * @param array<int, FormField> $inputs
      * @return array<string, array<string, mixed>>
      */
     public static function normalizeFormInputs(array $inputs): array
@@ -100,7 +195,7 @@ final class CustomFieldRegistry
         $normalized = [];
 
         foreach ($inputs as $input) {
-            if (!$input instanceof FormInput) {
+            if (!$input instanceof FormField) {
                 continue;
             }
 

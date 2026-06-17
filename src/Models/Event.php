@@ -3,6 +3,7 @@
 namespace Wonder\Plugin\Rsvp\Models;
 
 use Wonder\App\Model;
+use Wonder\App\Support\SyncSchema;
 use Wonder\Data\UploadSchema as Field;
 use Wonder\Sql\TableSchema as Column;
 
@@ -11,6 +12,11 @@ final class Event extends Model
     public static string $table = 'rsvp_event';
     public static string $folder = 'rsvp/events';
     public static string $icon = 'bi bi-calendar-event';
+
+    public static function syncSchema(): ?SyncSchema
+    {
+        return SyncSchema::multiRow();
+    }
 
     public static function tableSchema(): array
     {

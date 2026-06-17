@@ -48,8 +48,19 @@ final class ExtensionRegistry
     }
 
     /**
-     * Field DEL contesto corrente (sessione/locale/ruolo). Usato dalla
-     * view per il rendering del form e da submit.php per validazione.
+     * Custom field del contesto corrente come `FormField` pronti al render,
+     * usati dal form frontend (`$input->render()`).
+     *
+     * @return array<int, \Wonder\App\ResourceSchema\FormField>
+     */
+    public static function inputs(): array
+    {
+        return CustomFieldRegistry::visibleInputs(self::get());
+    }
+
+    /**
+     * Definizioni normalizzate dei field del contesto corrente
+     * (chiave => type/label/options/required/value). Usato per validazione.
      *
      * @return array<string, array<string, mixed>>
      */

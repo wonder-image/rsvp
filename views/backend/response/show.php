@@ -1,167 +1,164 @@
-<?php \Wonder\View\View::layout('backend.show'); ?>
-
 <?php
-    use Wonder\Plugin\Rsvp\Models\Response;
 
-    $item = is_array($ITEM ?? null) ? $ITEM : [];
-    $participants = json_decode((string) ($item['participants_json'] ?? '[]'), true) ?: [];
-    $events = json_decode((string) ($item['events_json'] ?? '[]'), true) ?: [];
-    $consents = json_decode((string) ($item['consents_json'] ?? '[]'), true) ?: [];
-    $documents = json_decode((string) ($item['legal_documents_json'] ?? '[]'), true) ?: [];
-    $metadata = json_decode((string) ($item['metadata_json'] ?? '[]'), true) ?: [];
-    $customFields = Response::customFieldDefinitions();
-    $hasCustomFieldValues = false;
-    $bookingCode = Response::resolveBookingCode($item);
-    $attendanceStatus = rsvpResponseAttendanceStatus($item['attendance_status'] ?? null);
-    $showAttendanceStatus = rsvpAttendanceStatusEnabled(\Wonder\Plugin\Rsvp\Support\SubmissionNotifier::settings());
+use Wonder\Elements\Components\Card;
+use Wonder\Elements\Components\Container;
+use Wonder\Elements\Components\Link;
+use Wonder\Elements\Components\RichText;
+use Wonder\Elements\Components\SectionTitle;
+use Wonder\Plugin\Rsvp\Models\Response;
+use Wonder\Plugin\Rsvp\Services\SubmissionNotifier;
 
-    foreach ($customFields as $field) {
-        if (trim((string) ($item[$field['column']] ?? '')) !== '') {
-            $hasCustomFieldValues = true;
-            break;
-        }
+$item = is_array($ITEM ?? null) ? $ITEM : [];
+$participants = json_decode((string) ($item['participants_json'] ?? '[]'), true) ?: [];
+$events = json_decode((string) ($item['events_json'] ?? '[]'), true) ?: [];
+$documents = json_decode((string) ($item['legal_documents_json'] ?? '[]'), true) ?: [];
+$metadata = json_decode((string) ($item['metadata_json'] ?? '[]'), true) ?: [];
+$customFields = Response::customFieldDefinitions();
+// Valori derivati forniti da Response::decorate() sulla riga letta.
+$bookingCode = (string) ($item['booking_code'] ?? '');
+$showAttendanceStatus = rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
+
+$e = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+
+$fullName = trim(((string) ($item['contact_name'] ?? '')).' '.((string) ($item['contact_surname'] ?? '')));
+
+\Wonder\View\View::layout('backend.show', [
+    'TITLE' => $fullName !== '' ? $fullName : 'Risposta RSVP',
+    'SUBTITLE' => 'Prenotazione '.($bookingCode !== '' ? $bookingCode : '--')
+        .' del '.((string) ($item['creation'] ?? '--')),
+]);
+
+// --- Colonna principale -----------------------------------------------------
+
+$participantsHtml = 'Totale: <b>'.count($participants).'</b><br>'
+    .'Bambini: <b>'.$e($item['children_count'] ?? '0').'</b><br>';
+
+foreach ($participants as $index => $participant) {
+    $name = trim(((string) ($participant['name'] ?? '')).' '.((string) ($participant['surname'] ?? '')));
+    $participantsHtml .= 'Partecipante '.($index + 1).': <b>'.$e($name).'</b>';
+
+    if (!empty($participant['is_child'])) {
+        $participantsHtml .= ' <em>(bambino)</em>';
     }
-?>
 
-<div class="row g-3">
+    if (!empty($participant['dietary_requirements'])) {
+        $participantsHtml .= ' - '.$e($participant['dietary_requirements']);
+    }
 
-    <div class="col-9">
-        <div class="row g-3">
+    $participantsHtml .= '<br>';
+}
 
-            <wi-card class="col-12">
-                <div class="col-6">
-                    <h6>Contatto</h6>
-                    <div class="w-100 mt-2">
-                        Nome: <strong><?=htmlspecialchars(trim(((string) ($item['contact_name'] ?? '')).' '.((string) ($item['contact_surname'] ?? ''))), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Email: <strong><?=htmlspecialchars((string) ($item['contact_email'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Telefono: <strong><?=htmlspecialchars((string) ($item['contact_phone'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <h6>Partecipanti</h6>
-                    <div class="w-100 mt-2">
-                        Totale: <strong><?=count($participants)?></strong><br>
-                        Bambini: <strong><?=htmlspecialchars((string) ($item['children_count'] ?? '0'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        <?php foreach ($participants as $index => $participant) { ?>
-                            Partecipante <?=($index + 1)?>:
-                            <strong><?=htmlspecialchars(trim(((string) ($participant['name'] ?? '')).' '.((string) ($participant['surname'] ?? ''))), ENT_QUOTES, 'UTF-8')?></strong>
-                            <?php if (!empty($participant['is_child'])) { ?> <em>(bambino)</em><?php } ?>
-                            <?php if (!empty($participant['dietary_requirements'])) { ?>
-                                - <?=htmlspecialchars((string) $participant['dietary_requirements'], ENT_QUOTES, 'UTF-8')?>
-                            <?php } ?>
-                            <br>
-                        <?php } ?>
-                    </div>
-                </div>
-            </wi-card>
+$mainCards = [
+    (new Card)->components([
+        (new Container)->components([
+            (new SectionTitle)->text('Contatto'),
+            (new RichText(
+                'Nome: <b>'.$e($fullName).'</b><br>'
+                .'Email: <b>'.$e($item['contact_email'] ?? '--').'</b><br>'
+                .'Telefono: <b>'.$e($item['contact_phone'] ?? '--').'</b>'
+            )),
+        ])->columnSpan(1),
+        (new Container)->components([
+            (new SectionTitle)->text('Partecipanti'),
+            (new RichText($participantsHtml)),
+        ])->columnSpan(1),
+    ])->columns(2),
 
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Richieste</h6>
-                    <div class="w-100 mt-2"><?=nl2br(htmlspecialchars((string) ($item['notes'] ?? '--'), ENT_QUOTES, 'UTF-8'))?></div>
-                </div>
-            </wi-card>
+    (new Card)->components([
+        (new SectionTitle)->text('Richieste'),
+        (new RichText(nl2br($e($item['notes'] ?? '--')))),
+    ]),
+];
 
-            <?php if ($hasCustomFieldValues) { ?>
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Campi personalizzati</h6>
-                    <div class="w-100 mt-2">
-                        <?php foreach ($customFields as $field) { ?>
-                            <?php $value = rsvpRenderCustomFieldValue($field, $item[$field['column']] ?? null); ?>
-                            <?php if ($value === '') { continue; } ?>
-                            <?=htmlspecialchars(rsvpCustomFieldLabel($field, (string) ($field['key'] ?? '')), ENT_QUOTES, 'UTF-8')?>:
-                            <strong><?=htmlspecialchars($value, ENT_QUOTES, 'UTF-8')?></strong><br>
-                        <?php } ?>
-                    </div>
-                </div>
-            </wi-card>
-            <?php } ?>
+$customFieldsHtml = '';
+foreach ($customFields as $field) {
+    $value = rsvpRenderCustomFieldValue($field, $item[$field['column']] ?? null);
 
-            <?php if ($metadata !== []) { ?>
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Dati aggiuntivi</h6>
-                    <div class="w-100 mt-2">
-                        <pre class="mb-0"><?=htmlspecialchars(json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8')?></pre>
-                    </div>
-                </div>
-            </wi-card>
-            <?php } ?>
-        </div>
-    </div>
+    if ($value === '') {
+        continue;
+    }
 
-    <div class="col-3">
-        <div class="row g-3">
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Dettagli</h6>
-                    <div class="w-100 mt-2">
-                        <?php if ($showAttendanceStatus) { ?>
-                        Conferma: <?=$attendanceStatus->automaticResize?><br>
-                        <?php } ?>
-                        Codice prenotazione: <strong><?=htmlspecialchars($bookingCode !== '' ? $bookingCode : '--', ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Creazione: <strong><?=htmlspecialchars((string) ($item['creation'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Lingua: <strong><?=htmlspecialchars((string) ($item['locale'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Evento: <strong><?=htmlspecialchars((string) ($item['event_key'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Codice invito: <strong><?=htmlspecialchars((string) ($item['invite_code'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Gruppo invito: <strong><?=htmlspecialchars((string) ($item['invite_group_code'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Autorizzazione: <strong><?=htmlspecialchars((string) ($item['authorization_code'] ?? '--'), ENT_QUOTES, 'UTF-8')?></strong>
-                    </div>
-                </div>
-            </wi-card>
+    $customFieldsHtml .= $e(rsvpCustomFieldLabel($field, (string) ($field['key'] ?? '')))
+        .': <b>'.$e($value).'</b><br>';
+}
 
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Consensi</h6>
-                    <div class="w-100 mt-2">
-                        Privacy: <strong><?=htmlspecialchars(rsvpBooleanText($consents['privacy'] ?? false), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        Foto: <strong><?=htmlspecialchars(rsvpBooleanText($consents['photo'] ?? false), ENT_QUOTES, 'UTF-8')?></strong>
-                    </div>
-                </div>
-            </wi-card>
+if ($customFieldsHtml !== '') {
+    $mainCards[] = (new Card)->components([
+        (new SectionTitle)->text('Campi personalizzati'),
+        (new RichText($customFieldsHtml)),
+    ]);
+}
 
-            <?php if ($documents !== []) { ?>
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Documenti legali</h6>
-                    <div class="w-100 mt-2">
-                        <?php foreach ($documents as $docType => $document) { ?>
-                            <?=htmlspecialchars((string) $docType, ENT_QUOTES, 'UTF-8')?>:
-                            <strong><?=htmlspecialchars(rsvpBooleanText($document['accepted'] ?? false), ENT_QUOTES, 'UTF-8')?></strong><br>
-                        <?php } ?>
-                    </div>
-                </div>
-            </wi-card>
-            <?php } ?>
+if ($metadata !== []) {
+    $mainCards[] = (new Card)->components([
+        (new SectionTitle)->text('Dati aggiuntivi'),
+        (new RichText('<pre class="mb-0">'.$e(json_encode(
+            $metadata,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        )).'</pre>')),
+    ]);
+}
 
-            <?php if ($events !== []) { ?>
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Eventi selezionati</h6>
-                    <div class="w-100 mt-2">
-                        <?php foreach ($events as $event) { ?>
-                            <?=htmlspecialchars((string) $event, ENT_QUOTES, 'UTF-8')?><br>
-                        <?php } ?>
-                    </div>
-                </div>
-            </wi-card>
-            <?php } ?>
+// --- Colonna laterale -------------------------------------------------------
 
-            <?php if (!empty($item['source_url'])) { ?>
-            <wi-card class="col-12">
-                <div class="col-12">
-                    <h6>Origine</h6>
-                    <div class="w-100 mt-2">
-                        <a href="<?=htmlspecialchars((string) $item['source_url'], ENT_QUOTES, 'UTF-8')?>" target="_blank" rel="noopener noreferrer">
-                            <?=htmlspecialchars((string) $item['source_url'], ENT_QUOTES, 'UTF-8')?>
-                        </a>
-                    </div>
-                </div>
-            </wi-card>
-            <?php } ?>
-        </div>
-    </div>
-</div>
+$detailsHtml = '';
+if ($showAttendanceStatus) {
+    $detailsHtml .= 'Conferma: <b>'.$e($item['pretty_attendance_status'] ?? '').'</b><br>';
+}
+$detailsHtml .= 'Codice prenotazione: <b>'.$e($bookingCode !== '' ? $bookingCode : '--').'</b><br>'
+    .'Creazione: <b>'.$e($item['creation'] ?? '--').'</b><br>'
+    .'Lingua: <b>'.$e($item['locale'] ?? '--').'</b><br>'
+    .'Evento: <b>'.$e($item['event_key'] ?? '--').'</b><br>'
+    .'Codice invito: <b>'.$e($item['invite_code'] ?? '--').'</b><br>'
+    .'Gruppo invito: <b>'.$e($item['invite_group_code'] ?? '--').'</b><br>'
+    .'Autorizzazione: <b>'.$e($item['authorization_code'] ?? '--').'</b>';
 
-<?php \Wonder\View\View::end(); ?>
+$sideCards = [
+    (new Card)->components([
+        (new SectionTitle)->text('Dettagli'),
+        (new RichText($detailsHtml)),
+    ]),
+
+    (new Card)->components([
+        (new SectionTitle)->text('Consensi'),
+        (new RichText(
+            'Privacy: <b>'.$e($item['pretty_privacy'] ?? '').'</b><br>'
+            .'Foto: <b>'.$e($item['pretty_photo'] ?? '').'</b>'
+        )),
+    ]),
+];
+
+if ($documents !== []) {
+    $documentsHtml = '';
+    foreach ($documents as $docType => $document) {
+        $documentsHtml .= $e($docType).': <b>'.$e(rsvpBooleanText($document['accepted'] ?? false)).'</b><br>';
+    }
+
+    $sideCards[] = (new Card)->components([
+        (new SectionTitle)->text('Documenti legali'),
+        (new RichText($documentsHtml)),
+    ]);
+}
+
+if ($events !== []) {
+    $sideCards[] = (new Card)->components([
+        (new SectionTitle)->text('Eventi selezionati'),
+        (new RichText(implode('<br>', array_map($e, $events)))),
+    ]);
+}
+
+if (!empty($item['source_url'])) {
+    $sideCards[] = (new Card)->components([
+        (new SectionTitle)->text('Origine'),
+        (new RichText((string) (new Link((string) $item['source_url']))
+            ->label((string) $item['source_url'])
+            ->blank())),
+    ]);
+}
+
+echo (new Container)->components([
+    (new Container)->components($mainCards)->columnSpan(2)->columns(1),
+    (new Container)->components($sideCards)->columnSpan(1)->columns(1),
+])->columns(3);
+
+\Wonder\View\View::end();

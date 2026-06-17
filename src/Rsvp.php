@@ -4,8 +4,8 @@ namespace Wonder\Plugin\Rsvp;
 
 use Wonder\App\Module\Contracts\ModuleInterface;
 use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
-use Wonder\Plugin\Rsvp\Support\FrontendContext;
-use Wonder\Plugin\Rsvp\Support\FrontendPage;
+use Wonder\Plugin\Rsvp\Services\FrontendContext;
+use Wonder\Plugin\Rsvp\Services\FrontendPage;
 
 final class Rsvp implements ModuleInterface
 {

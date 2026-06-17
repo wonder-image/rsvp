@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "391bfa0a62f4c9fea54e795a47e00aa18bd39451a8219dc46ee23337d05b5260"
+    },
+    "wi-app": {
+      "source": "wonder-image/skills",
+      "sourceType": "github",
+      "skillPath": "skills/wi-app/SKILL.md",
+      "computedHash": "48fb3ff4628c33894f7b1f98634da5db4cfb71393fd378e824139dce75cdffe6"
+    },
+    "wi-site": {
+      "source": "wonder-image/skills",
+      "sourceType": "github",
+      "skillPath": "skills/wi-site/SKILL.md",
+      "computedHash": "b611ecfd2f77451a5bc962bd25d4cb174504e8f90f62593fa4a0b25b77e456ba"
+    }
+  }
+}

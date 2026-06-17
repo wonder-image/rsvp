@@ -2,7 +2,7 @@
 
 namespace Wonder\Plugin\Rsvp\Resources;
 
-use Wonder\App\ResourceSchema\FormInput;
+use Wonder\App\ResourceSchema\FormField;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\Resources\Support\SingletonResource;
@@ -52,39 +52,39 @@ final class SettingsResource extends SingletonResource
     public static function formSchema(): array
     {
         return [
-            FormInput::key('require_invite_code')->select([
+            FormField::key('require_invite_code')->select([
                 'false' => 'Libero',
                 'true' => 'Richiede codice',
             ])->value('false'),
-            FormInput::key('login_title')->text(),
-            FormInput::key('login_text')->textarea(),
-            FormInput::key('enable_attendance_status')->select([
+            FormField::key('login_title')->text(),
+            FormField::key('login_text')->textarea(),
+            FormField::key('enable_attendance_status')->select([
                 'false' => 'No',
                 'true' => 'Sì',
             ])->value('false'),
-            FormInput::key('max_participants')->number(),
-            FormInput::key('allow_children')->select([
+            FormField::key('max_participants')->number(),
+            FormField::key('allow_children')->select([
                 'false' => 'No',
                 'true' => 'Sì',
             ])->value('false'),
-            FormInput::key('max_children')->number(),
-            FormInput::key('require_image_release')->select([
+            FormField::key('max_children')->number(),
+            FormField::key('require_image_release')->select([
                 'false' => 'No',
                 'true' => 'Sì',
             ])->value('false'),
-            FormInput::key('admin_email')->email(),
-            FormInput::key('admin_notifications')->select([
+            FormField::key('admin_email')->email(),
+            FormField::key('admin_notifications')->select([
                 'true' => 'Sì',
                 'false' => 'No',
             ])->value('true'),
-            FormInput::key('customer_notifications')->select([
+            FormField::key('customer_notifications')->select([
                 'true' => 'Sì',
                 'false' => 'No',
             ])->value('true'),
-            FormInput::key('customer_subject')->text(),
-            FormInput::key('customer_message')->textarea(),
-            FormInput::key('admin_subject')->text(),
-            FormInput::key('admin_message')->textarea(),
+            FormField::key('customer_subject')->text(),
+            FormField::key('customer_message')->textarea(),
+            FormField::key('admin_subject')->text(),
+            FormField::key('admin_message')->textarea(),
         ];
     }
 
@@ -135,7 +135,7 @@ final class SettingsResource extends SingletonResource
         string $mode,
         string $context = 'backend'
     ): array {
-        $defaults = \Wonder\Plugin\Rsvp\Support\SubmissionNotifier::defaults();
+        $defaults = \Wonder\Plugin\Rsvp\Services\SubmissionNotifier::defaults();
 
         $values['customer_subject'] = trim((string) ($values['customer_subject'] ?? '')) !== ''
             ? (string) $values['customer_subject']

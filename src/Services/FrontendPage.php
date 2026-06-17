@@ -1,6 +1,6 @@
 <?php
 
-namespace Wonder\Plugin\Rsvp\Support;
+namespace Wonder\Plugin\Rsvp\Services;
 
 use Wonder\App\LegacyGlobals;
 

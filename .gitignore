@@ -1,2 +1,6 @@
 .DS_Store
+.agents/
+.claude/
 vendor/
+tests/
+skill-lock.json

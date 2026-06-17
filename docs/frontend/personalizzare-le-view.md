@@ -1,0 +1,79 @@
+# Personalizzare le view
+
+Il modulo è pensato per essere personalizzato dal sito **senza toccare
+`vendor/`**. La personalizzazione del frontend avviene tramite l'override delle
+view.
+
+## Override delle view frontend
+
+Se nel sito crei questi file, il modulo li userà al posto delle view del package:
+
+```text
+custom/modules/rsvp/views/frontend/home.php
+custom/modules/rsvp/views/frontend/login.php
+custom/modules/rsvp/views/components/<nome>.php
+```
+
+È la meccanica corretta per cambiare HTML, struttura, sezioni, stile e logica
+presentazionale. Le view del modulo restano come fallback.
+
+## Contesto disponibile: `$STATE`
+
+Le view ricevono `$STATE` (output di `FrontendContext::state()`). Chiavi
+principali:
+
+| Chiave | Contenuto |
+| --- | --- |
+| `$STATE['settings']` | configurazione `rsvp/settings` |
+| `$STATE['session']` | sessione invito corrente (`id`, `code`, `usage_mode`, `can_submit`, …) |
+| `$STATE['authorization']` | autorizzazione del codice attivo |
+| `$STATE['visible_events']` | eventi visibili per l'autorizzazione |
+| `$STATE['featured_event']` | evento in evidenza |
+| `$STATE['requires_invite_code']` | `true` se serve il login |
+| `$STATE['max_participants']` | limite adulti effettivo |
+| `$STATE['allow_children']` / `$STATE['max_children']` | regole bambini |
+| `$STATE['require_image_release']` | liberatoria obbligatoria |
+| `$STATE['custom_fields']` | custom field del contesto corrente |
+
+Le view RSVP sono renderizzate **dentro il layout frontend del sito**, quindi
+ereditano automaticamente `head.php`, `header.php`, `footer.php`, asset e utility
+globali. Nelle override puoi usare `__l()`, `__t()` e `__r()` come in qualsiasi
+altra pagina.
+
+## Componenti riutilizzabili
+
+Il modulo include componenti in `views/components/` (es. `countdown`,
+`event-date`, `form`). Richiamali dalle view con l'entrypoint:
+
+```php
+<?= \Wonder\Plugin\Rsvp\Rsvp::component('countdown', [
+    'target_date' => '2026-06-02 18:30',
+]) ?>
+```
+
+Gli `$args` sono esposti al componente come `$args`; i legacy-globals del
+framework e `$STATE` restano disponibili nello scope del componente.
+
+## Pagine RSVP aggiuntive
+
+Per creare nuove pagine RSVP-gated del sito (es. una wishlist), registra una
+route in `custom/routes/route.frontend.php`, punta a un file in `custom/pages/...`
+e usa `Rsvp::renderPage()`:
+
+```php
+<?php
+
+use Wonder\Plugin\Rsvp\Rsvp;
+
+Rsvp::renderPage([
+    'key'             => 'wishlist',                 // diventa $PAGE_KEY = 'rsvp.wishlist'
+    'view'            => __DIR__ . '/views/wishlist.php',
+    'title'           => 'Lista regali',
+    'require_session' => true,                        // redirect a login se serve il codice
+    'data'            => ['extra' => '...'],          // variabili extra per la view ($STATE è automatico)
+]);
+```
+
+`renderPage()` carica lo stato, gestisce il redirect al login quando serve,
+applica l'hook SEO dell'estensione e include la view dentro lo scaffold del
+layout frontend.

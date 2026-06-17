@@ -24,36 +24,36 @@
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
     $featuredEvent = is_array($state['featured_event'] ?? null) ? $state['featured_event'] : [];
 
-    $escape = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
-
     $eventName = trim((string) ($featuredEvent['label']
         ?? ($featuredEvent['name'] ?? '')));
-    $homeTitle = trim((string) ($state['home_title'] ?? rsvp_trans('rsvp.frontend.home.title', 'RSVP')));
+    $homeTitle = trim((string) ($state['home_title'] ?? rsvp_trans('pages.rsvp.home.title', 'RSVP')));
     $homeText = trim((string) ($state['home_text'] ?? ''));
-    $sectionTitle = rsvp_trans('rsvp.frontend.home.section_title', 'Conferma la tua partecipazione');
 ?>
 
-<section class="rsvp-section rsvp-hero">
-    <?php if ($eventName !== '') { ?>
-        <h1 class="rsvp-hero-title"><?=$escape($eventName)?></h1>
-    <?php } ?>
-    <?php if ($homeTitle !== '' && $homeTitle !== $eventName) { ?>
-        <p class="rsvp-hero-subtitle"><?=$escape($homeTitle)?></p>
-    <?php } ?>
-    <?php if ($homeText !== '') { ?>
-        <div class="rsvp-hero-text"><?= nl2br($escape($homeText)) ?></div>
-    <?php } ?>
+<section class="mt-10">
+    <div class="content a-c">
+        <?php if ($eventName !== '') { ?>
+            <h1 class="title-big tx-upper w-100"><?=e($eventName)?></h1>
+        <?php } ?>
+        <?php if ($homeTitle !== '' && $homeTitle !== $eventName) { ?>
+            <p class="subtitle w-100 mt-4"><?=e($homeTitle)?></p>
+        <?php } ?>
+        <?php if ($homeText !== '') { ?>
+            <div class="text w-100 mt-4"><?= nl2br(e($homeText)) ?></div>
+        <?php } ?>
+    </div>
 </section>
 
-<section class="rsvp-section rsvp-section-event-date">
-    <?php Rsvp::component('event-date'); ?>
+<section class="mt-10">
+    <div class="content">
+        <?php Rsvp::component('event-date'); ?>
+    </div>
 </section>
 
-<section class="rsvp-section rsvp-section-countdown">
-    <?php Rsvp::component('countdown'); ?>
+<section class="mt-10">
+    <div class="content">
+        <?php Rsvp::component('countdown'); ?>
+    </div>
 </section>
 
-<section class="rsvp-section rsvp-section-form">
-    <h2 class="rsvp-section-title"><?=$escape($sectionTitle)?></h2>
-    <?php Rsvp::component('form'); ?>
-</section>
+<?php Rsvp::component('form'); ?>

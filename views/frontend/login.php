@@ -1,149 +1,93 @@
 <?php
+    /**
+     * Override RSVP login page per fatimagabrielewedding-com.
+     *
+     * Risolto da Wonder\Plugin\Rsvp\Rsvp::viewPath() se il file esiste qui.
+     * Form di accesso con codice invito: input password + submit, layout
+     * full-page con sfondo. Il submit usa API_CLIENT (Bearer + JSON) per
+     * chiamare /api/rsvp/login/; in caso di successo redirect a /rsvp/.
+     */
+
     $state = is_array($STATE ?? null) ? $STATE : [];
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
-    $pageContent = is_array($state['page_content'] ?? null) ? $state['page_content'] : [];
-    $ambient = is_array($pageContent['ambient_background'] ?? null) ? $pageContent['ambient_background'] : [];
-    $requiresInviteCode = !empty($state['requires_invite_code']);
-    $homeUrl = function_exists('__r') ? __r('rsvp.home') : '/rsvp/';
-    $loginApiUrl = function_exists('__r') ? __r('api.rsvp.login') : '/api/rsvp/login/';
-    $logoutApiUrl = function_exists('__r') ? __r('api.rsvp.logout') : '/api/rsvp/logout/';
-
-    $escape = static fn ($value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-    $isTrue = static function (mixed $value): bool {
-        return in_array(strtolower(trim((string) $value)), ['1', 'true', 'yes', 'on'], true);
-    };
-    $renderVideo = static function (string $path) use ($escape): string {
-        $path = trim($path);
-
-        if ($path === '') {
-            return '';
-        }
-
-        if (function_exists('__videoBG')) {
-            return (string) __videoBG($path);
-        }
-
-        return '<video class="rsvp-video-fallback" autoplay muted loop playsinline>'
-            .'<source src="'.$escape($path).'">'
-            .'</video>';
-    };
-    $kicker = rsvp_trans('rsvp.frontend.login.kicker', 'RSVP');
-    $sessionText = rsvp_trans('rsvp.frontend.login.session_text', 'Sessione attiva con codice');
-    $homeButton = rsvp_trans('rsvp.frontend.login.home_button', 'Vai al form RSVP');
-    $logoutButton = rsvp_trans('rsvp.frontend.login.logout_button', 'Esci');
-    $codePlaceholder = rsvp_trans('rsvp.frontend.login.code_placeholder', 'Inserisci il codice invito');
-    $loginButton = rsvp_trans('rsvp.frontend.login.login_button', 'Accedi');
-    $freeText = rsvp_trans('rsvp.frontend.login.free_text', 'Questo RSVP è libero: puoi entrare direttamente nella pagina di conferma.');
-    $loadingText = rsvp_trans('rsvp.frontend.login.loading_text', 'Accesso in corso...');
-    $errorText = rsvp_trans('rsvp.frontend.login.error_text', 'Accesso non riuscito.');
+    $hasSession = (int) ($session['id'] ?? 0) > 0;
+    $homeUrl = function_exists('localizedFrontendPath') ? localizedFrontendPath('rsvp') : '/it/rsvp/';
+    
 ?>
 
-<style>
-    #rsvp-login-page { position: relative; min-height: 100vh; background: #000; color: #fff; overflow: hidden; }
-    #rsvp-login-page .rsvp-video-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    #rsvp-login-page .rsvp-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-    #rsvp-login-page .rsvp-layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); backdrop-filter: blur(12px); }
-    #rsvp-login-page .rsvp-shell { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
-    #rsvp-login-page .rsvp-card { width: min(720px, 100%); background: rgba(255,255,255,.93); color: #241a14; border-radius: 24px; border: 1px solid rgba(216, 179, 111, .22); box-shadow: 0 24px 80px rgba(0,0,0,.24); padding: 2rem; }
-    #rsvp-login-page .rsvp-kicker { font-size: .76rem; letter-spacing: .18em; text-transform: uppercase; color: #9c6b3f; }
-    #rsvp-login-page .rsvp-title { font-size: clamp(2rem, 3vw, 3rem); line-height: .95; margin-top: .75rem; }
-    #rsvp-login-page .rsvp-text { margin-top: 1rem; color: #5b493d; }
-    #rsvp-login-page .rsvp-form-grid { display: grid; gap: 1rem; margin-top: 2rem; }
-    #rsvp-login-page .rsvp-input { width: 100%; border: 1px solid #d8c4b3; border-radius: 14px; padding: .95rem 1rem; background: #fffdfb; font: inherit; }
-    #rsvp-login-page .rsvp-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
-    #rsvp-login-page .rsvp-btn { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; padding: .95rem 1.4rem; background: #241a14; color: #fff; font-weight: 700; text-decoration: none; cursor: pointer; }
-    #rsvp-login-page .rsvp-btn-light { background: transparent; color: #241a14; border: 1px solid #d8c4b3; }
-    #rsvp-login-page .rsvp-note { margin-top: 1rem; color: #7c6757; font-size: .95rem; }
-</style>
+<section class="full-page">
 
-<div id="rsvp-login-page">
-    <?php if ($isTrue($ambient['enabled'] ?? false) && trim((string) ($ambient['video'] ?? '')) !== '') { ?>
-        <section class="rsvp-bg" aria-hidden="true">
-            <?=$renderVideo((string) $ambient['video'])?>
-            <div class="rsvp-layer"></div>
-        </section>
-    <?php } ?>
+    <?= __ri($PATH->upload.'/images/texture-1-phone.png')->fitCover()->skeleton(false)->size(1920)->render() ?>
 
-    <section class="rsvp-shell">
-        <div class="rsvp-card">
-            <div class="rsvp-kicker"><?= $escape($kicker) ?></div>
-            <h1 class="rsvp-title"><?= $escape((string) ($state['login_title'] ?? rsvp_trans('rsvp.frontend.login.title', 'Accesso RSVP'))) ?></h1>
-            <div class="rsvp-text"><?= nl2br($escape((string) ($state['login_text'] ?? ''))) ?></div>
+    <div class="content content-small" style="z-index: 2;">
+        <form
+            id="rsvp-login-form"
+            method="post"
+            action=""
+            autocomplete="off"
+            class="w-100 p-6 center bg-secondary b-r-25"
+            onsubmit="event.preventDefault(); submitRsvpLogin(this); return false;"
+        >
+            <img src="<?=$SOCIETY->logoWhite?>" alt="<?=e($SOCIETY->name)?>" class="w-30 c-w">
 
-            <?php if (($session['id'] ?? 0) > 0) { ?>
-                <div class="rsvp-note">
-                    <?= $escape($sessionText) ?>
-                    <strong><?= $escape((string) ($session['code'] ?? '')) ?></strong>.
-                </div>
-                <div class="rsvp-actions">
-                    <a class="rsvp-btn" href="<?=$escape($homeUrl)?>"><?= $escape($homeButton) ?></a>
-                    <button type="button" class="rsvp-btn rsvp-btn-light" id="rsvp-logout"><?= $escape($logoutButton) ?></button>
-                </div>
-            <?php } elseif ($requiresInviteCode) { ?>
-                <form id="rsvp-login-form" class="rsvp-form-grid">
-                    <input
-                        class="rsvp-input"
-                        type="text"
-                        name="code"
-                        placeholder="<?=$escape($codePlaceholder)?>"
-                        required
-                        autocomplete="off"
-                    >
-                    <button class="rsvp-btn" type="submit"><?= $escape($loginButton) ?></button>
-                </form>
-            <?php } else { ?>
-                <div class="rsvp-note"><?= $escape($freeText) ?></div>
-                <div class="rsvp-actions">
-                    <a class="rsvp-btn" href="<?=$escape($homeUrl)?>"><?= $escape($homeButton) ?></a>
-                </div>
-            <?php } ?>
-
-            <div id="rsvp-login-feedback" class="rsvp-note"></div>
-        </div>
-    </section>
-</div>
+            <div class="w-100 mt-6">
+                <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
+            </div>
+            <div class="w-100 mt-4">
+                <?=submit(__t('components.buttons.login'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
+            </div>
+            <div id="rsvp-login-feedback" class="w-100 mt-4 a-c tx-danger"></div>
+        </form>
+    </div>
+</section>
 
 <script>
+    window.submitRsvpLogin = async function (form) {
+        const password = (form.elements.password.value || '').trim();
+
+        if (password === '') {
+            // 905 = "Password errata" nelle traduzioni framework. Usiamo
+            // lo stesso codice anche per "campo vuoto" per coerenza UX.
+            if (typeof alertToast === 'function') alertToast(905);
+            return;
+        }
+
+        try {
+            // API_CLIENT serializza il payload come application/json e
+            // aggiunge il Bearer token + Accept-Language. L'endpoint
+            // /api/rsvp/login/ accetta sia `code` che `password`.
+            await API_CLIENT.post('/rsvp/login/', { password: password });
+            window.location.href = <?=json_encode($homeUrl, JSON_UNESCAPED_SLASHES)?>;
+        } catch (err) {
+            // ApiClient throwa l'oggetto risposta intero in caso di fail.
+            // Lo `status` arriva da InviteCodeSession::login() throwato
+            // con code 905 in vendor/wonder-image/rsvp. Lo passiamo a
+            // alertToast() del framework che fetcha la traduzione
+            // corretta via /api/frontend/alert/ (notifications.json).
+            const code = (err && err.status) || 905;
+            if (typeof alertToast === 'function') {
+                alertToast(code);
+            } else if (err && err.response) {
+                console.error('RSVP login error:', err.response);
+            }
+            // Reset campo per permettere il retry
+            const input = form.elements.password;
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+        }
+    };
+
+    // Belt & suspenders: se per qualunque motivo l'attributo onsubmit
+    // sul <form> non scattasse (es. browser bug, manipolazione DOM esterna),
+    // il listener sotto blocca comunque la GET-submission nativa.
     (() => {
-        const loginForm = document.getElementById('rsvp-login-form');
-        const logoutButton = document.getElementById('rsvp-logout');
-        const feedback = document.getElementById('rsvp-login-feedback');
-        const loadingText = <?=json_encode($loadingText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-        const errorText = <?=json_encode($errorText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-
-        if (loginForm) {
-            loginForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                feedback.textContent = loadingText;
-
-                const formData = new URLSearchParams();
-                formData.set('code', loginForm.elements.code.value.trim());
-
-                try {
-                    const response = await fetch('<?=$escape($loginApiUrl)?>', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                        body: formData.toString(),
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok || !data.success) {
-                        throw new Error(data.response || data.message || errorText);
-                    }
-
-                    window.location.href = '<?=$escape($homeUrl)?>';
-                } catch (error) {
-                    feedback.textContent = error.message || errorText;
-                }
-            });
-        }
-
-        if (logoutButton) {
-            logoutButton.addEventListener('click', async () => {
-                await fetch('<?=$escape($logoutApiUrl)?>', { method: 'POST' });
-                window.location.reload();
-            });
-        }
+        const form = document.getElementById('rsvp-login-form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitRsvpLogin(form);
+        });
     })();
 </script>

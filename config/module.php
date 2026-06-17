@@ -3,7 +3,7 @@
 use Wonder\Consent\LegalDocumentTypeContext;
 use Wonder\Localization\LanguageContext;
 use Wonder\Plugin\Rsvp\Rsvp;
-use Wonder\Plugin\Rsvp\Support\LegalDocumentSeeder;
+use Wonder\Plugin\Rsvp\Services\LegalDocumentSeeder;
 
 LegalDocumentTypeContext::addType('image_release', 'Liberatoria immagini');
 LanguageContext::addUrlsPath(Rsvp::langPath());

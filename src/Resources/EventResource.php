@@ -4,7 +4,7 @@ namespace Wonder\Plugin\Rsvp\Resources;
 
 use Wonder\App\Resource;
 use Wonder\App\ResourceSchema\ApiSchema;
-use Wonder\App\ResourceSchema\FormInput;
+use Wonder\App\ResourceSchema\FormField;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
@@ -52,17 +52,17 @@ final class EventResource extends Resource
     public static function formSchema(): array
     {
         return [
-            FormInput::key('code')->text()->required(),
-            FormInput::key('name')->text()->required(),
-            FormInput::key('description')->textarea(),
-            FormInput::key('starts_at')->textDatetime(),
-            FormInput::key('location_name')->text(),
-            FormInput::key('location_address')->textarea(),
-            FormInput::key('location_address_url')->url(),
-            FormInput::key('location_position_url')->url(),
-            FormInput::key('location_logo')->url(),
-            FormInput::key('position')->number()->value('0'),
-            FormInput::key('active')->select([
+            FormField::key('code')->text()->required(),
+            FormField::key('name')->text()->required(),
+            FormField::key('description')->textarea(),
+            FormField::key('starts_at')->textDatetime(),
+            FormField::key('location_name')->text(),
+            FormField::key('location_address')->textarea(),
+            FormField::key('location_address_url')->url(),
+            FormField::key('location_position_url')->url(),
+            FormField::key('location_logo')->url(),
+            FormField::key('position')->number()->value('0'),
+            FormField::key('active')->select([
                 'true' => 'Sì',
                 'false' => 'No',
             ])->required()->value('true'),

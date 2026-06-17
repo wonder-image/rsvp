@@ -1,31 +1,19 @@
 <?php
-    use Wonder\Plugin\Rsvp\Support\CustomFieldRenderer;
-
     /**
      * Componente: form RSVP completo.
      *
-     * Renderizza tutto il flow di conferma partecipazione: selettore numero
-     * ospiti, blocchi dinamici (nome/cognome/intolleranze) per ogni ospite,
-     * contatti del referente, custom field dichiarati dall'estensione,
-     * consenso privacy, bottone submit. La submission usa API_CLIENT.post
-     * verso `/rsvp/` con feedback via `loadingSpinner()` del framework.
+     * Input statici resi con gli helper di input frontend; i custom field
+     * dell'estensione sono `FormField` che si renderizzano da soli
+     * (`$input->render()`). Blocchi ospite dinamici e scelta partecipa/non
+     * partecipa gestiti dal JS inline. La submission usa `formSubmit()` verso
+     * la rotta resource `api.resource.rsvp-responses.store` (normalizzazione,
+     * validazione e notifiche in `ResponseResource`).
      *
-     * Override consumer:
-     *     custom/modules/rsvp/views/components/form.php
-     *
-     * Args attesi in $args (tutti opzionali, fallback su $STATE):
-     *   - 'state'                array  Output di FrontendContext::state().
-     *                                    Default: $STATE.
-     *   - 'submit_label'         string Etichetta bottone submit. Default 'INVIA'.
-     *   - 'success_text'         string Testo modal successo. Default IT.
-     *   - 'error_text'           string Testo modal errore. Default IT.
-     *   - 'success_button_label' string Label bottone modal successo.
-     *   - 'error_button_label'   string Label bottone modal errore.
-     *
-     * Il componente si aspetta che API_CLIENT (head.js del framework) sia
-     * disponibile a runtime e che la rotta `/api/rsvp/` sia registrata.
+     * Override consumer: `custom/modules/rsvp/views/components/form.php`.
      */
 
+    use Wonder\Plugin\Rsvp\Resources\ResponseResource;
+    
     $args = $args ?? [];
     $state = is_array($args['state'] ?? null)
         ? $args['state']
@@ -39,33 +27,9 @@
     $locale = (string) ($state['locale'] ?? rsvp_locale('it'));
     $maxParticipants = max(1, (int) ($state['max_participants'] ?? 1));
     $enableAttendanceStatus = !empty($state['enable_attendance_status']);
-    $loginUrl = function_exists('__r') ? __r('rsvp.login') : '/rsvp/login/';
-    $privacyField = function_exists('inputAcceptDocument')
-        ? inputAcceptDocument('privacy_policy', 'required')
-        : '';
+    $loginUrl = __r('rsvp.login');
     $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
-
-    $submitLabel = (string) ($args['submit_label'] ?? rsvp_trans('rsvp.frontend.form.submit_label', 'Invia risposta'));
-    $successText = (string) ($args['success_text'] ?? rsvp_trans('rsvp.frontend.form.success_text', 'La tua risposta è stata registrata!'));
-    $errorText   = (string) ($args['error_text'] ?? rsvp_trans('rsvp.frontend.form.error_text', 'Non è stato possibile inviare la tua risposta. Riprova.'));
-    $successButton = (string) ($args['success_button_label'] ?? rsvp_trans('rsvp.frontend.form.success_button_label', 'Torna al sito'));
-    $errorButton   = (string) ($args['error_button_label'] ?? rsvp_trans('rsvp.frontend.form.error_button_label', 'Riprova'));
-    $inviteRequiredText = rsvp_trans('rsvp.frontend.form.invite_required_text', 'Per compilare questo RSVP serve un codice invito.');
-    $inviteRequiredButton = rsvp_trans('rsvp.frontend.form.invite_required_button', 'Vai al login');
-    $attendanceStatusLabel = rsvp_trans('rsvp.frontend.form.attendance_status_label', 'Partecipazione');
-    $attendanceConfirmedLabel = rsvp_trans('rsvp.frontend.form.attendance_confirmed_label', 'Partecipo');
-    $attendanceDeclinedLabel = rsvp_trans('rsvp.frontend.form.attendance_declined_label', 'Non partecipo');
-    $contactNameLabel = rsvp_trans('rsvp.frontend.form.contact_name_label', 'Nome referente');
-    $contactSurnameLabel = rsvp_trans('rsvp.frontend.form.contact_surname_label', 'Cognome referente');
-    $participantsLabel = rsvp_trans('rsvp.frontend.form.participants_count_label', 'Partecipanti');
-    $participantLabel = rsvp_trans('rsvp.frontend.form.participant_label', 'Ospite');
-    $participantNameLabel = rsvp_trans('rsvp.frontend.form.participant_name_label', 'Nome');
-    $participantSurnameLabel = rsvp_trans('rsvp.frontend.form.participant_surname_label', 'Cognome');
-    $participantDietaryLabel = rsvp_trans('rsvp.frontend.form.participant_dietary_label', 'Intolleranze o allergie');
-    $contactPhoneLabel = rsvp_trans('rsvp.frontend.form.contact_phone_label', 'Cellulare');
-    $contactEmailLabel = rsvp_trans('rsvp.frontend.form.contact_email_label', 'Email');
-
-    $escape = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+    $submitUrl = __e('api.resource.rsvp-responses.store');
 
     $partecipantiOptions = [];
     for ($i = 1; $i <= $maxParticipants; $i++) {
@@ -74,97 +38,139 @@
 
 ?>
 
-<?php if (!$canAccessForm) { ?>
-    <div class="rsvp-form-reserved">
-        <?=$escape($inviteRequiredText)?><br>
-        <a href="<?=$escape($loginUrl)?>"><?=$escape($inviteRequiredButton)?></a>
-    </div>
-<?php } else { ?>
+<section class="mt-10">
+    <div class="content content-medium">
 
-<form id="rsvp-form" class="rsvp-form">
+        <div class="subtitle a-c tx-upper w-100"><?= __t('pages.rsvp.form.intro') ?></div>
 
-    <input type="hidden" name="invite_code_id" value="<?=$escape((string) ($session['id'] ?? ''))?>">
-    <input type="hidden" name="locale" value="<?=$escape($locale)?>">
+        <?php if (!$canAccessForm) { ?>
 
-    <?php
-        // Se c'è un solo evento (caso wedding-only), lo passiamo nascosto.
-        if (count($visibleEvents) === 1) {
-            $singleKey = array_key_first($visibleEvents);
-    ?>
-        <input type="hidden" name="event_key" value="<?=$escape((string) $singleKey)?>">
-    <?php } ?>
-
-    <?php if ($enableAttendanceStatus) { ?>
-    <div class="rsvp-attendance-choice">
-        <div class="mb-2"><?=$escape($attendanceStatusLabel)?></div>
-        <div class="d-flex flex-wrap gap-3">
-            <label class="d-inline-flex align-items-center gap-2">
-                <input type="radio" name="attendance_status" value="confirmed" checked>
-                <span><?=$escape($attendanceConfirmedLabel)?></span>
-            </label>
-            <label class="d-inline-flex align-items-center gap-2">
-                <input type="radio" name="attendance_status" value="declined">
-                <span><?=$escape($attendanceDeclinedLabel)?></span>
-            </label>
-        </div>
-    </div>
-    <?php } ?>
-
-    <div id="rsvp-attending-fields">
-        <?= select($participantsLabel, 'participants_count', $partecipantiOptions, '1', 'required') ?>
-
-        <!-- Container per i blocchi ospite dinamici -->
-        <div id="rsvp-participants" class="rsvp-participants"></div>
-    </div>
-
-    <div id="rsvp-decline-contact" style="display:none;">
-        <div class="rsvp-guest-row">
-            <div><?= text($contactNameLabel, 'contact_name', null, "data-decline-contact='true'") ?></div>
-            <div><?= text($contactSurnameLabel, 'contact_surname', null, "data-decline-contact='true'") ?></div>
-        </div>
-    </div>
-
-    <template id="rsvp-guest-template">
-        <div class="rsvp-guest" data-participant-block data-index="__INDEX__" data-is-child="false">
-            <div class="rsvp-guest-label">__TITLE__</div>
-            <div class="rsvp-guest-row">
-                <div><?= text($participantNameLabel, '', null, "data-field='name' data-index='__INDEX__' required") ?></div>
-                <div><?= text($participantSurnameLabel, '', null, "data-field='surname' data-index='__INDEX__' required") ?></div>
+            <div class="text a-c mt-5 tx-white">
+                <?= __t('pages.rsvp.form.invite_required_text') ?><br>
             </div>
-            <div class="rsvp-guest-allergies">
-                <?= textarea($participantDietaryLabel, '', null, "data-field='dietary_requirements' data-index='__INDEX__'") ?>
+            <div class="w-100 mt-6">
+                <a href="<?=e($loginUrl)?>" class="btn btn-primary c-w w-40 w-p-100">
+                    <?= __t('pages.rsvp.form.invite_required_button') ?>
+                </a>
             </div>
-            <input type="hidden" data-field="is_child" data-index="__INDEX__" value="false">
-        </div>
-    </template>
 
-    <?= phone($contactPhoneLabel, 'contact_phone', null, 'required') ?>
-    <?= email($contactEmailLabel, 'contact_email', null, 'required') ?>
+        <?php } else { ?>
 
-    <?php foreach ($customFields as $customKey => $customDef) { ?>
-        <div data-rsvp-custom-field="<?=$escape($customKey)?>">
-            <?= CustomFieldRenderer::renderFrontend($customKey, $customDef) ?>
-        </div>
-    <?php } ?>
+            <form 
+                id="rsvp-form"
+                data-rsvp-form="true"
+                data-success-text="<?=e(__t('pages.rsvp.form.success_text'))?>"
+                data-error-text="<?=e(__t('pages.rsvp.form.error_text'))?>"
+                data-success-button-label="<?=e(__t('pages.rsvp.form.success_button_label'))?>"
+                data-error-button-label="<?=e(__t('pages.rsvp.form.error_button_label'))?>"
+                data-participant-label="<?=e(__t('pages.rsvp.form.participant_label'))?>"
+                class="p-r f-start w-100 d-grid gap-5 mt-10 col-1 bg-white tx-black p-10 b-r-25 gap-p-3 p-p-5"
+                >
 
-    <div>
-        <?= inputAcceptDocument('privacy_policy', 'required') ?>
+                <div>
+
+                    <div class="w-15 w-p-20 c-w">
+                        <?= __ri($SOCIETY->logoBlack)->size(1200)->skeleton(false)->addClass('w-100')->render() ?>
+                    </div>
+
+                    <div class="subtitle a-c tx-upper w-100 tx-primary mt-10"><?= __t('pages.rsvp.form.title') ?></div>
+                    <div class="text a-c mt-2 mb-5"><?= __t('pages.rsvp.form.subtitle') ?></div>
+
+                </div>
+
+                <?= ResponseResource::getInput('invite_code_id')->value($session['id'] ?? '') ?>
+                <?= ResponseResource::getInput('locale')->value($locale) ?>
+                <?= ResponseResource::getInput('request_url')?>
+
+                <?php if ($enableAttendanceStatus) { ?>
+                    <div class="w-100">
+                        <?= ResponseResource::getInput('attendance_status'); ?>
+                    </div>
+                <?php } ?>
+
+                <?php 
+
+                    /**
+                     * Se ci sono più eventi visibili dai la scelta
+                     */
+                
+                    if (count($visibleEvents) === 1) {
+
+                        $singleKey = array_key_first($visibleEvents);
+                        echo ResponseResource::getInput('event_key')->hidden()->value($singleKey);
+
+                    } else {
+
+                        echo ResponseResource::getInput('event_key')->options($visibleEvents);
+
+                    }
+                        
+                ?>
+                
+                <div id="rsvp-attending-fields" class="w-100 d-grid gap-5">
+
+                    <div class="w-100">
+                        <?= ResponseResource::getInput('participants_count')->options($partecipantiOptions); ?>
+                    </div>
+
+                    <div id="rsvp-participants" class="w-100 d-grid gap-5"></div>
+
+                    <template id="rsvp-guest-template">
+                        <div class="w-100">
+                            <div class="text fw-500 w-100 mt-p-2">__TITLE__</div>
+                            <div class="w-100 d-grid col-2 gap-5 gap-p-3 mt-2">
+                                <?=ResponseResource::getInput('participants[__INDEX__][name]')?>
+                                <?=ResponseResource::getInput('participants[__INDEX__][surname]')?>
+                                <div class="col-2"><?=ResponseResource::getInput('participants[__INDEX__][dietary_requirements]')?></div>
+                            </div>
+                            <?=ResponseResource::getInput('participants[__INDEX__][is_child]')?>
+                        </div>
+                    </template>
+
+                    <div class="w-100 bt-1 tx-black mh-p-2"></div>
+
+                    <?php if ($customFields !== []) { ?>
+                        <div class="w-100 bt-1 tx-black mh-p-2"></div>
+                        <div class="w-100 d-grid gap-5">
+                            <?php foreach ($customFields as $customField) { ?>
+                                <div class="w-100"><?= $customField->render() ?></div>
+                            <?php } ?>
+                        </div>
+                    <?php } ?>
+
+                </div>
+
+                <div>
+                    <div class="text fw-500 w-100 mb-2"><?= __t('pages.rsvp.form.contacts_label') ?></div>
+                    <div id="rsvp-decline-contact" class="w-100 d-grid col-2 gap-5 gap-p-3 mt-2 mb-5" style="display:none;">
+                        <?=ResponseResource::getInput('contact_name')?>
+                        <?=ResponseResource::getInput('contact_surname')?>
+                    </div>
+                    <?=ResponseResource::getInput('contact_phone')?>
+                </div>
+
+                <?=ResponseResource::getInput('contact_email')?>
+
+                <div class="w-100 bt-1 tx-black mh-p-2"></div>
+
+                <?= ResponseResource::getInput('accept_privacy_policy') ?>
+
+                <?php if (!empty($state['require_image_release'])) { echo ResponseResource::getInput('accept_image_release'); } ?>
+
+                <div class="w-100 mt-5">
+                    <button type="button" class="btn btn-primary c-w w-60 w-p-100" onclick="formSubmit(this.form, '<?=e($submitUrl)?>', rsvpFormSubmitResponse)">
+                        <?= __t('pages.rsvp.form.submit_label') ?>
+                    </button>
+                </div>
+
+            </form>
+
+        <?php } ?>
+
     </div>
+</section>
 
-    <?php if (!empty($state['require_image_release'])) { ?>
-        <div id="rsvp-image-release-wrap">
-            <?=inputAcceptDocument('image_release', 'required')?>
-        </div>
-    <?php } ?>
-
-    <div class="rsvp-form-actions">
-        <button type="button" class="btn" onclick="rsvpSubmit(this.form)"><?=$escape($submitLabel)?></button>
-    </div>
-
-    <div id="rsvp-feedback" class="rsvp-feedback"></div>
-
-</form>
-
+<?php if ($canAccessForm) { ?>
 <script>
 (() => {
     const form = document.getElementById('rsvp-form');
@@ -173,17 +179,15 @@
     const participantsBox = document.getElementById('rsvp-participants');
     const participantsCount = form.elements.participants_count;
     const guestTemplate = document.getElementById('rsvp-guest-template');
-    const feedback = document.getElementById('rsvp-feedback');
     const attendingFields = document.getElementById('rsvp-attending-fields');
     const declineContact = document.getElementById('rsvp-decline-contact');
     const attendanceInputs = Array.from(form.querySelectorAll('input[name="attendance_status"]'));
     const imageReleaseWrap = document.getElementById('rsvp-image-release-wrap');
 
-    const SUCCESS_TEXT = <?=json_encode($successText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const ERROR_TEXT = <?=json_encode($errorText, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const SUCCESS_BUTTON = <?=json_encode($successButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const ERROR_BUTTON = <?=json_encode($errorButton, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const PARTICIPANT_LABEL = <?=json_encode($participantLabel, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+    const SUCCESS_TEXT = <?=json_encode(__t('pages.rsvp.form.success_text'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+    const ERROR_TEXT = <?=json_encode(__t('pages.rsvp.form.error_text'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+    const RETRY_TEXT = <?=json_encode(__t('pages.rsvp.form.error_button_label'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+    const PARTICIPANT_LABEL = <?=json_encode(__t('pages.rsvp.form.participant_label'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
 
     function attendanceStatus() {
         if (attendanceInputs.length === 0) return 'confirmed';
@@ -202,8 +206,8 @@
     }
 
     // Gli helper framework (text/textarea/select) generano id randomici
-    // condivisi nel <template>: quando cloniamo gli id si duplicano e i
-    // <label for=...> puntano al primo input. Rimappiamo per blocco.
+    // condivisi nel <template>: clonandoli si duplicano e i <label for=...>
+    // puntano al primo input. Rimappiamo gli id per blocco.
     function uniquifyIds(html, suffix) {
         const idMap = new Map();
         return html.replace(/(id|for)=(["'])(input_[a-z0-9]+|checkbox_[a-z0-9]+)\2/g,
@@ -221,36 +225,10 @@
         return uniquifyIds(raw, `g${index}`);
     }
 
-    // I label flottanti del framework (.wi-label) ricevono i listener
-    // input/focusin/focusout da head.js solo al DOMContentLoaded. Gli
-    // input dinamici (Ospite N) sono iniettati dopo: riattacchiamo le
-    // funzioni globali del framework se presenti, fallback locale.
-    function rebindWiInputs(scope) {
-        scope.querySelectorAll('[data-wi-label="true"]').forEach((el) => {
-            const sync = () => {
-                const container = el.parentElement;
-                if (!container) return;
-                if ((el.value || '').toString().trim() === '') {
-                    container.classList.remove('compiled');
-                } else {
-                    container.classList.add('compiled');
-                }
-            };
-            sync();
-            if (typeof window.labelPosition === 'function') {
-                el.addEventListener('input', window.labelPosition);
-            } else {
-                el.addEventListener('input', sync);
-            }
-            if (typeof window.labelPositionTop === 'function') {
-                el.addEventListener('focusin', window.labelPositionTop);
-            }
-            if (typeof window.check === 'function') {
-                el.addEventListener('focusin', window.check);
-                el.addEventListener('focusout', window.check);
-            }
-        });
-        if (typeof window.checkLabel === 'function') window.checkLabel();
+    // setInput() della lib inizializza i data-wi-* (label flottanti,
+    // validazione) sugli input iniettati a runtime.
+    function bindInputs(scope) {
+        if (scope && typeof setInput === 'function') setInput(scope);
     }
 
     function renderGuests() {
@@ -263,76 +241,7 @@
         let html = '';
         for (let i = 0; i < n; i++) html += guestHTML(i);
         participantsBox.innerHTML = html;
-        rebindWiInputs(participantsBox);
-    }
-
-    function collectGuests() {
-        if (attendanceStatus() !== 'confirmed') {
-            return [];
-        }
-
-        const grouped = {};
-        participantsBox.querySelectorAll('[data-index][data-field]').forEach((el) => {
-            const idx = el.getAttribute('data-index');
-            const fld = el.getAttribute('data-field');
-            grouped[idx] = grouped[idx] || {};
-            grouped[idx][fld] = el.value;
-        });
-        return Object.values(grouped).map((p) => ({
-            name: p.name || '',
-            surname: p.surname || '',
-            dietary_requirements: p.dietary_requirements || '',
-            is_child: p.is_child === 'true',
-        }));
-    }
-
-    function collectConsents(payload) {
-        // 1) Documenti legali: accept_<doc> (checkbox) + <doc>_id (hidden).
-        form.querySelectorAll('input[name^="accept_"], input[name$="_id"]').forEach((el) => {
-            if (el.disabled) return;
-            if (el.type === 'checkbox') {
-                if (el.checked) payload[el.name] = el.value || 'true';
-                return;
-            }
-            if (el.value !== '') payload[el.name] = el.value;
-        });
-        // 2) Fallback senza legal_documents: privacy[] / photo_privacy[].
-        ['privacy', 'photo_privacy'].forEach((key) => {
-            const checked = form.querySelector(
-                `input[name="${key}[]"]:checked, input[name="${key}"]:checked`
-            );
-            if (checked && !checked.disabled) payload[key] = checked.value || 'true';
-        });
-    }
-
-    function collectCustom(payload) {
-        const custom = {};
-        form.querySelectorAll('[data-rsvp-custom-field]').forEach((wrap) => {
-            const key = wrap.getAttribute('data-rsvp-custom-field');
-            if (!key) return;
-            const multi = wrap.querySelectorAll(`input[name="${key}[]"]:checked`);
-            if (multi.length > 0) {
-                custom[key] = Array.from(multi).map((el) => el.value);
-                return;
-            }
-            const checkedRadio = wrap.querySelector(`input[type="radio"][name="${key}"]:checked`);
-            if (checkedRadio) {
-                custom[key] = checkedRadio.value || '';
-                return;
-            }
-            const el = wrap.querySelector(`[name="${key}"]`);
-            if (!el) return;
-            if (el.type === 'radio') {
-                custom[key] = '';
-                return;
-            }
-            if (el.type === 'checkbox') {
-                custom[key] = el.checked ? (el.value || 'true') : '';
-                return;
-            }
-            custom[key] = (el.value || '').toString().trim();
-        });
-        payload.custom_fields = custom;
+        bindInputs(participantsBox);
     }
 
     function syncAttendanceUI() {
@@ -346,95 +255,46 @@
         setDisabled(imageReleaseWrap, declined);
 
         renderGuests();
-        if (declineContact) rebindWiInputs(declineContact);
+        bindInputs(declineContact);
     }
 
-    function renderResultIntoSpinner(success, message) {
-        const container = document.querySelector('#loading-spinner .center');
-        if (!container) {
-            feedback.textContent = message;
-            return;
+    function rsvpFormErrorMessage(data) {
+        if (!data || data.response == null) return ERROR_TEXT;
+        if (typeof data.response === 'string') return data.response;
+        if (data.response.errors && typeof data.response.errors === 'object') {
+            const errors = Object.values(data.response.errors).filter(Boolean);
+            if (errors.length > 0) return errors[0];
         }
-        container.classList.add('w-80');
-        if (success) {
-            container.innerHTML = `
-                <div class="title-big a-c"><i class="bi bi-check2-circle tx-success"></i></div>
-                <div class="subtitle mt-8 a-c">${SUCCESS_TEXT}</div>
-                <div class="c-w mt-10"><a onclick="location.reload();" class="btn btn-primary c-w">${SUCCESS_BUTTON}</a></div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div class="title-big a-c"><i class="bi bi-x-circle tx-danger"></i></div>
-                <div class="subtitle mt-8 a-c">${message || ERROR_TEXT}</div>
-                <div class="c-w mt-10"><a onclick="location.reload();" class="btn btn-primary c-w">${ERROR_BUTTON}</a></div>
-            `;
+        if (typeof data.response.message === 'string' && data.response.message !== '') {
+            return data.response.message;
         }
+        return RETRY_TEXT;
     }
 
-    window.rsvpSubmit = async function (theForm) {
-        const guests = collectGuests();
-        const declined = attendanceStatus() === 'declined';
-        const declineName = theForm.elements.contact_name;
-        const declineSurname = theForm.elements.contact_surname;
-        const referente = declined
-            ? {
-                name: declineName ? (declineName.value || '').trim() : '',
-                surname: declineSurname ? (declineSurname.value || '').trim() : '',
-            }
-            : (guests[0] || { name: '', surname: '' });
+    // Callback di formSubmit: mostra l'esito nel loader del framework.
+    window.rsvpFormSubmitResponse = function (data) {
+        const ok = !!(data && data.success);
 
-        const payload = {
-            attendance_status: attendanceStatus(),
-            invite_code_id: theForm.elements.invite_code_id.value || '',
-            locale: theForm.elements.locale.value || '',
-            contact_name: referente.name || '',
-            contact_surname: referente.surname || '',
-            contact_phone: (theForm.elements.contact_phone.value || '').trim(),
-            contact_email: (theForm.elements.contact_email.value || '').trim(),
-            notes: '',
-            source_url: window.location.href,
-            participants: guests,
-            events: theForm.elements.event_key ? [theForm.elements.event_key.value] : [],
-        };
-
-        if (theForm.elements.event_key) {
-            payload.event_key = theForm.elements.event_key.value;
+        if (typeof loadingResponse === 'function') {
+            loadingResponse({ success: ok, response: ok ? SUCCESS_TEXT : rsvpFormErrorMessage(data) });
         }
 
-        collectConsents(payload);
-        collectCustom(payload);
-
-        if (typeof loadingSpinner === 'function') loadingSpinner();
-
-        try {
-            // API_CLIENT è inizializzato in head.js come
-            // new ApiClient(pathSite+"/api", API_TOKEN). Il body non-FormData
-            // viene serializzato come application/json.
-            await API_CLIENT.post('/rsvp/', payload);
-            theForm.reset();
+        if (ok) {
+            form.reset();
             syncAttendanceUI();
-            renderResultIntoSpinner(true, SUCCESS_TEXT);
-        } catch (err) {
-            const message = (err && (err.response || err.message)) || ERROR_TEXT;
-            renderResultIntoSpinner(false, message);
         }
     };
 
-    attendanceInputs.forEach((input) => {
-        input.addEventListener('change', syncAttendanceUI);
-    });
+    attendanceInputs.forEach((input) => input.addEventListener('change', syncAttendanceUI));
 
     syncAttendanceUI();
     if (participantsCount) {
-        // Il widget wi-select del framework NON dispatcha l'evento `change`:
-        // fa solo `selElmnt.value = ...`. All'init copia però la property
-        // `.onchange` sugli onclick delle option custom. Quindi SETTIAMO la
-        // property PRIMA che body-end.js inizializzi il widget; fallback su
-        // addEventListener per il caso di select native.
+        // Il widget wi-select non dispatcha `change` (fa solo selElmnt.value =
+        // ...): impostiamo la property onchange PRIMA dell'init di body-end.js,
+        // con fallback su addEventListener per le select native.
         participantsCount.onchange = renderGuests;
         participantsCount.addEventListener('change', renderGuests);
     }
 })();
 </script>
-
-<?php } // canAccessForm ?>
+<?php } ?>

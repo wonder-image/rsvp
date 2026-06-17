@@ -3,6 +3,7 @@
 namespace Wonder\Plugin\Rsvp\Models;
 
 use Wonder\App\Model;
+use Wonder\App\Support\SyncSchema;
 use Wonder\Data\UploadSchema as Field;
 use Wonder\Sql\TableSchema as Column;
 
@@ -12,6 +13,11 @@ final class Authorization extends Model
     public static string $folder = 'rsvp/authorizations';
     public static string $icon = 'bi bi-shield-check';
 
+    public static function syncSchema(): ?SyncSchema
+    {
+        return SyncSchema::multiRow();
+    }
+    
     public static function tableSchema(): array
     {
         return [

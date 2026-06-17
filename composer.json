@@ -1,6 +1,6 @@
 {
     "name": "wonder-image/rsvp",
-    "description": "RSVP plugin for Wonder Image new-site projects.",
+    "description": "RSVP plugin for wonder-image/new-site projects.",
     "type": "library",
     "license": "MIT",
     "require": {
