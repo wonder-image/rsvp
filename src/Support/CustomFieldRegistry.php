@@ -14,8 +14,6 @@ final class CustomFieldRegistry
      */
     public static function visibleDefinitions(RsvpExtension $extension): array
     {
-        rsvp_boot_translations();
-
         try {
             if (self::hasCustomFormInputs($extension, 'formInputs')) {
                 /** @var array<int, FormField> $formInputs */
@@ -42,8 +40,6 @@ final class CustomFieldRegistry
      */
     public static function allDefinitions(RsvpExtension $extension): array
     {
-        rsvp_boot_translations();
-
         try {
             if (self::hasCustomFormInputs($extension, 'allFormInputs')) {
                 /** @var array<int, FormField> $formInputs */
@@ -74,8 +70,6 @@ final class CustomFieldRegistry
      */
     public static function visibleInputs(RsvpExtension $extension): array
     {
-        rsvp_boot_translations();
-
         try {
             if (self::hasCustomFormInputs($extension, 'formInputs')) {
                 return self::onlyFormFields($extension->formInputs());

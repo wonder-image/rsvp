@@ -28,7 +28,7 @@ if ($authorizationId > 0) {
     }
 }
 
-$locale = rsvp_locale('it');
+$locale = __l();
 
 try {
     $catalog = Event::all();

@@ -24,7 +24,7 @@
     $requiresInviteCode = !empty($state['requires_invite_code']);
     $hasSession = (int) ($session['id'] ?? 0) > 0;
     $canAccessForm = !$requiresInviteCode || $hasSession;
-    $locale = (string) ($state['locale'] ?? rsvp_locale('it'));
+    $locale = (string) ($state['locale'] ?? __l());
     $maxParticipants = max(1, (int) ($state['max_participants'] ?? 1));
     $enableAttendanceStatus = !empty($state['enable_attendance_status']);
     $loginUrl = __r('rsvp.login');

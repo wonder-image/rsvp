@@ -5,55 +5,6 @@ use Wonder\Plugin\Rsvp\Models\InviteCode;
 use Wonder\Plugin\Rsvp\Models\InviteGroup;
 use Wonder\Plugin\Rsvp\Models\Response;
 
-if (!function_exists('rsvp_locale')) {
-    function rsvp_locale(string $fallback = 'it'): string
-    {
-        if (!function_exists('__l')) {
-            return $fallback;
-        }
-
-        try {
-            $locale = __l();
-        } catch (\Throwable) {
-            return $fallback;
-        }
-
-        $locale = trim((string) $locale);
-
-        return $locale !== '' ? $locale : $fallback;
-    }
-}
-
-if (!function_exists('rsvp_locales')) {
-    /**
-     * @return string[]
-     */
-    function rsvp_locales(string $fallback = 'it'): array
-    {
-        if (!function_exists('__ls')) {
-            return [$fallback];
-        }
-
-        try {
-            $locales = array_keys((array) __ls());
-        } catch (\Throwable) {
-            return [$fallback];
-        }
-
-        $normalized = [];
-
-        foreach ($locales as $locale) {
-            $locale = strtolower(trim((string) $locale));
-
-            if ($locale !== '') {
-                $normalized[] = $locale;
-            }
-        }
-
-        return $normalized !== [] ? array_values(array_unique($normalized)) : [$fallback];
-    }
-}
-
 if (!function_exists('rsvpInviteUsageMode')) {
     function rsvpInviteUsageMode(mixed $mode = null): array|object
     {
@@ -326,7 +277,7 @@ if (!function_exists('rsvpResolveLocalizedValue')) {
     {
         $locale = $locale !== null && trim($locale) !== ''
             ? trim($locale)
-            : rsvp_locale($fallbackLocale);
+            : (trim((string) __l()) !== '' ? trim((string) __l()) : $fallbackLocale);
 
         if (!is_array($value)) {
             return $value;
