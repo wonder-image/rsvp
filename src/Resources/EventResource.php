@@ -21,8 +21,8 @@ final class EventResource extends Resource
     public static function textSchema(): array
     {
         return [
-            'label' => 'evento RSVP',
-            'plural_label' => 'eventi RSVP',
+            'label' => 'evento',
+            'plural_label' => 'eventi',
             'last' => 'ultimi',
             'all' => 'tutti',
             'article' => 'gli',
@@ -39,11 +39,10 @@ final class EventResource extends Resource
             'name' => 'Nome',
             'description' => 'Descrizione',
             'starts_at' => 'Data evento',
-            'location_name' => 'Nome location',
-            'location_address' => 'Indirizzo',
-            'location_address_url' => 'Link indirizzo',
-            'location_position_url' => 'Link posizione',
-            'location_logo' => 'Logo location',
+            'location_name' => 'Nome',
+            ...static::$model::addressExtension()->labels(),
+            'location_site_url' => 'Link sito',
+            'location_logo' => 'Logo',
             'position' => 'Ordine',
             'active' => 'Attivo',
         ];
@@ -57,15 +56,11 @@ final class EventResource extends Resource
             FormField::key('description')->textarea(),
             FormField::key('starts_at')->textDatetime(),
             FormField::key('location_name')->text(),
-            FormField::key('location_address')->textarea(),
-            FormField::key('location_address_url')->url(),
-            FormField::key('location_position_url')->url(),
-            FormField::key('location_logo')->url(),
-            FormField::key('position')->number()->value('0'),
-            FormField::key('active')->select([
-                'true' => 'Sì',
-                'false' => 'No',
-            ])->required()->value('true'),
+            ...static::$model::addressExtension()->formSchema(),
+            FormField::key('location_site_url')->url(),
+            FormField::key('location_logo')->fileDragDrop(),
+            FormField::key('position')->position(),
+            FormField::key('active')->bool(),
         ];
     }
 
@@ -75,19 +70,38 @@ final class EventResource extends Resource
             (new Container)->components([
 
                 (new Card)->components([
+                    
                     static::getInput('code')->columnSpan(3),
                     static::getInput('name')->columnSpan(6),
                     static::getInput('starts_at')->columnSpan(3),
                     static::getInput('description')->columnSpan(12)
+
                 ])->columns(12)->columnSpan(1)
 
                 (new Card)->components([
+
                     (new SectionTitle('Location'))->columnSpan(12),
-                    static::getInput('location_name')->columnSpan(6),
-                    static::getInput('location_address')->columnSpan(6),
-                    static::getInput('location_address_url')->columnSpan(6),
-                    static::getInput('location_position_url')->columnSpan(6),
-                    static::getInput('location_logo')->columnSpan(12),
+
+                    (new Container)->components([
+                        static::getInput('location_logo')->columnSpan(1)
+                    ])->columnSpan(4)->columns(1),
+
+                    (new Container)->components([
+
+                        static::getInput('location_name')->columnSpan(12),
+                    
+                        static::getInput('location_country')->columnSpan(6),
+                        static::getInput('location_province')->columnSpan(6),
+                        static::getInput('location_cap')->columnSpan(4),
+                        static::getInput('location_city')->columnSpan(8),
+                        static::getInput('location_street')->columnSpan(10),
+                        static::getInput('location_number')->columnSpan(2),
+                        static::getInput('location_position_url')->columnSpan(12),
+                        static::getInput('location_site_url')->columnSpan(12),
+
+                    ])->columnSpan(8)->columns(12),
+                    
+
                 ])->columns(12)->columnSpan(1)
 
             ])->columns(12)->columnSpan(1),

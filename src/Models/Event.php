@@ -6,6 +6,7 @@ use Wonder\App\Model;
 use Wonder\App\Support\SyncSchema;
 use Wonder\Data\UploadSchema as Field;
 use Wonder\Sql\TableSchema as Column;
+use Wonder\App\Schema\Extensions\AddressExtension;
 
 final class Event extends Model
 {
@@ -21,22 +22,25 @@ final class Event extends Model
     public static function tableSchema(): array
     {
         return [
-            Column::key('code')->length(120)->unique(),
-            Column::key('name')->length(255),
-            Column::key('description')->type('TEXT')->null(),
-            Column::key('starts_at')->type('DATETIME')->null(),
-            Column::key('location_name')->length(255)->null(),
-            Column::key('location_address')->type('TEXT')->null(),
-            Column::key('location_address_url')->type('TEXT')->null(),
-            Column::key('location_position_url')->type('TEXT')->null(),
-            Column::key('location_logo')->type('TEXT')->null(),
-            Column::key('position')->type('INT')->default('0'),
-            Column::key('active')->length(10)->default('true'),
+
+            ...static::sqlColumnsFromDataSchema([
+                'code',
+                'name',
+                'description',
+                'starts_at',
+                'location_logo',
+                'position',
+                'active'
+            ]),
+
+            ...static::addressExtension()->tableSchema(),
+
         ];
     }
 
     public static function tablePseudos(): array
     {
+
         return [
             'ind_code' => [
                 'index' => 'code',
@@ -45,22 +49,31 @@ final class Event extends Model
                 'index' => 'position',
             ],
         ];
+
     }
 
     public static function dataSchema(): array
     {
         return [
+            
             Field::key('code')->text()->required()->codeUpper(),
             Field::key('name')->text()->required()->sanitizeFirst(),
-            Field::key('description')->text()->sanitize(false),
+            Field::key('description')->text(),
             Field::key('starts_at')->date(),
-            Field::key('location_name')->text()->sanitize(false),
-            Field::key('location_address')->text()->sanitize(false),
-            Field::key('location_address_url')->text()->sanitize(false),
-            Field::key('location_position_url')->text()->sanitize(false),
-            Field::key('location_logo')->text()->sanitize(false),
             Field::key('position')->number()->decimals(0),
             Field::key('active')->text()->required(),
+
+            Field::key('location_name')->text(),
+            Field::key('location_site_url')->text(),
+            Field::key('location_logo')->file()->sanitize(false),
+            ...static::addressExtension()->dataSchema()
+
         ];
     }
+
+    public static function addressExtension(): AddressExtension
+    {
+        return AddressExtension::make('location', 'position_url')->withLink();
+    }
+
 }
