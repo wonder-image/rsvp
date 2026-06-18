@@ -28,6 +28,7 @@ final class Event extends Model
                 'name',
                 'description',
                 'starts_at',
+                'location_name',
                 'location_logo',
                 'position',
                 'active'
@@ -73,7 +74,7 @@ final class Event extends Model
 
     public static function addressExtension(): AddressExtension
     {
-        return AddressExtension::make('location', 'position_url')->withLink();
+        return AddressExtension::make('location', 'simple', 'position_url')->withLink();
     }
 
 }
