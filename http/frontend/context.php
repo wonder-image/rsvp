@@ -5,6 +5,7 @@ use Wonder\Plugin\Rsvp\Models\Event;
 use Wonder\Plugin\Rsvp\Services\InviteCodeSession;
 use Wonder\Plugin\Rsvp\Services\SubmissionNotifier;
 use Wonder\Plugin\Rsvp\Support\ExtensionRegistry;
+use Wonder\Support\Prettify\Date as PrettyDate;
 
 $isTrue = static fn (mixed $value): bool => in_array(
     strtolower(trim((string) $value)),
@@ -49,11 +50,19 @@ foreach ($catalog as $eventKey => $event) {
         continue;
     }
 
+    $date = $event['starts_at'];
+
     $eventCatalog[$eventKey] = rsvpResolveLocalizedValue([
         'key' => $eventKey,
         'label' => (string) ($event['name'] ?? $eventKey),
         'description' => (string) ($event['description'] ?? ''),
-        'date' => (string) ($event['starts_at'] ?? ''),
+        'date' => $date,
+        'pretty_date' => prettyDate($date, false),
+        'hour' => date('H:i', strtotime($date)),
+        'day' => date('d', strtotime($date)),
+        'pretty_day' => PrettyDate::day($date),
+        'month' => date('m', strtotime($date)),
+        'pretty_month' => PrettyDate::month($date),
         'location_name' => (string) ($event['location_name'] ?? ''),
         'location_address' => (string) ($event['location_address'] ?? ''),
         'location_address_url' => (string) ($event['location_address_url'] ?? ''),
@@ -61,6 +70,7 @@ foreach ($catalog as $eventKey => $event) {
         'location_logo' => (string) ($event['location_logo'] ?? ''),
         'position' => (int) ($event['position'] ?? 0),
     ], $locale);
+    
     $eventCatalog[$eventKey]['key'] = $eventKey;
     $eventCatalog[$eventKey]['label'] = trim((string) ($eventCatalog[$eventKey]['label'] ?? $eventKey));
 }

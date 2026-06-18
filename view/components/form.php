@@ -116,7 +116,7 @@
                     <div id="rsvp-participants" class="w-100 d-grid gap-5"></div>
 
                     <template id="rsvp-guest-template">
-                        <div class="w-100">
+                        <div class="w-100" data-rsvp-participant="__INDEX__">
                             <div class="text fw-500 w-100 mt-p-2">__TITLE__</div>
                             <div class="w-100 d-grid col-2 gap-5 gap-p-3 mt-2">
                                 <?=ResponseResource::getInput('participants[__INDEX__][name]')?>
@@ -155,7 +155,11 @@
 
                 <?= ResponseResource::getInput('accept_privacy_policy') ?>
 
-                <?php if (!empty($state['require_image_release'])) { echo ResponseResource::getInput('accept_image_release'); } ?>
+                <?php if (!empty($state['require_image_release'])) { ?>
+                    <div id="rsvp-image-release-wrap">
+                        <?= ResponseResource::getInput('accept_image_release') ?>
+                    </div>
+                <?php } ?>
 
                 <div class="w-100 mt-5">
                     <button type="button" class="btn btn-primary c-w w-60 w-p-100" onclick="formSubmit(this.form, '<?=e($submitUrl)?>', rsvpFormSubmitResponse)">
@@ -183,6 +187,8 @@
     const declineContact = document.getElementById('rsvp-decline-contact');
     const attendanceInputs = Array.from(form.querySelectorAll('input[name="attendance_status"]'));
     const imageReleaseWrap = document.getElementById('rsvp-image-release-wrap');
+    const participantSelectWrap = participantsCount ? participantsCount.closest('[data-wi-select="true"]') : null;
+    const attendanceWrap = attendanceInputs[0] ? attendanceInputs[0].closest('.wi-input-container') : null;
 
     const SUCCESS_TEXT = <?=json_encode(__t('pages.rsvp.form.success_text'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
     const ERROR_TEXT = <?=json_encode(__t('pages.rsvp.form.error_text'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
@@ -203,6 +209,12 @@
             }
             el.disabled = disabled;
         });
+    }
+
+    function toggleBlock(scope, visible) {
+        if (!scope) return;
+        scope.hidden = !visible;
+        scope.style.display = visible ? '' : 'none';
     }
 
     // Gli helper framework (text/textarea/select) generano id randomici
@@ -231,28 +243,69 @@
         if (scope && typeof setInput === 'function') setInput(scope);
     }
 
+    function participantSnapshot() {
+        return Array.from(participantsBox.querySelectorAll('[data-rsvp-participant]')).map((block, index) => ({
+            index,
+            name: (block.querySelector(`[name="participants[${index}][name]"]`) || {}).value || '',
+            surname: (block.querySelector(`[name="participants[${index}][surname]"]`) || {}).value || '',
+            dietary_requirements: (block.querySelector(`[name="participants[${index}][dietary_requirements]"]`) || {}).value || '',
+            is_child: (block.querySelector(`[name="participants[${index}][is_child]"]`) || {}).value || 'false',
+        }));
+    }
+
+    function restoreParticipants(values) {
+        values.forEach((participant, index) => {
+            [
+                ['name', participant.name],
+                ['surname', participant.surname],
+                ['dietary_requirements', participant.dietary_requirements],
+                ['is_child', participant.is_child],
+            ].forEach(([field, value]) => {
+                const input = participantsBox.querySelector(`[name="participants[${index}][${field}]"]`);
+                if (!input) return;
+                input.value = value;
+            });
+        });
+
+        if (typeof checkLabel === 'function') checkLabel();
+        if (typeof check === 'function') check();
+    }
+
+    function syncDeclineContactRequirements(declined) {
+        if (!declineContact || typeof setRequired !== 'function') return;
+
+        ['contact_name', 'contact_surname'].forEach((fieldName) => {
+            const input = form.elements[fieldName];
+            if (input) setRequired(input, declined);
+        });
+    }
+
     function renderGuests() {
         if (attendanceStatus() !== 'confirmed') {
             participantsBox.innerHTML = '';
+            if (typeof check === 'function') check();
             return;
         }
 
+        const previousParticipants = participantSnapshot();
         const n = parseInt(participantsCount ? participantsCount.value : '1', 10) || 1;
         let html = '';
         for (let i = 0; i < n; i++) html += guestHTML(i);
         participantsBox.innerHTML = html;
         bindInputs(participantsBox);
+        restoreParticipants(previousParticipants);
     }
 
     function syncAttendanceUI() {
         const declined = attendanceStatus() === 'declined';
 
-        if (attendingFields) attendingFields.style.display = declined ? 'none' : '';
-        if (declineContact) declineContact.style.display = declined ? '' : 'none';
+        toggleBlock(attendingFields, !declined);
+        toggleBlock(declineContact, declined);
 
         setDisabled(attendingFields, declined);
         setDisabled(declineContact, !declined);
         setDisabled(imageReleaseWrap, declined);
+        syncDeclineContactRequirements(declined);
 
         renderGuests();
         bindInputs(declineContact);
@@ -286,14 +339,25 @@
     };
 
     attendanceInputs.forEach((input) => input.addEventListener('change', syncAttendanceUI));
+    if (attendanceWrap) {
+        attendanceWrap.addEventListener('click', (event) => {
+            if (event.target.closest('.wi-checkbox-container')) {
+                requestAnimationFrame(syncAttendanceUI);
+            }
+        });
+    }
 
     syncAttendanceUI();
     if (participantsCount) {
-        // Il widget wi-select non dispatcha `change` (fa solo selElmnt.value =
-        // ...): impostiamo la property onchange PRIMA dell'init di body-end.js,
-        // con fallback su addEventListener per le select native.
-        participantsCount.onchange = renderGuests;
         participantsCount.addEventListener('change', renderGuests);
+        participantsCount.addEventListener('input', renderGuests);
+    }
+    if (participantSelectWrap) {
+        participantSelectWrap.addEventListener('click', (event) => {
+            if (event.target.closest('.wi-input-list-value')) {
+                requestAnimationFrame(renderGuests);
+            }
+        });
     }
 })();
 </script>

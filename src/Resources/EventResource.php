@@ -10,7 +10,7 @@ use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
 use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\ResourceSchema\TableLayoutSchema;
-use Wonder\Elements\Components\Card;
+use Wonder\Elements\Components\{Card, SectionTitle, Container};
 use Wonder\Elements\Form\Form;
 use Wonder\Plugin\Rsvp\Models\Event;
 
@@ -39,7 +39,7 @@ final class EventResource extends Resource
             'name' => 'Nome',
             'description' => 'Descrizione',
             'starts_at' => 'Data evento',
-            'location_name' => 'Location',
+            'location_name' => 'Nome location',
             'location_address' => 'Indirizzo',
             'location_address_url' => 'Link indirizzo',
             'location_position_url' => 'Link posizione',
@@ -72,17 +72,25 @@ final class EventResource extends Resource
     public static function formLayoutSchema(): ?Form
     {
         return (new Form)->components([
-            (new Card)->components([
-                static::getInput('code')->columnSpan(3),
-                static::getInput('name')->columnSpan(6),
-                static::getInput('starts_at')->columnSpan(3),
-                static::getInput('description')->columnSpan(12),
-                static::getInput('location_name')->columnSpan(6),
-                static::getInput('location_address')->columnSpan(6),
-                static::getInput('location_address_url')->columnSpan(6),
-                static::getInput('location_position_url')->columnSpan(6),
-                static::getInput('location_logo')->columnSpan(12),
-            ])->columns(12)->columnSpan(9),
+            (new Container)->components([
+
+                (new Card)->components([
+                    static::getInput('code')->columnSpan(3),
+                    static::getInput('name')->columnSpan(6),
+                    static::getInput('starts_at')->columnSpan(3),
+                    static::getInput('description')->columnSpan(12)
+                ])->columns(12)->columnSpan(1)
+
+                (new Card)->components([
+                    (new SectionTitle('Location'))->columnSpan(12),
+                    static::getInput('location_name')->columnSpan(6),
+                    static::getInput('location_address')->columnSpan(6),
+                    static::getInput('location_address_url')->columnSpan(6),
+                    static::getInput('location_position_url')->columnSpan(6),
+                    static::getInput('location_logo')->columnSpan(12),
+                ])->columns(12)->columnSpan(1)
+
+            ])->columns(12)->columnSpan(1),
             (new Card)->components([
                 static::getInput('position')->columnSpan(12),
                 static::getInput('active')->columnSpan(12),
