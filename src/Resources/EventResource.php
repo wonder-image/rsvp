@@ -76,7 +76,7 @@ final class EventResource extends Resource
                     static::getInput('starts_at')->columnSpan(3),
                     static::getInput('description')->columnSpan(12)
 
-                ])->columns(12)->columnSpan(1)
+                ])->columns(12)->columnSpan(1),
 
                 (new Card)->components([
 
@@ -102,7 +102,7 @@ final class EventResource extends Resource
                     ])->columnSpan(8)->columns(12),
                     
 
-                ])->columns(12)->columnSpan(1)
+                ])->columns(12)->columnSpan(1),
 
             ])->columns(12)->columnSpan(1),
             (new Card)->components([
