@@ -41,6 +41,7 @@ final class EventResource extends Resource
             'starts_at' => 'Data evento',
             'location_name' => 'Nome',
             ...static::$model::addressExtension()->labels(),
+            'location_position_url' => 'Link posizione',
             'location_site_url' => 'Link sito',
             'location_logo' => 'Logo',
             'position' => 'Ordine',
@@ -76,7 +77,7 @@ final class EventResource extends Resource
                     static::getInput('starts_at')->columnSpan(3),
                     static::getInput('description')->columnSpan(12)
 
-                ])->columns(12)->columnSpan(1),
+                ])->columns(12)->columnSpan(12),
 
                 (new Card)->components([
 
@@ -102,13 +103,15 @@ final class EventResource extends Resource
                     ])->columnSpan(8)->columns(12),
                     
 
-                ])->columns(12)->columnSpan(1),
+                ])->columns(12)->columnSpan(12),
 
-            ])->columns(12)->columnSpan(1),
+            ])->columns(12)->columnSpan(9),
+
             (new Card)->components([
                 static::getInput('position')->columnSpan(12),
                 static::getInput('active')->columnSpan(12),
             ])->columns(12)->columnSpan(3),
+
         ])->columns(12);
     }
 
@@ -127,7 +130,7 @@ final class EventResource extends Resource
     public static function tableLayoutSchema(): TableLayoutSchema
     {
         return TableLayoutSchema::for(static::class)
-            ->title('Eventi RSVP')
+            ->title('Eventi')
             ->buttonAdd('Aggiungi evento')
             ->results()
             ->filters()
@@ -153,9 +156,9 @@ final class EventResource extends Resource
     public static function navigationSchema(): NavigationSchema
     {
         return NavigationSchema::for(static::class)
-            ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
+            ->inSection('rsvp')
             ->title('Eventi')
-            ->order(10)
+            ->order(9)
             ->authority(['admin']);
     }
 
@@ -164,6 +167,7 @@ final class EventResource extends Resource
         string $mode,
         string $context = 'backend'
     ): array {
+
         if (!empty($values['starts_at']) && strtotime((string) $values['starts_at']) !== false) {
             $values['starts_at'] = date('Y-m-d\TH:i', strtotime((string) $values['starts_at']));
         }

@@ -74,7 +74,12 @@ final class Event extends Model
 
     public static function addressExtension(): AddressExtension
     {
-        return AddressExtension::make('location', 'simple', 'position_url')->withLink();
+        return AddressExtension::simple('location', 'position_url', 'it')->withLink();
+    }
+
+    public static function decorate($row): array
+    {
+        return static::addressExtension()->decorate($row);
     }
 
 }

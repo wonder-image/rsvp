@@ -21,8 +21,8 @@ final class AuthorizationResource extends Resource
     public static function textSchema(): array
     {
         return [
-            'label' => 'autorizzazione RSVP',
-            'plural_label' => 'autorizzazioni RSVP',
+            'label' => 'autorizzazione',
+            'plural_label' => 'autorizzazioni',
             'last' => 'ultime',
             'all' => 'tutte',
             'article' => 'le',
@@ -119,10 +119,10 @@ final class AuthorizationResource extends Resource
     public static function navigationSchema(): NavigationSchema
     {
         return NavigationSchema::for(static::class)
-            ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
+            ->inSection('rsvp')
             ->title('Autorizzazioni')
-            ->order(15)
-            ->authority(['admin']);
+            ->order(7)
+            ->authority([ 'admin' ]);
     }
 
     public static function mutateRequestValues(

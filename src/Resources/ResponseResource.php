@@ -291,10 +291,9 @@ final class ResponseResource extends Resource
     public static function navigationSchema(): NavigationSchema
     {
         return NavigationSchema::for(static::class)
-            ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
             ->title('Risposte')
-            ->order(10)
-            ->authority(['admin', 'rsvp_response_viewer']);
+            ->sectionOrder(610)
+            ->authority([ 'admin', 'rsvp_response_viewer' ]);
     }
 
     public static function mutateRequestValues(

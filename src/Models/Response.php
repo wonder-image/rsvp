@@ -11,7 +11,7 @@ final class Response extends Model
 {
     public static string $table = 'rsvp_response';
     public static string $folder = 'rsvp/responses';
-    public static string $icon = 'bi bi-envelope-check';
+    public static string $icon = 'bi bi-people';
 
     public static function tableSchema(): array
     {

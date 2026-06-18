@@ -134,23 +134,10 @@ final class InviteCodeResource extends Resource
     public static function navigationSchema(): NavigationSchema
     {
         return NavigationSchema::for(static::class)
-            ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
+            ->inSection('rsvp')
             ->title('Codici invito')
-            ->order(20)
-            ->authority(['admin']);
-    }
-
-    public static function mutateRequestValues(
-        array $values,
-        string $action,
-        string $context = 'backend',
-        ?array $oldValues = null
-    ): array {
-        if (trim((string) ($values['code'] ?? '')) === '') {
-            $values['code'] = strtoupper(bin2hex(random_bytes(4)));
-        }
-
-        return $values;
+            ->order(6)
+            ->authority([ 'admin' ]);
     }
 
     private static function groupOptions(): array

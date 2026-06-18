@@ -102,9 +102,9 @@ final class InviteGroupResource extends Resource
     public static function navigationSchema(): NavigationSchema
     {
         return NavigationSchema::for(static::class)
-            ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
+            ->inSection('rsvp')
             ->title('Gruppi inviti')
-            ->order(30)
-            ->authority(['admin']);
+            ->order(8)
+            ->authority([ 'admin' ]);
     }
 }

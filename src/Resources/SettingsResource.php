@@ -54,29 +54,14 @@ final class SettingsResource extends SingletonResource
                 'false' => 'Libero',
                 'true' => 'Richiede codice',
             ])->value('false'),
-            FormField::key('enable_attendance_status')->select([
-                'false' => 'No',
-                'true' => 'Sì',
-            ])->value('false'),
+            FormField::key('enable_attendance_status')->bool()->value('false'),
             FormField::key('max_participants')->number(),
-            FormField::key('allow_children')->select([
-                'false' => 'No',
-                'true' => 'Sì',
-            ])->value('false'),
+            FormField::key('allow_children')->bool()->value('false'),
             FormField::key('max_children')->number(),
-            FormField::key('require_image_release')->select([
-                'false' => 'No',
-                'true' => 'Sì',
-            ])->value('false'),
+            FormField::key('require_image_release')->bool()->value('false'),
             FormField::key('admin_email')->email(),
-            FormField::key('admin_notifications')->select([
-                'true' => 'Sì',
-                'false' => 'No',
-            ])->value('true'),
-            FormField::key('customer_notifications')->select([
-                'true' => 'Sì',
-                'false' => 'No',
-            ])->value('true'),
+            FormField::key('admin_notifications')->bool()->value('true'),
+            FormField::key('customer_notifications')->bool()->value('true'),
             FormField::key('customer_subject')->text(),
             FormField::key('customer_message')->textarea(),
             FormField::key('admin_subject')->text(),
@@ -150,9 +135,9 @@ final class SettingsResource extends SingletonResource
     public static function navigationSchema(): NavigationSchema
     {
         return NavigationSchema::for(static::class)
-            ->section('RSVP', 'rsvp', 'bi-ticket-perforated')
+            ->section('rsvp', 'RSVP', 'bi-ticket-perforated', 600, [ 'admin' ])
             ->title('Impostazioni')
-            ->order(40)
-            ->authority(['admin']);
+            ->order(10)
+            ->authority([ 'admin' ]);
     }
 }
