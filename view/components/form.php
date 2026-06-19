@@ -190,10 +190,10 @@
     const participantSelectWrap = participantsCount ? participantsCount.closest('[data-wi-select="true"]') : null;
     const attendanceWrap = attendanceInputs[0] ? attendanceInputs[0].closest('.wi-input-container') : null;
 
-    const SUCCESS_TEXT = <?=json_encode(__t('pages.rsvp.form.success_text'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const ERROR_TEXT = <?=json_encode(__t('pages.rsvp.form.error_text'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const RETRY_TEXT = <?=json_encode(__t('pages.rsvp.form.error_button_label'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
-    const PARTICIPANT_LABEL = <?=json_encode(__t('pages.rsvp.form.participant_label'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)?>;
+    const SUCCESS_TEXT = <?=js_e(__t('pagesvalue: .rsvp.form.success'))?>;
+    const ERROR_TEXT = <?=js_e(__t('pages.rsvp.form.error_text'))?>;
+    const RETRY_TEXT = <?=js_e(__t('pages.rsvp.form.error_button_label'))?>;
+    const PARTICIPANT_LABEL = <?=js_e(__t('pages.rsvp.form.participant_label'))?>;
 
     function attendanceStatus() {
         if (attendanceInputs.length === 0) return 'confirmed';

@@ -74,7 +74,9 @@ final class Event extends Model
 
     public static function addressExtension(): AddressExtension
     {
-        return AddressExtension::simple('location', 'position_url', 'it')->withLink();
+        return AddressExtension::simple('location', 'position_url', 'it')
+                ->withLink()
+                ->requiredFields([ 'country', 'province', 'city', 'cap', 'street', 'number', 'link' ]);
     }
 
     public static function decorate($row): array

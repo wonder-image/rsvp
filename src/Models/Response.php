@@ -148,8 +148,6 @@ final class Response extends Model
         $row['pretty_attendance_status'] = rsvpAttendanceStatusText($row['attendance_status'] ?? null);
         $row['pretty_accept_privacy_policy'] = rsvpBooleanText($row['accept_privacy_policy'] ?? false);
         $row['pretty_accept_image_release'] = rsvpBooleanText($row['accept_image_release'] ?? false);
-        $row['pretty_privacy'] = $row['pretty_accept_privacy_policy'];
-        $row['pretty_photo'] = $row['pretty_accept_image_release'];
 
         return $row;
     }
