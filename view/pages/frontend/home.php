@@ -1,6 +1,7 @@
 <?php
 
 use Wonder\Plugin\Rsvp\Rsvp;
+use Wonder\View\View;
 
 $state = is_array($STATE ?? null) ? $STATE : [];
 $featuredEvent = is_array($state['featured_event'] ?? null) ? $state['featured_event'] : [];
@@ -37,16 +38,16 @@ $GLOBALS['PAGE_KEY'] = (string) ($PAGE_KEY ?? 'rsvp.home');
 
 <section class="mt-10">
     <div class="content">
-        <?php Rsvp::component('event-date'); ?>
+        <?= View::component('rsvp/event-date', ['state' => $STATE]) ?>
     </div>
 </section>
 
 <section class="mt-10">
     <div class="content">
-        <?php Rsvp::component('countdown'); ?>
+        <?= View::component('rsvp/countdown', ['state' => $STATE]) ?>
     </div>
 </section>
 
-<?php Rsvp::component('form'); ?>
+<?= View::component('rsvp/form', ['state' => $STATE]) ?>
 
 <?php \Wonder\View\View::end(); ?>
