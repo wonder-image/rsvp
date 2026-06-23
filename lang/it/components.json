@@ -28,23 +28,8 @@
             "dietary_requirements": {
                 "label": "Intolleranze o allergie"
             },
-            "society_name": {
-                "label": "Indica il nome della tua attività"
-            },
-            "bus": {
-                "label": "Vuoi usufruire del servizio bus privato da/per Milano?",
-                "options": {
-                    "no": "No, non usufruisco del servizio bus",
-                    "famagosta": "Famagosta - {{time}}",
-                    "porta_venezia": "Porta Venezia - {{time}}"
-                }
-            },
-            "hotel": {
-                "label": "Desideri essere nostro ospite in hotel per la notte tra il 29 e il 30 giugno?",
-                "options": {
-                    "no": "No, non pernotto",
-                    "yes": "Sì, accetto il pernottamento"
-                }
+            "is_child": {
+                "label": "Partecipante minorenne"
             }
         }
     }

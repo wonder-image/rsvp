@@ -31,20 +31,8 @@
             "society_name": {
                 "label": "Enter your business name"
             },
-            "bus": {
-                "label": "Do you want to use the private bus service to/from Milan?",
-                "options": {
-                    "no": "No, I will not use the bus service",
-                    "famagosta": "Famagosta - {{time}}",
-                    "porta_venezia": "Porta Venezia - {{time}}"
-                }
-            },
-            "hotel": {
-                "label": "Would you like to be our guest at the hotel for the night between June 29 and 30?",
-                "options": {
-                    "no": "No, I will not stay overnight",
-                    "yes": "Yes, I accept the overnight stay"
-                }
+            "is_child": {
+                "label": "Minor participant"
             }
         }
     }
