@@ -3,7 +3,7 @@
      * Componente: data + ora + location dell'evento.
      *
      * Override consumer:
-     *     custom/modules/rsvp/view/components/event-date.php
+     *     custom/view/components/rsvp/event-date.php
      *
      * Args attesi in $args (tutti opzionali):
      *   - 'event'     array  Featured event (default: $STATE['featured_event'])

@@ -3,7 +3,7 @@
      * Componente: countdown live verso una data target.
      *
      * Override consumer:
-     *     custom/modules/rsvp/view/components/countdown.php
+     *     custom/view/components/rsvp/countdown.php
      *
      * Args attesi in $args:
      *   - 'target_date' string  ISO date / strtotime-parsable. Obbligatorio.

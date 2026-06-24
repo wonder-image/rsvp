@@ -9,8 +9,8 @@ view.
 Se nel sito crei questi file, il modulo li userà al posto delle view del package:
 
 ```text
-custom/view/frontend/rsvp/home.php
-custom/view/frontend/rsvp/login.php
+custom/view/pages/rsvp/frontend/home.php
+custom/view/pages/rsvp/frontend/login.php
 custom/view/components/rsvp/<nome>.php
 ```
 
@@ -68,7 +68,7 @@ senza sovrascrivere l'intera view:
     'state' => $STATE,
     'slots' => [
         'before_fields' => fn () => View::component('rsvp/event-date', ['state' => $STATE]),
-        'after_submit'  => '<p class="text-small">Ti aspettiamo!</p>',
+        'extra_cta'     => '<p class="text-small">Ti aspettiamo!</p>',
     ],
 ]) ?>
 ```
