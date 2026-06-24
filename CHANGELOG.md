@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed (BREAKING)
+- Rimosso `Rsvp::component()`. I componenti del modulo si renderizzano ora con `View::component('rsvp/<nome>')`.
+- `Rsvp::viewPath()` risolve ora le view con la catena di override `custom/view/{area}/rsvp/...` (in precedenza `custom/modules/rsvp/view/...`). Sposta gli override esistenti al nuovo percorso.
+
+### Added
+- Slot nel form RSVP: `before_fields`, `after_fields`, `before_submit`, `extra_cta`.
+- `php forge module:publish rsvp` per scaffoldare gli override delle view nel sito.
+
 ## 2.0.0
 
 - **Fix**: `SubmissionNotifier::settings()` ora gestisce il caso in cui

@@ -9,9 +9,9 @@ view.
 Se nel sito crei questi file, il modulo li userà al posto delle view del package:
 
 ```text
-custom/modules/rsvp/view/pages/frontend/home.php
-custom/modules/rsvp/view/pages/frontend/login.php
-custom/modules/rsvp/view/components/<nome>.php
+custom/view/frontend/rsvp/home.php
+custom/view/frontend/rsvp/login.php
+custom/view/components/rsvp/<nome>.php
 ```
 
 È la meccanica corretta per cambiare HTML, struttura, sezioni, stile e logica
@@ -43,16 +43,57 @@ altra pagina.
 ## Componenti riutilizzabili
 
 Il modulo include componenti in `view/components/` (es. `countdown`,
-`event-date`, `form`). Richiamali dalle view con l'entrypoint:
+`event-date`, `form`). Richiamali dalle view con il resolver del framework:
 
 ```php
-<?= \Wonder\Plugin\Rsvp\Rsvp::component('countdown', [
+<?= View::component('rsvp/countdown', [
     'target_date' => '2026-06-02 18:30',
+    'state'       => $STATE,
 ]) ?>
 ```
 
-Gli `$args` sono esposti al componente come `$args`; i legacy-globals del
-framework e `$STATE` restano disponibili nello scope del componente.
+Il modulo registra il namespace `rsvp` al boot; `View::component('rsvp/<nome>')`
+risolve con la catena di override `custom/view/components/rsvp/<nome>.php` →
+view del modulo. Gli `$args` sono esposti al componente come `$args`; i
+legacy-globals del framework e `$STATE` restano disponibili nello scope del
+componente.
+
+## Slot del form
+
+Il componente `rsvp/form` supporta slot nominati per iniettare contenuto
+senza sovrascrivere l'intera view:
+
+```php
+<?= View::component('rsvp/form', [
+    'state' => $STATE,
+    'slots' => [
+        'before_fields' => fn () => View::component('rsvp/event-date', ['state' => $STATE]),
+        'after_submit'  => '<p class="text-small">Ti aspettiamo!</p>',
+    ],
+]) ?>
+```
+
+Slot disponibili:
+
+- `before_fields` — prima dei campi del form
+- `after_fields` — dopo i campi del form
+- `before_submit` — prima del pulsante di invio
+- `extra_cta` — call-to-action aggiuntiva
+
+Ogni slot accetta una stringa HTML o un callable che ritorna una stringa.
+
+## Scaffolding degli override
+
+Il comando forge `module:publish` copia le view del modulo negli override del
+sito, pronte per la personalizzazione:
+
+```bash
+# pubblica tutte le view del modulo
+php forge module:publish rsvp
+
+# pubblica un singolo file (sovrascrive se già presente)
+php forge module:publish rsvp --only=components/form.php --force
+```
 
 ## Pagine RSVP aggiuntive
 

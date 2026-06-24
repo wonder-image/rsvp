@@ -63,9 +63,11 @@ mantengono il namespace.
 ed espone i path del modulo (`httpPath()`, `handlerPath()`, `viewPath()`, `langPath()`,
 `assetPath()`). Aggiunge due helper utili nelle view del sito:
 
-* `Rsvp::component(string $name, array $args = [])` — include un componente
-  riutilizzabile da `view/components/` (override dal sito in
-  `custom/modules/rsvp/view/components/`).
+* I componenti del modulo si renderizzano con `View::component('rsvp/<nome>')`.
+  Il modulo registra il namespace `rsvp` al boot; il resolver cerca gli override
+  in `custom/view/components/rsvp/<nome>.php`, poi cade sulle view del modulo.
+* `Rsvp::viewPath()` risolve le pagine del modulo con la catena di override
+  `custom/view/{area}/rsvp/...` (in precedenza `custom/modules/rsvp/view/...`).
 * `Rsvp::renderPage(array $config)` — scaffold per pagine RSVP-gated aggiuntive
   del sito (gestisce stato, redirect al login, hook SEO e layout).
 
