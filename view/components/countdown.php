@@ -17,9 +17,11 @@
      * inizializza solo quelli non ancora processati (data-rsvp-countdown-init).
      */
 
-    $args = $args ?? [];
-    $targetDate = trim((string) ($args['target_date']
-        ?? ($STATE['featured_event']['date'] ?? '')));
+    $args = props($args ?? [], [
+        'target_date' => $STATE['featured_event']['date'] ?? '',
+        'labels' => [],
+    ]);
+    $targetDate = trim((string) $args['target_date']);
 
     $labels = is_array($args['labels'] ?? null) ? $args['labels'] : [];
     $labels = array_merge([

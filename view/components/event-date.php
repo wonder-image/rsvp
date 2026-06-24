@@ -16,7 +16,7 @@
      * Stampa solo se almeno data o location sono valorizzati.
      */
 
-    $args = $args ?? [];
+    $args = props($args ?? [], ['state' => $STATE ?? []]);
     $event = is_array($args['event'] ?? null)
         ? $args['event']
         : (is_array($STATE['featured_event'] ?? null) ? $STATE['featured_event'] : []);

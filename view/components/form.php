@@ -14,10 +14,8 @@
 
     use Wonder\Plugin\Rsvp\Resources\ResponseResource;
     
-    $args = $args ?? [];
-    $state = is_array($args['state'] ?? null)
-        ? $args['state']
-        : (is_array($STATE ?? null) ? $STATE : []);
+    $args = props($args ?? [], ['state' => $STATE ?? []]);
+    $state = is_array($args['state'] ?? null) ? $args['state'] : [];
 
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
     $visibleEvents = is_array($state['visible_events'] ?? null) ? $state['visible_events'] : [];
@@ -67,6 +65,8 @@
                 data-participant-label="<?=e(__t('pages.rsvp.form.participant_label'))?>"
                 class="p-r f-start w-100 d-grid gap-5 mt-10 col-1 bg-white tx-black p-10 b-r-25 gap-p-3 p-p-5"
                 >
+
+                <?php slot('before_fields'); ?>
 
                 <div>
 
@@ -134,6 +134,8 @@
 
                     <div class="w-100 bt-1 tx-black mh-p-2"></div>
 
+                    <?php slot('after_fields'); ?>
+
                     <?php if ($customFields !== []) { ?>
                         <div class="w-100 d-grid gap-5">
                             <?php foreach ($customFields as $customField) { ?>
@@ -167,11 +169,15 @@
                     </div>
                 <?php } ?>
 
+                <?php slot('before_submit'); ?>
+
                 <div class="w-100 mt-5">
                     <button type="button" class="btn btn-primary c-w w-60 w-p-100" onclick="formSubmit(this.form, '<?=e($submitUrl)?>', rsvpFormSubmitResponse)">
                         <?= __t('pages.rsvp.form.submit_label') ?>
                     </button>
                 </div>
+
+                <?php slot('extra_cta'); ?>
 
             </form>
 
