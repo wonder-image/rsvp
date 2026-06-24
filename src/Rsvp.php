@@ -46,7 +46,7 @@ final class Rsvp implements ModuleInterface
         return self::root().'/view/'.$relative;
     }
 
-/**
+    /**
      * Scaffold per nuove pagine RSVP-gated del consumer.
      *
      * Il consumer registra la route nel proprio
