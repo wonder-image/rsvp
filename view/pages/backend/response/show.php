@@ -126,7 +126,8 @@ $sideCards = [
 if ($documents !== []) {
     $documentsHtml = '';
     foreach ($documents as $docType => $document) {
-        $documentsHtml .= $e($docType).': <b>'.$e(rsvpBooleanText($document['accepted'] ?? false)).'</b><br>';
+        $documentsHtml .= $e(rsvpLegalDocumentLabel((string) $docType) ?: (string) $docType)
+            .': <b>'.$e(rsvpBooleanText($document['accepted'] ?? false)).'</b><br>';
     }
 
     $sideCards[] = (new Card)->components([

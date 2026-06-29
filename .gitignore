@@ -2,5 +2,4 @@
 .agents/
 .claude/
 vendor/
-tests/
 skills-lock.json

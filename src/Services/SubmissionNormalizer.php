@@ -51,6 +51,8 @@ final class SubmissionNormalizer
             )),
             'notes' => self::string($payload, ['notes', 'requests', 'request']),
             'events_json' => $events !== [] ? json_encode($events, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null,
+            'accept_privacy_policy' => $privacyAccepted ? 'true' : 'false',
+            'accept_image_release' => $photoAccepted ? 'true' : 'false',
             'consents_json' => json_encode([
                 'privacy' => $privacyAccepted,
                 'photo' => $photoAccepted,
@@ -304,6 +306,8 @@ final class SubmissionNormalizer
             'event',
             'event_key',
             'attendance_status',
+            'status',
+            'attending',
             'locale',
             'lang',
             'privacy',
