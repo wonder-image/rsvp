@@ -1,45 +1,36 @@
 <?php
 
-use Wonder\Elements\Components\Card;
-use Wonder\Elements\Components\Container;
-use Wonder\Elements\Components\Link;
-use Wonder\Elements\Components\RichText;
-use Wonder\Elements\Components\SectionTitle;
+use Wonder\Elements\Components\{ Card, Container, Link, RichText, SectionTitle };
 use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Services\SubmissionNotifier;
 
-$item = is_array($ITEM ?? null) ? $ITEM : [];
-$participants = json_decode((string) ($item['participants_json'] ?? '[]'), true) ?: [];
-$events = json_decode((string) ($item['events_json'] ?? '[]'), true) ?: [];
-$documents = json_decode((string) ($item['legal_documents_json'] ?? '[]'), true) ?: [];
-$metadata = json_decode((string) ($item['metadata_json'] ?? '[]'), true) ?: [];
+$RESPONSE = Response::safeFindById($ITEM['id'] ?? 0) ?? [];
 $customFields = Response::customFieldDefinitions();
-$bookingCode = (string) ($item['booking_code'] ?? '');
+
 $showAttendanceStatus = rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
 
-$e = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
-
-$fullName = trim(((string) ($item['contact_name'] ?? '')).' '.((string) ($item['contact_surname'] ?? '')));
+$fullName = trim(($RESPONSE['contact_name'] ?? '').' '.($RESPONSE['contact_surname'] ?? ''));
 
 \Wonder\View\View::layout('backend.show', [
     'TITLE' => $fullName !== '' ? $fullName : 'Risposta RSVP',
-    'SUBTITLE' => 'Prenotazione '.($bookingCode !== '' ? $bookingCode : '--')
-        .' del '.((string) ($item['creation'] ?? '--')),
+    'SUBTITLE' => 'Prenotazione '.$RESPONSE['booking_code'].' del '.prettyDate($RESPONSE['creation'], true),
 ]);
 
+$participants = $RESPONSE['participants'] ?? [];
+
 $participantsHtml = 'Totale: <b>'.count($participants).'</b><br>'
-    .'Bambini: <b>'.$e($item['children_count'] ?? '0').'</b><br>';
+    .'Bambini: <b>'.e($RESPONSE['children_count'] ?? '0').'</b><br>';
 
 foreach ($participants as $index => $participant) {
     $name = trim(((string) ($participant['name'] ?? '')).' '.((string) ($participant['surname'] ?? '')));
-    $participantsHtml .= 'Partecipante '.($index + 1).': <b>'.$e($name).'</b>';
+    $participantsHtml .= 'Partecipante '.($index + 1).': <b>'.e($name).'</b>';
 
     if (!empty($participant['is_child'])) {
         $participantsHtml .= ' <em>(bambino)</em>';
     }
 
     if (!empty($participant['dietary_requirements'])) {
-        $participantsHtml .= ' - '.$e($participant['dietary_requirements']);
+        $participantsHtml .= ' - '.e($participant['dietary_requirements']);
     }
 
     $participantsHtml .= '<br>';
@@ -50,9 +41,9 @@ $mainCards = [
         (new Container)->components([
             (new SectionTitle)->text('Contatto'),
             (new RichText(
-                'Nome: <b>'.$e($fullName).'</b><br>'
-                .'Email: <b>'.$e($item['contact_email'] ?? '--').'</b><br>'
-                .'Telefono: <b>'.$e($item['contact_phone'] ?? '--').'</b>'
+                'Nome: <b>'.e($fullName).'</b><br>'
+                .'Email: <b>'.e($RESPONSE['contact_email'] ?? '--').'</b><br>'
+                .'Telefono: <b>'.e($RESPONSE['contact_phone'] ?? '--').'</b>'
             )),
         ])->columnSpan(1),
         (new Container)->components([
@@ -63,20 +54,20 @@ $mainCards = [
 
     (new Card)->components([
         (new SectionTitle)->text('Richieste'),
-        (new RichText(nl2br($e($item['notes'] ?? '--')))),
+        (new RichText(nl2br(e($RESPONSE['notes'] ?? '--')))),
     ]),
 ];
 
 $customFieldsHtml = '';
 foreach ($customFields as $field) {
-    $value = rsvpRenderCustomFieldValue($field, $item[$field['column']] ?? null);
+    $value = rsvpRenderCustomFieldValue($field, $RESPONSE[$field['column']] ?? null);
 
     if ($value === '') {
         continue;
     }
 
-    $customFieldsHtml .= $e(rsvpCustomFieldLabel($field, (string) ($field['key'] ?? '')))
-        .': <b>'.$e($value).'</b><br>';
+    $customFieldsHtml .= e(rsvpCustomFieldLabel($field, (string) ($field['key'] ?? '')))
+        .': <b>'.e($value).'</b><br>';
 }
 
 if ($customFieldsHtml !== '') {
@@ -86,11 +77,11 @@ if ($customFieldsHtml !== '') {
     ]);
 }
 
-if ($metadata !== []) {
+if (($RESPONSE['metadata'] ?? []) !== []) {
     $mainCards[] = (new Card)->components([
         (new SectionTitle)->text('Dati aggiuntivi'),
-        (new RichText('<pre class="mb-0">'.$e(json_encode(
-            $metadata,
+        (new RichText('<pre class="mb-0">'.e(json_encode(
+            $RESPONSE['metadata'],
             JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
         )).'</pre>')),
     ]);
@@ -98,36 +89,28 @@ if ($metadata !== []) {
 
 $detailsHtml = '';
 if ($showAttendanceStatus) {
-    $detailsHtml .= 'Conferma: <b>'.$e($item['pretty_attendance_status'] ?? '').'</b><br>';
+    $detailsHtml .= 'Conferma: <b>'.e($RESPONSE['pretty_attendance_status'] ?? '').'</b><br>';
 }
-$detailsHtml .= 'Codice prenotazione: <b>'.$e($bookingCode !== '' ? $bookingCode : '--').'</b><br>'
-    .'Creazione: <b>'.$e($item['creation'] ?? '--').'</b><br>'
-    .'Lingua: <b>'.$e($item['locale'] ?? '--').'</b><br>'
-    .'Evento: <b>'.$e($item['event_key'] ?? '--').'</b><br>'
-    .'Codice invito: <b>'.$e($item['invite_code'] ?? '--').'</b><br>'
-    .'Gruppo invito: <b>'.$e($item['invite_group_code'] ?? '--').'</b><br>'
-    .'Autorizzazione: <b>'.$e($item['authorization_code'] ?? '--').'</b>';
+$detailsHtml .= 'Codice prenotazione: <b>'.e($RESPONSE['booking_code'] ?? '--').'</b><br>'
+    .'Creazione: <b>'.prettyDate($RESPONSE['creation'], true).'</b><br>'
+    .'Lingua: <b>'.e($RESPONSE['locale'] ?? '--').'</b><br>'
+    .'Evento: <b>'.e($RESPONSE['event_key'] ?? '--').'</b><br>'
+    .'Codice invito: <b>'.e($RESPONSE['invite_code'] ?? '--').'</b><br>'
+    .'Gruppo invito: <b>'.e($RESPONSE['invite_group_code'] ?? '--').'</b><br>'
+    .'Autorizzazione: <b>'.e($RESPONSE['authorization_code'] ?? '--').'</b>';
 
 $sideCards = [
     (new Card)->components([
         (new SectionTitle)->text('Dettagli'),
         (new RichText($detailsHtml)),
     ]),
-
-    (new Card)->components([
-        (new SectionTitle)->text('Consensi'),
-        (new RichText(
-            'Privacy: <b>'.$e($item['pretty_accept_privacy_policy'] ?? '').'</b><br>'
-            .'Foto: <b>'.$e($item['pretty_accept_image_release'] ?? '').'</b>'
-        )),
-    ]),
 ];
 
-if ($documents !== []) {
+if (($RESPONSE['legal_documents'] ?? []) !== []) {
     $documentsHtml = '';
-    foreach ($documents as $docType => $document) {
-        $documentsHtml .= $e(rsvpLegalDocumentLabel((string) $docType) ?: (string) $docType)
-            .': <b>'.$e(rsvpBooleanText($document['accepted'] ?? false)).'</b><br>';
+    foreach ($RESPONSE['legal_documents'] as $docType => $document) {
+        $documentsHtml .= e(rsvpLegalDocumentLabel((string) $docType) ?: (string) $docType)
+            .': <b>'.e(rsvpBooleanText($document['accepted'] ?? false)).'</b><br>';
     }
 
     $sideCards[] = (new Card)->components([
@@ -136,18 +119,18 @@ if ($documents !== []) {
     ]);
 }
 
-if ($events !== []) {
+if (($RESPONSE['events'] ?? []) !== []) {
     $sideCards[] = (new Card)->components([
         (new SectionTitle)->text('Eventi selezionati'),
-        (new RichText(implode('<br>', array_map($e, $events)))),
+        (new RichText(implode('<br>', array_map('e', $RESPONSE['events'])))),
     ]);
 }
 
-if (!empty($item['request_url'])) {
+if (!empty($RESPONSE['request_url'])) {
     $sideCards[] = (new Card)->components([
         (new SectionTitle)->text('Origine'),
-        (new RichText((string) (new Link((string) $item['request_url']))
-            ->label((string) $item['request_url'])
+        (new RichText((string) (new Link((string) $RESPONSE['request_url']))
+            ->label((string) $RESPONSE['request_url'])
             ->blank())),
     ]);
 }

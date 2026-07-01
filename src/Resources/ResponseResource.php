@@ -233,7 +233,7 @@ final class ResponseResource extends Resource
     {
         $labels = [];
 
-        foreach (rsvpDecodeJsonArray($row['participants_json'] ?? '[]') as $participant) {
+        foreach (rsvpDecodeJsonArray($row['participants'] ?? '[]') as $participant) {
             if (!is_array($participant)) {
                 continue;
             }
@@ -256,7 +256,7 @@ final class ResponseResource extends Resource
 
     private static function eventsSummary(array $row): string
     {
-        $events = rsvpDecodeJsonArray($row['events_json'] ?? '[]');
+        $events = rsvpDecodeJsonArray($row['events'] ?? '[]');
 
         if ($events !== []) {
             return implode(', ', array_map('strval', $events));

@@ -48,7 +48,7 @@ Il normalizzatore accetta anche varianti legacy dei nomi campo (`name`,
 `surname`, `children_*`, `partner_*`, `phone`, `cel`, `email`, `event`,
 `allergies`, `requests`/`request`, `lang`, `photo_privacy`, `password_id`, oltre
 a un blocco `form` JSON). I campi extra non riconosciuti e non dichiarati
-nell'estensione confluiscono in `metadata_json`.
+nell'estensione confluiscono in `metadata`.
 
 ## Login (`api.rsvp.login`)
 

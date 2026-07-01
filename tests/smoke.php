@@ -218,7 +218,7 @@ namespace {
             'image_release' => ['accepted' => false, 'document_id' => 0],
         ], SubmissionNormalizer::legalDocumentsFromNormalized($normalized), 'Serializza i documenti legali normalizzati.'));
         $assert(static fn () => assertSame(['ceremony', 'party'], SubmissionNormalizer::eventsFromNormalized($normalized), 'Deduplica gli eventi mantenendo l’ordine.'));
-        $assert(static fn () => assertSame(['unknown_flag' => 'keep-me'], rsvpDecodeJsonArray($normalized['metadata_json'] ?? '[]'), 'Esclude dal metadata i campi già gestiti dal normalizer.'));
+        $assert(static fn () => assertSame(['unknown_flag' => 'keep-me'], rsvpDecodeJsonArray($normalized['metadata'] ?? '[]'), 'Esclude dal metadata i campi già gestiti dal normalizer.'));
 
         $declined = SubmissionNormalizer::fromPayload([
             'attendance_status' => 'declined',

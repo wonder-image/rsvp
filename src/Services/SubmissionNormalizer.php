@@ -43,46 +43,46 @@ final class SubmissionNormalizer
             'contact_surname' => self::string($payload, ['contact_surname']) ?: ($participants[0]['surname'] ?? ''),
             'contact_phone' => self::string($payload, ['contact_phone', 'phone', 'cel']),
             'contact_email' => strtolower(self::string($payload, ['contact_email', 'email'])),
-            'participants_json' => json_encode($participants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'participants' => json_encode($participants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'participants_count' => count($participants),
             'children_count' => count(array_filter(
                 $participants,
                 static fn ($participant) => !empty($participant['is_child'])
             )),
             'notes' => self::string($payload, ['notes', 'requests', 'request']),
-            'events_json' => $events !== [] ? json_encode($events, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null,
+            'events' => $events !== [] ? json_encode($events, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null,
             'accept_privacy_policy' => $privacyAccepted ? 'true' : 'false',
             'accept_image_release' => $photoAccepted ? 'true' : 'false',
-            'consents_json' => json_encode([
+            'consents' => json_encode([
                 'privacy' => $privacyAccepted,
                 'photo' => $photoAccepted,
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'legal_documents_json' => $legalDocuments !== []
+            'legal_documents' => $legalDocuments !== []
                 ? json_encode($legalDocuments, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
                 : null,
-            'metadata_json' => json_encode(self::metadata($payload), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'metadata' => json_encode(self::metadata($payload), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'request_url' => self::string($payload, ['request_url', 'source_url']),
         ], $customFieldColumns);
     }
 
     public static function participantsFromNormalized(array $normalized): array
     {
-        return rsvpDecodeJsonArray($normalized['participants_json'] ?? '[]');
+        return rsvpDecodeJsonArray($normalized['participants'] ?? '[]');
     }
 
     public static function eventsFromNormalized(array $normalized): array
     {
-        return rsvpDecodeJsonArray($normalized['events_json'] ?? '[]');
+        return rsvpDecodeJsonArray($normalized['events'] ?? '[]');
     }
 
     public static function consents(array $normalized): array
     {
-        return rsvpDecodeJsonArray($normalized['consents_json'] ?? '[]');
+        return rsvpDecodeJsonArray($normalized['consents'] ?? '[]');
     }
 
     public static function legalDocumentsFromNormalized(array $normalized): array
     {
-        return rsvpDecodeJsonArray($normalized['legal_documents_json'] ?? '[]');
+        return rsvpDecodeJsonArray($normalized['legal_documents'] ?? '[]');
     }
 
     private static function normalizePayload(array $payload): array
