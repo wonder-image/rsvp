@@ -37,8 +37,8 @@ final class Response extends Model
             Column::key('legal_documents_json')->type('LONGTEXT')->null(),
             Column::key('metadata_json')->type('LONGTEXT')->null(),
             Column::key('request_url')->type('TEXT')->null(),
-            Column::key('accept_privacy_policy')->type('TEXT')->null(false),
-            Column::key('accept_image_release')->type('TEXT')->null(false),
+            Column::key('accept_privacy_policy')->type('TEXT')->null(false)->default('false'),
+            Column::key('accept_image_release')->type('TEXT')->null(false)->default('false')
         ];
 
         foreach (self::customFieldDefinitions() as $field) {

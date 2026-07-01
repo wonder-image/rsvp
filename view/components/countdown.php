@@ -17,9 +17,11 @@
      * inizializza solo quelli non ancora processati (data-rsvp-countdown-init).
      */
 
+    use Wonder\Plugin\Rsvp\Rsvp;
+
     $args = $args ?? [];
     $targetDate = trim((string) ($args['target_date']
-        ?? ($STATE['featured_event']['date'] ?? '')));
+        ?? (Rsvp::context()['featured_event']['date'] ?? '')));
 
     $labels = is_array($args['labels'] ?? null) ? $args['labels'] : [];
     $labels = array_merge([
@@ -37,7 +39,7 @@
     $iso = date('c', $ts);
 ?>
 
-<div class="w-100 d-grid col-4 gap-5 a-c" data-rsvp-countdown="<?=e($iso)?>">
+<div class="w-100 d-grid col-4 col-p-2 gap-5 a-c" data-rsvp-countdown="<?=e($iso)?>">
     <?php foreach (['days', 'hours', 'minutes', 'seconds'] as $unit) { ?>
         <div class="w-100">
             <div class="title-big fw-700" data-unit="<?=e($unit)?>">00</div>

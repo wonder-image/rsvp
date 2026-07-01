@@ -81,7 +81,10 @@ final class Event extends Model
 
     public static function decorate($row): array
     {
-        return static::addressExtension()->decorate($row);
+
+        $row = static::addressExtension()->decorate($row);
+
+        return $row;
     }
 
 }

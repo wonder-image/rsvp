@@ -68,6 +68,7 @@ foreach ($catalog as $eventKey => $event) {
         'location_address_url' => (string) ($event['location_address_url'] ?? ''),
         'location_position_url' => (string) ($event['location_position_url'] ?? ''),
         'location_logo' => (string) ($event['location_logo'] ?? ''),
+        'location_logo_url' => (string) ($event['locationLogoUrl'] ?? ''),
         'position' => (int) ($event['position'] ?? 0),
     ], $locale);
     

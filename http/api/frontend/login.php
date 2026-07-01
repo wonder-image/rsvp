@@ -23,8 +23,6 @@ Handler::run('/api/rsvp/login/', 'POST', ['api_internal_user', 'api_public_acces
     return [
         'success' => true,
         'status' => 200,
-        'response' => (static function () use ($session) {
-            return require Rsvp::httpPath('frontend/context.php');
-        })(),
+        'response' => Rsvp::context($session),
     ];
 });

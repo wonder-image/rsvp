@@ -16,10 +16,12 @@
      * Stampa solo se almeno data o location sono valorizzati.
      */
 
+    use Wonder\Plugin\Rsvp\Rsvp;
+
     $args = $args ?? [];
     $event = is_array($args['event'] ?? null)
         ? $args['event']
-        : (is_array($STATE['featured_event'] ?? null) ? $STATE['featured_event'] : []);
+        : (Rsvp::context()['featured_event'] ?? []);
 
     $dateRaw = trim((string) ($args['date'] ?? ($event['date'] ?? '')));
     $locationName = trim((string) ($args['location'] ?? ($event['location_name'] ?? '')));

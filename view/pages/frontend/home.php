@@ -2,24 +2,19 @@
 
 use Wonder\Plugin\Rsvp\Rsvp;
 
-$state = is_array($STATE ?? null) ? $STATE : [];
-$featuredEvent = is_array($state['featured_event'] ?? null) ? $state['featured_event'] : [];
-$eventName = trim((string) ($featuredEvent['label'] ?? ($featuredEvent['name'] ?? '')));
+Rsvp::auth();
 
-$SEO = $GLOBALS['SEO'] ?? (object) [];
-$SEO->title = (string) ($SEO_TITLE ?? '');
-$SEO->description = (string) ($SEO_DESCRIPTION ?? '');
-$SEO->url = (string) ($SEO_URL ?? '');
-$SEO->breadcrumb = is_array($SEO_BREADCRUMB ?? null) ? $SEO_BREADCRUMB : [];
+$SEO->title = __t('pages.rsvp.home.seo.title');
+$SEO->description = __t('pages.rsvp.home.seo.description');
+$SEO->url = __r('rsvp.home');
+$SEO->breadcrumb = [];
 
-if (trim((string) ($SEO_IMAGE ?? '')) !== '') {
-    $SEO->image = (string) $SEO_IMAGE;
-}
+$GLOBALS['PAGE_KEY'] = 'rsvp.home';
 
-$GLOBALS['SEO'] = $SEO;
-$GLOBALS['PAGE_KEY'] = (string) ($PAGE_KEY ?? 'rsvp.home');
+$event = Rsvp::context()['featured_event'] ?? [];
+$eventName = trim((string) ($event['label'] ?? ($event['name'] ?? '')));
 
-\Wonder\View\View::layout('frontend.main');
+Rsvp::layout('main');
 
 ?>
 

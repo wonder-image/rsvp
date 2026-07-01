@@ -2,62 +2,48 @@
 
 use Wonder\Plugin\Rsvp\Rsvp;
 
-$state = is_array($STATE ?? null) ? $STATE : [];
-$session = is_array($state['session'] ?? null) ? $state['session'] : [];
+/**
+ * Pagina login RSVP.
+ *
+ * La route punta direttamente a questa pagina: lo stato arriva da
+ * `Rsvp::context()` (condiviso e memoizzato tra le pagine RSVP) e la SEO
+ * viene impostata qui, senza passare da un handler http dedicato.
+ */
+
+$session = Rsvp::context()['session'] ?? [];
 $hasSession = (int) ($session['id'] ?? 0) > 0;
 $homeUrl = __r('rsvp.home');
 
-$SEO = $GLOBALS['SEO'] ?? (object) [];
-$SEO->title = (string) ($SEO_TITLE ?? '');
-$SEO->description = (string) ($SEO_DESCRIPTION ?? '');
-$SEO->url = (string) ($SEO_URL ?? '');
-$SEO->breadcrumb = is_array($SEO_BREADCRUMB ?? null) ? $SEO_BREADCRUMB : [];
+$SEO->title = __t('pages.rsvp.login.seo.title');
+$SEO->description = __t('pages.rsvp.login.seo.description');
+$SEO->url = __r('rsvp.login');
+$SEO->breadcrumb = [];
 
-if (trim((string) ($SEO_IMAGE ?? '')) !== '') {
-    $SEO->image = (string) $SEO_IMAGE;
-}
+$GLOBALS['PAGE_KEY'] = 'rsvp.login';
 
-$GLOBALS['SEO'] = $SEO;
-$GLOBALS['PAGE_KEY'] = (string) ($PAGE_KEY ?? 'rsvp.login');
-
-\Wonder\View\View::layout('frontend.main');
+Rsvp::layout('auth', [
+    'id' => 'rsvp-login-form',
+    'title' => __t('pages.rsvp.login.title'),
+    'subtitle' => $hasSession
+        ? __t('pages.rsvp.login.session_text')
+        : __t('pages.rsvp.login.text'),
+    'onsubmit' => 'event.preventDefault(); submitRsvpLogin(this); return false;',
+]);
 ?>
 
-<section class="full-page">
-
-    <?= __ri($PATH->upload.'/images/texture-1-phone.png')->fitCover()->skeleton(false)->size(1920)->render() ?>
-
-    <div class="content content-small" style="z-index: 2;">
-        <form
-            id="rsvp-login-form"
-            method="post"
-            action=""
-            autocomplete="off"
-            class="w-100 p-6 center bg-secondary b-r-25"
-            onsubmit="event.preventDefault(); submitRsvpLogin(this); return false;"
-        >
-            <img src="<?=$SOCIETY->logoWhite?>" alt="<?=e($SOCIETY->name)?>" class="w-30 c-w">
-
-            <?php if ($hasSession) { ?>
-                <div class="subtitle a-c tx-upper w-100 mt-6"><?=__t('pages.rsvp.login.title')?></div>
-                <div class="text a-c w-100 mt-2"><?=__t('pages.rsvp.login.session_text')?></div>
-                <div class="w-100 mt-4">
-                    <a href="<?=e($homeUrl)?>" class="btn btn-primary w-100"><?=__t('pages.rsvp.login.home_button')?></a>
-                </div>
-            <?php } else { ?>
-                <div class="subtitle a-c tx-upper w-100 mt-6"><?=__t('pages.rsvp.login.title')?></div>
-                <div class="text a-c w-100 mt-2"><?=__t('pages.rsvp.login.text')?></div>
-                <div class="w-100 mt-6">
-                    <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
-                </div>
-                <div class="w-100 mt-4">
-                    <?=submit(__t('components.buttons.login'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
-                </div>
-            <?php } ?>
-            <div id="rsvp-login-feedback" class="w-100 mt-4 a-c tx-danger"></div>
-        </form>
+<?php if ($hasSession) { ?>
+    <div class="w-100 mt-4">
+        <a href="<?=e($homeUrl)?>" class="btn btn-primary w-100"><?=__t('pages.rsvp.login.home_button')?></a>
     </div>
-</section>
+<?php } else { ?>
+    <div class="w-100 mt-6">
+        <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
+    </div>
+    <div class="w-100 mt-4">
+        <?=submit(__t('components.buttons.login'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
+    </div>
+<?php } ?>
+<div id="rsvp-login-feedback" class="w-100 mt-4 a-c tx-danger"></div>
 
 <script>
     window.submitRsvpLogin = async function (form) {

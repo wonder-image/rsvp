@@ -19,8 +19,8 @@ presentazionale. Le view del modulo restano come fallback.
 
 ## Contesto disponibile: `$STATE`
 
-Le view ricevono `$STATE`, preparato dall'handler HTTP del modulo tramite
-`http/frontend/context.php`. Chiavi principali:
+Le view ricevono `$STATE`, preparato dal modulo tramite `Rsvp::context()`
+(il provider in `context.php`). Chiavi principali:
 
 | Chiave | Contenuto |
 | --- | --- |

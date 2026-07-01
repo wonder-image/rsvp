@@ -122,14 +122,15 @@ final class ResponseResource extends Resource
             FormField::key('participants[__INDEX__][dietary_requirements]')->textarea()
                 ->label(__t('components.forms.fields.dietary_requirements.label')),
 
-            FormField::key('participants[__INDEX__][is_child]')->hidden()
-                ->value('false'),
+            FormField::key('participants[__INDEX__][is_child]')->checkbox()
+                ->label(__t('components.forms.fields.is_child.label')),
 
             /**
              * Dati consensi.
              */
             FormField::key('accept_privacy_policy')->acceptDocument('privacy_policy')->required(),
-            FormField::key('accept_image_release')->acceptDocument('image_release')->required(),
+            FormField::key('accept_image_release')->acceptDocument('image_release')->required()
+            
         ];
 
         if (self::attendanceStatusEnabled()) {
@@ -371,7 +372,7 @@ final class ResponseResource extends Resource
         }
 
         $normalized = SubmissionNormalizer::fromPayload($payload);
-        $state = require Rsvp::httpPath('frontend/context.php');
+        $state = Rsvp::context();
         $attendanceStatus = rsvpAttendanceStatusValue($normalized['attendance_status'] ?? null);
 
         self::assertSubmission($normalized, $attendanceStatus, $state, $payload);

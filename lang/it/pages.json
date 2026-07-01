@@ -29,6 +29,10 @@
             }
         },
         "home": {
+            "seo": {
+                "title": "RSVP - {{society_name}}",
+                "description": "Conferma la tua partecipazione."
+            },
             "title": "RSVP",
             "section_title": "Conferma la tua partecipazione",
             "intro_text": ""
@@ -59,6 +63,7 @@
             "contact_surname_label": "Cognome referente",
             "participants_count_label": "Partecipanti",
             "children_count_label": "Numero bambini",
+            "children_max_text": "Hai raggiunto il numero massimo di bambini consentiti.",
             "participant_label": "Ospite",
             "child_label": "Bambino",
             "participant_name_label": "Nome",
@@ -84,6 +89,10 @@
             "concierge_label": "Concierge:"
         },
         "login": {
+            "seo": {
+                "title": "Accesso RSVP - {{society_name}}",
+                "description": "Inserisci il tuo codice invito per accedere alla pagina RSVP."
+            },
             "kicker": "RSVP",
             "title": "Accesso RSVP",
             "text": "Inserisci il tuo codice invito per accedere alla pagina RSVP.",

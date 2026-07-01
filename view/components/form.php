@@ -13,11 +13,9 @@
      */
 
     use Wonder\Plugin\Rsvp\Resources\ResponseResource;
-    
-    $args = $args ?? [];
-    $state = is_array($args['state'] ?? null)
-        ? $args['state']
-        : (is_array($STATE ?? null) ? $STATE : []);
+    use Wonder\Plugin\Rsvp\Rsvp;
+
+    $state = Rsvp::context();
 
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
     $visibleEvents = is_array($state['visible_events'] ?? null) ? $state['visible_events'] : [];
@@ -26,7 +24,8 @@
     $canAccessForm = !$requiresInviteCode || $hasSession;
     $locale = (string) ($state['locale'] ?? __l());
     $maxParticipants = max(1, (int) ($state['max_participants'] ?? 1));
-    $allowChildren = max(1, (int) ($state['allow_children'] ?? false));
+    $allowChildren = !empty($state['allow_children']);
+    $maxChildren = max(0, (int) ($state['max_children'] ?? 0));
     $enableAttendanceStatus = !empty($state['enable_attendance_status']);
     $loginUrl = __r('rsvp.login');
     $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
@@ -65,6 +64,8 @@
                 data-success-button-label="<?=e(__t('pages.rsvp.form.success_button_label'))?>"
                 data-error-button-label="<?=e(__t('pages.rsvp.form.error_button_label'))?>"
                 data-participant-label="<?=e(__t('pages.rsvp.form.participant_label'))?>"
+                data-allow-children="<?=$allowChildren ? '1' : '0'?>"
+                data-max-children="<?=$maxChildren?>"
                 class="p-r f-start w-100 d-grid gap-5 mt-10 col-1 bg-white tx-black p-10 b-r-25 gap-p-3 p-p-5"
                 >
 
@@ -115,6 +116,10 @@
                     </div>
 
                     <div id="rsvp-participants" class="w-100 d-grid gap-5"></div>
+
+                    <?php if ($allowChildren) { ?>
+                        <div id="rsvp-children-feedback" class="text-small a-c tx-danger w-100" style="display:none;"></div>
+                    <?php } ?>
 
                     <template id="rsvp-guest-template">
                         <div class="w-100" data-rsvp-participant="__INDEX__">
@@ -201,6 +206,12 @@
     const ERROR_TEXT = <?=js_e(__t('pages.rsvp.form.error_text'))?>;
     const RETRY_TEXT = <?=js_e(__t('pages.rsvp.form.error_button_label'))?>;
     const PARTICIPANT_LABEL = <?=js_e(__t('pages.rsvp.form.participant_label'))?>;
+    const CHILDREN_MAX_TEXT = <?=js_e(__t('pages.rsvp.form.children_max_text'))?>;
+
+    const ALLOW_CHILDREN = form.dataset.allowChildren === '1';
+    const MAX_CHILDREN = parseInt(form.dataset.maxChildren || '0', 10) || 0;
+    const childrenFeedback = document.getElementById('rsvp-children-feedback');
+    let childrenFeedbackTimer = null;
 
     function attendanceStatus() {
         if (attendanceInputs.length === 0) return 'confirmed';
@@ -230,13 +241,39 @@
             .replace('__TITLE__', title);
     }
 
+    function childCheckbox(scope, index) {
+        return scope.querySelector(`input.wi-checkbox[name="participants[${index}][is_child]"]`);
+    }
+
+    function checkedChildrenCount() {
+        return Array.from(participantsBox.querySelectorAll('input.wi-checkbox[name$="[is_child]"]'))
+            .filter((cb) => cb.checked).length;
+    }
+
+    function showChildrenFeedback() {
+        if (!childrenFeedback) return;
+        childrenFeedback.textContent = CHILDREN_MAX_TEXT;
+        childrenFeedback.style.display = '';
+        if (childrenFeedbackTimer) clearTimeout(childrenFeedbackTimer);
+        childrenFeedbackTimer = setTimeout(() => {
+            childrenFeedback.style.display = 'none';
+        }, 4000);
+    }
+
+    function enforceMaxChildren(changed) {
+        if (!ALLOW_CHILDREN) return;
+        if (checkedChildrenCount() <= MAX_CHILDREN) return;
+        if (changed) changed.checked = false;
+        showChildrenFeedback();
+    }
+
     function participantSnapshot() {
         return Array.from(participantsBox.querySelectorAll('[data-rsvp-participant]')).map((block, index) => ({
             index,
             name: (block.querySelector(`[name="participants[${index}][name]"]`) || {}).value || '',
             surname: (block.querySelector(`[name="participants[${index}][surname]"]`) || {}).value || '',
             dietary_requirements: (block.querySelector(`[name="participants[${index}][dietary_requirements]"]`) || {}).value || '',
-            is_child: (block.querySelector(`[name="participants[${index}][is_child]"]`) || {}).value || 'false',
+            is_child: !!(childCheckbox(block, index) || {}).checked,
         }));
     }
 
@@ -246,12 +283,14 @@
                 ['name', participant.name],
                 ['surname', participant.surname],
                 ['dietary_requirements', participant.dietary_requirements],
-                ['is_child', participant.is_child],
             ].forEach(([field, value]) => {
                 const input = participantsBox.querySelector(`[name="participants[${index}][${field}]"]`);
                 if (!input) return;
                 input.value = value;
             });
+
+            const child = childCheckbox(participantsBox, index);
+            if (child) child.checked = !!participant.is_child;
         });
 
         if (typeof checkLabel === 'function') checkLabel();
@@ -344,6 +383,13 @@
     window.addEventListener('loaded', () => {
 
         attendanceInputs.forEach((input) => input.addEventListener('change', syncAttendanceUI));
+
+        if (ALLOW_CHILDREN) {
+            participantsBox.addEventListener('change', (e) => {
+                const cb = e.target.closest('input.wi-checkbox[name$="[is_child]"]');
+                if (cb) enforceMaxChildren(cb);
+            });
+        }
 
         syncAttendanceUI();
 

@@ -3207,12 +3207,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wonder-image/app.git",
-                "reference": "b46bc69007bfbaff29c3702b9498ad0190f649a5"
+                "reference": "e5890a79a0ac345cce7aa28d7a074520cc0ba369"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wonder-image/app/zipball/b46bc69007bfbaff29c3702b9498ad0190f649a5",
-                "reference": "b46bc69007bfbaff29c3702b9498ad0190f649a5",
+                "url": "https://api.github.com/repos/wonder-image/app/zipball/e5890a79a0ac345cce7aa28d7a074520cc0ba369",
+                "reference": "e5890a79a0ac345cce7aa28d7a074520cc0ba369",
                 "shasum": ""
             },
             "require": {
@@ -3261,7 +3261,7 @@
                 "issues": "https://github.com/wonder-image/app/issues",
                 "source": "https://github.com/wonder-image/app/tree/main"
             },
-            "time": "2026-06-19T08:07:40+00:00"
+            "time": "2026-06-29T15:08:58+00:00"
         }
     ],
     "packages-dev": [],

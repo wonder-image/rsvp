@@ -49,7 +49,8 @@ invio. I codici `multiple_use` non hanno questo limite.
 ## Stato della pagina (`$STATE`)
 
 Entrambe le pagine ricevono dal modulo un array di stato preparato da
-`http/frontend/context.php` ed esposto alle view come `$STATE`. Contiene
+`Rsvp::context()` (il provider in `context.php`) ed esposto alle view come
+`$STATE`. Contiene
 impostazioni, sessione, autorizzazione, eventi visibili, limiti, contenuti e
 custom field. L'elenco completo delle chiavi è in
 [Personalizzare le view](personalizzare-le-view.md).
