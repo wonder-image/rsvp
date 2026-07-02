@@ -4,12 +4,15 @@ use Wonder\Plugin\Rsvp\Rsvp;
 
 Rsvp::auth();
 
-$SEO->title = __t('pages.rsvp.home.seo.title');
-$SEO->description = __t('pages.rsvp.home.seo.description');
-$SEO->url = __r('rsvp.home');
-$SEO->breadcrumb = [];
+$PAGE_KEY = 'rsvp.home';
 
-$GLOBALS['PAGE_KEY'] = 'rsvp.home';
+$SEO->title = __t('pages.'.$PAGE_KEY.'.seo.title');
+$SEO->description = __t('pages.'.$PAGE_KEY.'.seo.description');
+$SEO->url = __r($PAGE_KEY);
+$SEO->breadcrumb = [];
+$SEO->image = Rsvp::posterUrl();
+
+$GLOBALS['PAGE_KEY'] = $PAGE_KEY;
 
 $event = Rsvp::context()['featured_event'] ?? [];
 $eventName = trim((string) ($event['label'] ?? ($event['name'] ?? '')));

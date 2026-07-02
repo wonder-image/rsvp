@@ -8,6 +8,7 @@ del modulo.
 
 | Campo | Tipo | Descrizione |
 | --- | --- | --- |
+| `poster` | immagine | locandina dell'evento, usata come immagine SEO (`og:image`) di default delle pagine RSVP |
 | `require_invite_code` | bool | se `true`, l'accesso al form richiede un codice invito valido |
 | `enable_attendance_status` | bool | abilita la scelta esplicita "Confermato / Declinato" |
 | `max_participants` | numero | numero massimo di adulti per risposta |

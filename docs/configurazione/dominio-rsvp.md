@@ -22,8 +22,9 @@ applichi regole diverse a gruppi di ospiti diversi.
 
 Campi principali:
 
-* `visible_event_keys_json` — elenco dei `code` evento visibili (es.
-  `["WEDDING", "APERITIF"]`). Se vuoto, sono visibili tutti gli eventi attivi.
+* `visible_event_ids` — elenco degli `id` evento visibili, selezionati da
+  checkbox nel form backend (es. `[1, 2]`). Se vuoto, sono visibili tutti
+  gli eventi attivi.
 * `max_participants`, `allow_children`, `max_children` — limiti che
   **sovrascrivono** i default di `rsvp/settings`.
 
@@ -53,7 +54,7 @@ nella `authorization`. Serve per segmentare e filtrare in backend.
 ## Come si incastrano
 
 ```text
-invite_code ──► authorization ──► visible_event_keys_json ──► events
+invite_code ──► authorization ──► visible_event_ids ──► events
      │
      └──► invite_group (segmentazione organizzativa)
 ```
@@ -70,8 +71,8 @@ invite_code ──► authorization ──► visible_event_keys_json ──► 
 ### Esempio
 
 * evento `WEDDING`, evento `APERITIF`;
-* autorizzazione `WEDDING_ONLY` con `visible_event_keys_json = ["WEDDING"]`;
-* autorizzazione `WEDDING_AND_APERITIF` con
-  `visible_event_keys_json = ["WEDDING", "APERITIF"]`;
+* autorizzazione `WEDDING_ONLY` con il solo evento `WEDDING` selezionato;
+* autorizzazione `WEDDING_AND_APERITIF` con `WEDDING` e `APERITIF`
+  selezionati;
 * gruppo `FAMIGLIA_ROSSI`;
 * codice `ROSSI01` collegato a `FAMIGLIA_ROSSI` e `WEDDING_AND_APERITIF`.

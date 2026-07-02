@@ -72,6 +72,7 @@ foreach ($catalog as $eventKey => $event) {
         'position' => (int) ($event['position'] ?? 0),
     ], $locale);
     
+    $eventCatalog[$eventKey]['id'] = (int) ($event['id'] ?? 0);
     $eventCatalog[$eventKey]['key'] = $eventKey;
     $eventCatalog[$eventKey]['label'] = trim((string) ($eventCatalog[$eventKey]['label'] ?? $eventKey));
 }
@@ -81,17 +82,18 @@ uasort($eventCatalog, static function (array $left, array $right): int {
         ?: strcmp((string) ($left['label'] ?? ''), (string) ($right['label'] ?? ''));
 });
 
-$allowedKeys = rsvpDecodeJsonArray($authorization['visible_event_keys_json'] ?? '[]');
+$allowedIds = array_values(array_filter(
+    array_map('intval', rsvpDecodeJsonArray($authorization['visible_event_ids'] ?? '[]')),
+    static fn (int $id): bool => $id > 0
+));
 $visibleEvents = [];
 
-if ($allowedKeys === []) {
+if ($allowedIds === []) {
     $visibleEvents = $eventCatalog;
 } else {
-    foreach ($allowedKeys as $key) {
-        $key = trim((string) $key);
-
-        if ($key !== '' && isset($eventCatalog[$key])) {
-            $visibleEvents[$key] = $eventCatalog[$key];
+    foreach ($eventCatalog as $eventKey => $event) {
+        if (in_array((int) ($event['id'] ?? 0), $allowedIds, true)) {
+            $visibleEvents[$eventKey] = $event;
         }
     }
 }

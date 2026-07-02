@@ -31,6 +31,7 @@ final class SettingsResource extends SingletonResource
     public static function labelSchema(): array
     {
         return [
+            'poster' => 'Locandina (immagine SEO di default)',
             'require_invite_code' => 'Accesso con codice',
             'enable_attendance_status' => 'Abilita partecipo/non partecipo',
             'max_participants' => 'Max adulti',
@@ -50,6 +51,7 @@ final class SettingsResource extends SingletonResource
     public static function formSchema(): array
     {
         return [
+            FormField::key('poster')->fileDragDrop(),
             FormField::key('require_invite_code')->select([
                 'false' => 'Libero',
                 'true' => 'Richiede codice',
@@ -79,6 +81,7 @@ final class SettingsResource extends SingletonResource
                 static::getInput('admin_message')->columnSpan(12),
             ])->columns(12)->columnSpan(9),
             (new Card)->components([
+                static::getInput('poster')->columnSpan(12),
                 static::getInput('require_invite_code')->columnSpan(12),
                 static::getInput('enable_attendance_status')->columnSpan(12),
                 static::getInput('max_participants')->columnSpan(12),

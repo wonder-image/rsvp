@@ -3,6 +3,7 @@
 namespace Wonder\Plugin\Rsvp\Services;
 
 use RuntimeException;
+use Wonder\App\Credentials;
 use Wonder\Plugin\Rsvp\Models\Authorization;
 use Wonder\Plugin\Rsvp\Models\InviteCode;
 use Wonder\Plugin\Rsvp\Models\InviteGroup;
@@ -11,6 +12,15 @@ use Wonder\Plugin\Rsvp\Models\Response;
 final class InviteCodeSession
 {
     private const SESSION_KEY = 'wonder_rsvp_invite_code_id';
+
+    /**
+     * Cookie remember-me: ripristina la sessione dopo la sua scadenza
+     * naturale. Viene emesso SOLO dopo un login riuscito con codice
+     * digitato (mai da link/URL) e il valore è firmato con HMAC su
+     * APP_KEY, quindi non è forgiabile conoscendo solo l'id.
+     */
+    private const COOKIE_NAME = 'wonder_rsvp_remember';
+    private const COOKIE_TTL = 60 * 60 * 24 * 365;
 
     public static function login(string $code, array $allowedGroups = []): array
     {
@@ -46,6 +56,7 @@ final class InviteCodeSession
         }
 
         $_SESSION[self::SESSION_KEY] = (int) $record['id'];
+        self::remember((int) $record['id']);
 
         return self::current();
     }
@@ -53,11 +64,16 @@ final class InviteCodeSession
     public static function logout(): void
     {
         unset($_SESSION[self::SESSION_KEY]);
+        self::forget();
     }
 
     public static function current(): array
     {
         $inviteCodeId = (int) ($_SESSION[self::SESSION_KEY] ?? 0);
+
+        if ($inviteCodeId <= 0) {
+            $inviteCodeId = self::restoreFromCookie();
+        }
 
         if ($inviteCodeId <= 0) {
             return [];
@@ -124,6 +140,92 @@ final class InviteCodeSession
         ]);
 
         return (int) ($result->Nrow ?? 0);
+    }
+
+    private static function remember(int $inviteCodeId): void
+    {
+        $secret = self::cookieSecret();
+
+        if ($secret === '' || $inviteCodeId <= 0 || headers_sent()) {
+            return;
+        }
+
+        $expires = time() + self::COOKIE_TTL;
+        $payload = $inviteCodeId.'.'.$expires;
+        $value = $payload.'.'.hash_hmac('sha256', $payload, $secret);
+
+        setcookie(self::COOKIE_NAME, $value, [
+            'expires' => $expires,
+            'path' => '/',
+            'secure' => (($_SERVER['HTTPS'] ?? '') !== '' && $_SERVER['HTTPS'] !== 'off'),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+
+    private static function forget(): void
+    {
+        if (!isset($_COOKIE[self::COOKIE_NAME])) {
+            return;
+        }
+
+        unset($_COOKIE[self::COOKIE_NAME]);
+
+        if (!headers_sent()) {
+            setcookie(self::COOKIE_NAME, '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+            ]);
+        }
+    }
+
+    /**
+     * Valida il cookie remember-me e, se integro e non scaduto, riapre la
+     * sessione. La validità del codice invito (attivo, non cancellato) resta
+     * comunque riverificata dal chiamante (`current()`), quindi disattivare
+     * un codice dal backend lo revoca anche per chi ha il cookie.
+     */
+    private static function restoreFromCookie(): int
+    {
+        $raw = (string) ($_COOKIE[self::COOKIE_NAME] ?? '');
+        $secret = self::cookieSecret();
+
+        if ($raw === '' || $secret === '') {
+            return 0;
+        }
+
+        $parts = explode('.', $raw);
+
+        if (count($parts) !== 3) {
+            self::forget();
+
+            return 0;
+        }
+
+        [$inviteCodeId, $expires, $signature] = $parts;
+        $payload = $inviteCodeId.'.'.$expires;
+
+        if (!hash_equals(hash_hmac('sha256', $payload, $secret), $signature)
+            || (int) $expires < time()
+            || (int) $inviteCodeId <= 0
+        ) {
+            self::forget();
+
+            return 0;
+        }
+
+        $_SESSION[self::SESSION_KEY] = (int) $inviteCodeId;
+
+        return (int) $inviteCodeId;
+    }
+
+    private static function cookieSecret(): string
+    {
+        try {
+            return trim((string) Credentials::appKey());
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     private static function findByCode(string $normalizedCode): ?array

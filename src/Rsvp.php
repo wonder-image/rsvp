@@ -74,6 +74,16 @@ final class Rsvp implements ModuleInterface
     }
 
     /**
+     * URL pubblico della locandina caricata nelle impostazioni RSVP
+     * (campo `poster`), da usare come immagine SEO di default.
+     * Stringa vuota se non caricata.
+     */
+    public static function posterUrl(): string
+    {
+        return trim((string) ((self::context()['settings'] ?? [])['poster_url'] ?? ''));
+    }
+
+    /**
      * Gate di accesso RSVP.
      *
      * Se l'RSVP richiede un codice invito e non c'è una sessione attiva,
@@ -202,6 +212,9 @@ final class Rsvp implements ModuleInterface
      *                                il body della pagina. Obbligatorio.
      *   - 'title'         string   titolo SEO della pagina. Default: 'RSVP'.
      *   - 'description'   string   description di default. Default: ''.
+     *   - 'image'         string   URL immagine SEO (og:image). Default:
+     *                                la locandina caricata nelle impostazioni
+     *                                RSVP (`poster`), se presente.
      *   - 'url'           string   URL canonico (per SEO + breadcrumb).
      *                                Default: l'URL corrente.
      *   - 'require_session' bool   se true (default), redirect a login
@@ -239,11 +252,21 @@ final class Rsvp implements ModuleInterface
             }
         }
 
+        $image = trim((string) ($config['image'] ?? ''));
+
+        if ($image === '') {
+            $image = self::posterUrl();
+        }
+
         $seo = $GLOBALS['SEO'] ?? (object) [];
         $seo->title = $title;
         $seo->description = $description;
         $seo->url = $url;
         $seo->breadcrumb = [];
+
+        if ($image !== '') {
+            $seo->image = $image;
+        }
         $GLOBALS['SEO'] = $seo;
         $GLOBALS['PAGE_KEY'] = $pageKey;
 

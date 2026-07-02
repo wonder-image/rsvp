@@ -31,11 +31,17 @@ Con `require_invite_code = true`:
 
 1. l'utente apre `rsvp.login`;
 2. inserisce un codice invito valido;
-3. il modulo apre una sessione RSVP (`InviteCodeSession`);
+3. il modulo apre una sessione RSVP (`InviteCodeSession`) ed emette un
+   cookie remember-me firmato (12 mesi): alle visite successive la sessione
+   viene ripristinata senza reinserire il codice;
 4. l'utente entra in `rsvp.home` e compila il form.
 
-Se l'utente apre `rsvp.home` senza sessione valida, l'handler lo reindirizza
-automaticamente a `rsvp.login`.
+Se l'utente apre `rsvp.home` senza sessione valida (né cookie remember-me),
+l'handler lo reindirizza automaticamente a `rsvp.login`.
+
+Il cookie viene emesso **solo** dopo un login riuscito con codice digitato:
+avere il link di `rsvp.login` non basta per entrare. Disattivare o cancellare
+il codice dal backend revoca anche l'accesso via cookie.
 
 Con `require_invite_code = false`, `rsvp.home` è accessibile direttamente e la
 sessione invito non è richiesta.

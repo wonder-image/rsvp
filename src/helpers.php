@@ -1,6 +1,7 @@
 <?php
 
 use Wonder\Plugin\Rsvp\Models\Authorization;
+use Wonder\Plugin\Rsvp\Models\Event;
 use Wonder\Plugin\Rsvp\Models\InviteCode;
 use Wonder\Plugin\Rsvp\Models\InviteGroup;
 use Wonder\Plugin\Rsvp\Models\Response;
@@ -269,6 +270,42 @@ if (!function_exists('rsvpJsonPrettyList')) {
         )));
 
         return $labels === [] ? '--' : implode(', ', $labels);
+    }
+}
+
+if (!function_exists('rsvpEventNamesFromIds')) {
+    function rsvpEventNamesFromIds(mixed $value): string
+    {
+        $ids = array_values(array_filter(
+            array_map('intval', rsvpDecodeJsonArray($value)),
+            static fn (int $id): bool => $id > 0
+        ));
+
+        if ($ids === []) {
+            return '--';
+        }
+
+        try {
+            $events = Event::all();
+        } catch (\Throwable) {
+            return '--';
+        }
+
+        $names = [];
+
+        foreach ($events as $event) {
+            if (!is_array($event) || !in_array((int) ($event['id'] ?? 0), $ids, true)) {
+                continue;
+            }
+
+            $name = trim((string) ($event['name'] ?? $event['code'] ?? ''));
+
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        return $names === [] ? '--' : implode(', ', $names);
     }
 }
 

@@ -118,8 +118,8 @@ final class EventResource extends Resource
     public static function tableSchema(): array
     {
         return [
-            TableColumn::key('code')->text()->link('edit'),
-            TableColumn::key('name')->text()->link('edit'),
+            TableColumn::key('code')->text()->link('edit')->size('medium'),
+            TableColumn::key('name')->text(),
             TableColumn::key('starts_at')->datetime(),
             TableColumn::key('position')->text()->size('little'),
             TableColumn::key('active')->text()->function('rsvpBooleanText', 'active')->size('little'),

@@ -12,28 +12,30 @@ use Wonder\Plugin\Rsvp\Rsvp;
 
 $session = Rsvp::context()['session'] ?? [];
 $hasSession = (int) ($session['id'] ?? 0) > 0;
-$homeUrl = __r('rsvp.home');
 
-$SEO->title = __t('pages.rsvp.login.seo.title');
-$SEO->description = __t('pages.rsvp.login.seo.description');
-$SEO->url = __r('rsvp.login');
+$PAGE_KEY = 'rsvp.login';
+
+$SEO->title = __t('pages.'.$PAGE_KEY.'.seo.title');
+$SEO->description = __t('pages.'.$PAGE_KEY.'.seo.description');
+$SEO->url = __r($PAGE_KEY);
 $SEO->breadcrumb = [];
+$SEO->image = Rsvp::posterUrl();
 
-$GLOBALS['PAGE_KEY'] = 'rsvp.login';
+$GLOBALS['PAGE_KEY'] = $PAGE_KEY;
 
 Rsvp::layout('auth', [
     'id' => 'rsvp-login-form',
-    'title' => __t('pages.rsvp.login.title'),
+    'title' => __t('pages.'.$PAGE_KEY.'.title'),
     'subtitle' => $hasSession
-        ? __t('pages.rsvp.login.session_text')
-        : __t('pages.rsvp.login.text'),
+        ? __t('pages.'.$PAGE_KEY.'.session_text')
+        : __t('pages.'.$PAGE_KEY.'.text'),
     'onsubmit' => 'event.preventDefault(); submitRsvpLogin(this); return false;',
 ]);
 ?>
 
 <?php if ($hasSession) { ?>
     <div class="w-100 mt-4">
-        <a href="<?=e($homeUrl)?>" class="btn btn-primary w-100"><?=__t('pages.rsvp.login.home_button')?></a>
+        <a href="<?=e(__r('rsvp.home'))?>" class="btn btn-primary w-100"><?=__t('pages.'.$PAGE_KEY.'.home_button')?></a>
     </div>
 <?php } else { ?>
     <div class="w-100 mt-6">

@@ -13,6 +13,7 @@ use Wonder\App\ResourceSchema\TableLayoutSchema;
 use Wonder\Elements\Components\Card;
 use Wonder\Elements\Form\Form;
 use Wonder\Plugin\Rsvp\Models\Authorization;
+use Wonder\Plugin\Rsvp\Models\Event;
 
 final class AuthorizationResource extends Resource
 {
@@ -38,7 +39,7 @@ final class AuthorizationResource extends Resource
             'code' => 'Codice',
             'name' => 'Nome',
             'description' => 'Descrizione',
-            'visible_event_keys_json' => 'Eventi visibili',
+            'visible_event_ids' => 'Eventi visibili',
             'max_participants' => 'Max adulti',
             'allow_children' => 'Bambini',
             'max_children' => 'Max bambini',
@@ -51,7 +52,7 @@ final class AuthorizationResource extends Resource
             FormField::key('code')->text()->required(),
             FormField::key('name')->text()->required(),
             FormField::key('description')->textarea(),
-            FormField::key('visible_event_keys_json')->textarea()->prepare('sanitize', false),
+            FormField::key('visible_event_ids')->checkTree(static::eventOptions()),
             FormField::key('max_participants')->number(),
             FormField::key('allow_children')->select([
                 'false' => 'No',
@@ -68,7 +69,7 @@ final class AuthorizationResource extends Resource
                 static::getInput('code')->columnSpan(4),
                 static::getInput('name')->columnSpan(8),
                 static::getInput('description')->columnSpan(12),
-                static::getInput('visible_event_keys_json')->columnSpan(12),
+                static::getInput('visible_event_ids')->columnSpan(12),
             ])->columns(12)->columnSpan(9),
             (new Card)->components([
                 static::getInput('max_participants')->columnSpan(12),
@@ -83,7 +84,7 @@ final class AuthorizationResource extends Resource
         return [
             TableColumn::key('code')->text()->link('edit'),
             TableColumn::key('name')->text(),
-            TableColumn::key('visible_event_keys_json')->text()->function('rsvpJsonPrettyList', 'visible_event_keys_json')->size('medium'),
+            TableColumn::key('visible_event_ids')->text()->function('rsvpEventNamesFromIds', 'visible_event_ids')->size('medium'),
             TableColumn::key('max_participants')->text()->size('medium'),
             TableColumn::key('max_children')->text()->size('medium'),
             TableColumn::key('actions')->button()->actions(['edit', 'delete']),
@@ -131,10 +132,20 @@ final class AuthorizationResource extends Resource
         string $context = 'backend',
         ?array $oldValues = null
     ): array {
-        $values['visible_event_keys_json'] = json_encode(
-            rsvpParseListText((string) ($values['visible_event_keys_json'] ?? '')),
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-        );
+        // Il checkTree posta `visible_event_ids[]` (più un hidden vuoto):
+        // filtriamo i non-id e persistiamo un array JSON di interi.
+        $raw = $values['visible_event_ids'] ?? [];
+
+        if (is_string($raw)) {
+            $raw = rsvpDecodeJsonArray($raw);
+        }
+
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', (array) $raw),
+            static fn (int $id): bool => $id > 0
+        )));
+
+        $values['visible_event_ids'] = json_encode($ids);
 
         return $values;
     }
@@ -144,10 +155,50 @@ final class AuthorizationResource extends Resource
         string $mode,
         string $context = 'backend'
     ): array {
-        $values['visible_event_keys_json'] = rsvpFormatListText(
-            rsvpDecodeJsonArray($values['visible_event_keys_json'] ?? '[]')
-        );
+        // Il pre-check del checkTree confronta in modo stretto con le chiavi
+        // (int) delle opzioni: servono interi, non stringhe.
+        $values['visible_event_ids'] = array_values(array_filter(
+            array_map('intval', rsvpDecodeJsonArray($values['visible_event_ids'] ?? '[]')),
+            static fn (int $id): bool => $id > 0
+        ));
 
         return $values;
+    }
+
+    private static function eventOptions(): array
+    {
+        try {
+            $events = Event::all();
+        } catch (\Throwable) {
+            return [];
+        }
+
+        $options = [];
+
+        foreach ($events as $event) {
+            if (!is_array($event)) {
+                continue;
+            }
+
+            $id = (int) ($event['id'] ?? 0);
+
+            if ($id <= 0) {
+                continue;
+            }
+
+            $name = trim((string) ($event['name'] ?? ''));
+            $code = trim((string) ($event['code'] ?? ''));
+            $options[$id] = [
+                'label' => $name !== '' ? $name : $code,
+                'position' => (int) ($event['position'] ?? 0),
+            ];
+        }
+
+        uasort($options, static function (array $left, array $right): int {
+            return ($left['position'] <=> $right['position'])
+                ?: strcmp($left['label'], $right['label']);
+        });
+
+        return array_map(static fn (array $option): string => $option['label'], $options);
     }
 }

@@ -3,6 +3,7 @@
 namespace Wonder\Plugin\Rsvp\Models;
 
 use Wonder\App\Model;
+use Wonder\App\Support\MediaFileManager;
 use Wonder\App\Support\SyncSchema;
 use Wonder\Data\UploadSchema as Field;
 use Wonder\Sql\TableSchema as Column;
@@ -21,6 +22,7 @@ final class Settings extends Model
     public static function tableSchema(): array
     {
         return [
+            Column::key('poster')->length(1000)->null(),
             Column::key('require_invite_code')->length(10)->default('false'),
             Column::key('enable_attendance_status')->length(10)->default('false'),
             Column::key('max_participants')->type('INT')->default('1'),
@@ -40,6 +42,7 @@ final class Settings extends Model
     public static function dataSchema(): array
     {
         return [
+            Field::key('poster')->file()->sanitize(false),
             Field::key('require_invite_code')->text(),
             Field::key('enable_attendance_status')->text(),
             Field::key('max_participants')->number()->decimals(0),
@@ -54,5 +57,17 @@ final class Settings extends Model
             Field::key('admin_subject')->text()->sanitize(false),
             Field::key('admin_message')->text()->sanitize(false),
         ];
+    }
+
+    public static function decorate($row): array
+    {
+        $urls = static::storedFileUrls(
+            MediaFileManager::decodeStoredFiles($row['poster'] ?? ''),
+            []
+        );
+
+        $row['poster_url'] = $urls[0] ?? '';
+
+        return $row;
     }
 }
