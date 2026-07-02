@@ -226,15 +226,10 @@ final class SubmissionNotifier
             $documentLines[] = htmlspecialchars(rsvpLegalDocumentLabel((string) $docType), ENT_QUOTES, 'UTF-8')
                 .': <strong>'.rsvpBooleanText($document['accepted'] ?? false).'</strong>';
         }
-
-        $lines[] = __t('emails.summary.privacy')
-            .': <strong>'.rsvpBooleanText($consents['privacy'] ?? false).'</strong>';
-        $lines[] = __t('emails.summary.photo')
-            .': <strong>'.rsvpBooleanText($consents['photo'] ?? false).'</strong>';
-
+        
         if ($documentLines !== []) {
             $lines[] = __t('emails.summary.documents')
-                .': '.implode('<br>', $documentLines);
+                .':<br>'.implode('<br>', $documentLines);
         }
 
         return implode('<br>', $lines);

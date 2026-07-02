@@ -29,6 +29,7 @@ final class Event extends Model
                 'description',
                 'starts_at',
                 'location_name',
+                'location_site_url',
                 'location_logo',
                 'position',
                 'active'
