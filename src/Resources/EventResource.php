@@ -122,7 +122,7 @@ final class EventResource extends Resource
             TableColumn::key('name')->text(),
             TableColumn::key('starts_at')->datetime(),
             TableColumn::key('position')->text()->size('little'),
-            TableColumn::key('active')->text()->function('rsvpBooleanText', 'active')->size('little'),
+            TableColumn::key('active')->badge()->size('little'),
             TableColumn::key('actions')->button()->actions(['edit', 'delete']),
         ];
     }

@@ -22,6 +22,7 @@
     $id ??= 'rsvp-auth-form';
     $title ??= null;
     $subtitle ??= null;
+    $logo ??= $SOCIETY->logoWhite;
     $texture ??= 'texture.png';
     $method ??= 'post';
     $action ??= '';
@@ -44,13 +45,13 @@
                 class="w-100 p-6 center bg-secondary b-r-25"
                 <?php if ($onsubmit !== '') { ?>onsubmit="<?= $onsubmit ?>"<?php } ?>
             >
-                <img src="<?= $SOCIETY->logoWhite ?>" alt="<?= e($SOCIETY->name) ?>" class="w-30 c-w">
+                <img src="<?= $logo ?>" alt="<?= e($SOCIETY->name) ?>" class="w-30 c-w">
 
                 <?php if (!empty($title)) { ?>
-                    <div class="subtitle a-c tx-upper w-100 mt-6"><?= $title ?></div>
+                    <div class="subtitle a-c tx-upper w-100 mt-6"><?= e($title) ?></div>
                 <?php } ?>
                 <?php if (!empty($subtitle)) { ?>
-                    <div class="text a-c w-100 mt-2"><?= $subtitle ?></div>
+                    <div class="text a-c w-100 mt-2"><?= e($subtitle) ?></div>
                 <?php } ?>
 
                 <?= $PAGE_CONTENT ?>

@@ -52,7 +52,7 @@ final class AuthorizationResource extends Resource
             FormField::key('code')->text()->required(),
             FormField::key('name')->text()->required(),
             FormField::key('description')->textarea(),
-            FormField::key('visible_event_ids')->checkTree(static::eventOptions()),
+            FormField::key('visible_event_ids')->checkbox()->options(static::eventOptions())->multiple()->required(),
             FormField::key('max_participants')->number(),
             FormField::key('allow_children')->select([
                 'false' => 'No',

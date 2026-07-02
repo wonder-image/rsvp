@@ -42,13 +42,13 @@ Rsvp::layout('auth', [
         <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
     </div>
     <div class="w-100 mt-4">
-        <?=submit(__t('components.buttons.login'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
+        <?=submit(__t('pages.rsvp.login.login_button'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
     </div>
 <?php } ?>
 <div id="rsvp-login-feedback" class="w-100 mt-4 a-c tx-danger"></div>
 
 <script>
-    window.submitRsvpLogin = async function (form) {
+    async function submitRsvpLogin (form) {
         const password = (form.elements.password && form.elements.password.value || '').trim();
 
         if (password === '') {
@@ -58,7 +58,7 @@ Rsvp::layout('auth', [
 
         try {
             await API_CLIENT.post('/rsvp/login/', { password: password });
-            window.location.href = <?=json_encode($homeUrl, JSON_UNESCAPED_SLASHES)?>;
+            window.location.href = <?=js_e(__r('rsvp.home'))?>;
         } catch (err) {
             const code = (err && err.status) || 905;
             if (typeof alertToast === 'function') {

@@ -6,7 +6,7 @@ use Wonder\App\ResourceSchema\FormField;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\Resources\Support\SingletonResource;
-use Wonder\Elements\Components\Card;
+use Wonder\Elements\Components\{ Card, Container, SectionTitle };
 use Wonder\Elements\Form\Form;
 use Wonder\Plugin\Rsvp\Models\Settings;
 
@@ -39,12 +39,12 @@ final class SettingsResource extends SingletonResource
             'max_children' => 'Max bambini',
             'require_image_release' => 'Richiedi liberatoria immagini',
             'admin_email' => 'Email notifiche',
-            'admin_notifications' => 'Invia email admin',
-            'customer_notifications' => 'Invia email ospite',
-            'customer_subject' => 'Oggetto email ospite',
-            'customer_message' => 'Messaggio email ospite',
-            'admin_subject' => 'Oggetto email admin',
-            'admin_message' => 'Messaggio email admin',
+            'admin_notifications' => 'Invia email',
+            'customer_notifications' => 'Invia email',
+            'customer_subject' => 'Oggetto email',
+            'customer_message' => 'Messaggio email',
+            'admin_subject' => 'Oggetto email',
+            'admin_message' => 'Messaggio email',
         ];
     }
 
@@ -74,24 +74,37 @@ final class SettingsResource extends SingletonResource
     public static function formLayoutSchema(): ?Form
     {
         return (new Form)->components([
+
             (new Card)->components([
+                static::getInput('poster')->columnSpan(3),
+
+                (new Container)->components([
+                    (new SectionTitle('Impostazioni'))->columnSpan(12),
+                    static::getInput('require_invite_code')->columnSpan(4),
+                    static::getInput('enable_attendance_status')->columnSpan(4),
+                    static::getInput('require_image_release')->columnSpan(4),
+                    static::getInput('max_participants')->columnSpan(4),
+                    static::getInput('allow_children')->columnSpan(4),
+                    static::getInput('max_children')->columnSpan(4),
+                ])->columns(12)->columnSpan(9)
+
+            ])->columns(12)->columnSpan(12),
+            
+            (new Card)->components([
+                (new SectionTitle('Email ospite'))->columnSpan(12),
+                static::getInput('customer_notifications')->columnSpan(12),
                 static::getInput('customer_subject')->columnSpan(12),
                 static::getInput('customer_message')->columnSpan(12),
+            ])->columns(12)->columnSpan(6),
+
+            (new Card)->components([
+                (new SectionTitle('Email admin'))->columnSpan(12),
+                static::getInput('admin_notifications')->columnSpan(12),
+                static::getInput('admin_email')->columnSpan(12),
                 static::getInput('admin_subject')->columnSpan(12),
                 static::getInput('admin_message')->columnSpan(12),
-            ])->columns(12)->columnSpan(9),
-            (new Card)->components([
-                static::getInput('poster')->columnSpan(12),
-                static::getInput('require_invite_code')->columnSpan(12),
-                static::getInput('enable_attendance_status')->columnSpan(12),
-                static::getInput('max_participants')->columnSpan(12),
-                static::getInput('allow_children')->columnSpan(12),
-                static::getInput('max_children')->columnSpan(12),
-                static::getInput('require_image_release')->columnSpan(12),
-                static::getInput('admin_email')->columnSpan(12),
-                static::getInput('admin_notifications')->columnSpan(12),
-                static::getInput('customer_notifications')->columnSpan(12),
-            ])->columns(12)->columnSpan(3),
+            ])->columns(12)->columnSpan(6),
+
         ])->columns(12);
     }
 
