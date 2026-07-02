@@ -82,7 +82,7 @@
 
                 <?= ResponseResource::getInput('invite_code_id')->value($session['id'] ?? '') ?>
                 <?= ResponseResource::getInput('locale')->value($locale) ?>
-                <?= ResponseResource::getInput('request_url')?>
+                <?= ResponseResource::getInput('request_url')->value(__url()->getUrl()) ?>
 
                 <?php if ($enableAttendanceStatus) { ?>
                     <div class="w-100">

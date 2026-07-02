@@ -41,7 +41,8 @@ $mainCards = [
         (new Container)->components([
             (new SectionTitle)->text('Contatto'),
             (new RichText(
-                'Nome: <b>'.e($fullName).'</b><br>'
+                'Codice prenotazione: <b>'.e($RESPONSE['booking_code'] ?? '--').'</b><br>'
+                .'Nome: <b>'.e($fullName).'</b><br>'
                 .'Email: <b>'.e($RESPONSE['contact_email'] ?? '--').'</b><br>'
                 .'Telefono: <b>'.e($RESPONSE['contact_phone'] ?? '--').'</b>'
             )),
@@ -80,10 +81,7 @@ if ($customFieldsHtml !== '') {
 if (($RESPONSE['metadata'] ?? []) !== []) {
     $mainCards[] = (new Card)->components([
         (new SectionTitle)->text('Dati aggiuntivi'),
-        (new RichText('<pre class="mb-0">'.e(json_encode(
-            $RESPONSE['metadata'],
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-        )).'</pre>')),
+        (new RichText('<pre class="mb-0">'.e(js_e( $RESPONSE['metadata'] )).'</pre>')),
     ]);
 }
 
@@ -91,10 +89,7 @@ $detailsHtml = '';
 if ($showAttendanceStatus) {
     $detailsHtml .= 'Conferma: <b>'.e($RESPONSE['pretty_attendance_status'] ?? '').'</b><br>';
 }
-$detailsHtml .= 'Codice prenotazione: <b>'.e($RESPONSE['booking_code'] ?? '--').'</b><br>'
-    .'Creazione: <b>'.prettyDate($RESPONSE['creation'], true).'</b><br>'
-    .'Lingua: <b>'.e($RESPONSE['locale'] ?? '--').'</b><br>'
-    .'Evento: <b>'.e($RESPONSE['event_key'] ?? '--').'</b><br>'
+$detailsHtml .= 'Lingua: <b>'.e($RESPONSE['locale'] ?? '--').'</b><br>'
     .'Codice invito: <b>'.e($RESPONSE['invite_code'] ?? '--').'</b><br>'
     .'Gruppo invito: <b>'.e($RESPONSE['invite_group_code'] ?? '--').'</b><br>'
     .'Autorizzazione: <b>'.e($RESPONSE['authorization_code'] ?? '--').'</b>';
