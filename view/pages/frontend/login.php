@@ -33,18 +33,13 @@ Rsvp::layout('auth', [
 ]);
 ?>
 
-<?php if ($hasSession) { ?>
-    <div class="w-100 mt-4">
-        <a href="<?=e(__r('rsvp.home'))?>" class="btn btn-primary w-100"><?=__t('pages.'.$PAGE_KEY.'.home_button')?></a>
-    </div>
-<?php } else { ?>
-    <div class="w-100 mt-6">
-        <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
-    </div>
-    <div class="w-100 mt-4">
-        <?=submit(__t('pages.rsvp.login.login_button'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
-    </div>
-<?php } ?>
+<div class="w-100 mt-6">
+    <?=password(__t('components.forms.fields.password.label'), 'password', '', 'required')?>
+</div>
+<div class="w-100 mt-4">
+    <?=submit(__t('pages.rsvp.login.login_button'), 'login', 'btn-primary w-100', 'submitRsvpLogin(this.form)')?>
+</div>
+
 <div id="rsvp-login-feedback" class="w-100 mt-4 a-c tx-danger"></div>
 
 <script>
