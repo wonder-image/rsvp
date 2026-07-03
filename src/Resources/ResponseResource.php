@@ -164,9 +164,7 @@ final class ResponseResource extends Resource
             ]);
         }
 
-        $columns[] = TableColumn::key('actions')->button()->actions(
-            self::attendanceStatusEnabled() ? ['view', 'edit', 'delete'] : ['view', 'delete']
-        );
+        $columns[] = TableColumn::key('actions')->button()->actions(['view', 'delete']);
 
         return $columns;
     }

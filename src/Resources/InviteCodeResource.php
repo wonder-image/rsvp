@@ -89,8 +89,8 @@ final class InviteCodeResource extends Resource
             TableColumn::key('invite_group_id')->text()->function('rsvpInviteGroupLabel', 'invite_group_id')->size('medium'),
             TableColumn::key('usage_mode')->badge()->function('rsvpInviteUsageMode', 'usage_mode', 'automaticResize'),
             TableColumn::key('used_count')->text()->function('rsvpInviteCodeResponses', 'id')->size('little'),
-            TableColumn::key('active')->badge()->function('active', 'id', 'automaticResize'),
-            TableColumn::key('actions')->button()->actions(['edit', 'delete']),
+            TableColumn::key('active')->activeBadge()->size('little'),
+            TableColumn::key('actions')->button()->actions(['edit', 'active', 'delete']),
         ];
     }
 
