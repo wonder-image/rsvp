@@ -7,10 +7,19 @@
   backend è etichettato "Max adulti": con max adulti 2 e max bambini 2 il
   select mostrava 2 invece di 4).
 - il form frontend verifica anche il numero di adulti compilati (partecipanti
-  senza spunta bambino): togliere una spunta oltre il limite adulti la
-  ripristina, e superare il limite bambini annulla la spunta come prima.
-  L'alert ora riporta entrambi i limiti
+  senza spunta bambino). Il feedback limiti è dichiarativo: resta visibile
+  finché adulti o bambini superano i massimi e scompare appena la combinazione
+  torna valida; finché la violazione persiste `participants_count` è marcato
+  invalido via `setCustomValidity` e il bottone submit resta disabilitato.
+  L'alert riporta entrambi i limiti
   (`pages.rsvp.form.children_max_text` con `{{max_adults}}`/`{{max_children}}`).
+- il submit del form frontend usa il componente `Submit` (`.wi-submit`,
+  disabled di default): il `check()` della lib lo abilita solo quando tutti i
+  campi required sono compilati e ogni validity è valida. Nuova
+  `setBlockDisabled()` nel form: disabilita davvero i campi dei blocchi
+  nascosti (partecipa/non partecipa) e sospende il loro `required`, perché la
+  `setDisabled()` della lib gestisce solo campi singoli e `check()` non salta
+  i required disabilitati (i blocchi nascosti avrebbero bloccato il submit).
 - validazione server-side dei limiti in `ResponseResource::assertSubmission`:
   nuove chiavi lang `pages.rsvp.api.submit.max_adults_exceeded` e
   `pages.rsvp.api.submit.max_children_exceeded`.

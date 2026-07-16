@@ -14,6 +14,7 @@
 
     use Wonder\Plugin\Rsvp\Resources\ResponseResource;
     use Wonder\Plugin\Rsvp\Rsvp;
+    use Wonder\Elements\Form\Components\Submit;
 
     $state = Rsvp::context();
 
@@ -30,9 +31,6 @@
     $loginUrl = __r('rsvp.login');
     $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
     $submitUrl = __e('api.resource.rsvp-responses.store');
-
-    // `max_participants` in backend è il limite dei soli adulti: il select
-    // dei partecipanti arriva quindi ad adulti + bambini.
     $maxTotalParticipants = $maxAdults + $maxChildren;
 
     $partecipantiOptions = [];
@@ -178,9 +176,11 @@
                 <?php } ?>
 
                 <div class="w-100 mt-5">
-                    <button type="button" class="btn btn-primary c-w w-60 w-p-100" onclick="formSubmit(this.form, '<?=e($submitUrl)?>', rsvpFormSubmitResponse)">
-                        <?= __t('pages.rsvp.form.submit_label') ?>
-                    </button>
+                    <?=  (new Submit('send'))
+                            ->label(__t('pages.rsvp.form.submit_label'))
+                            ->class('btn btn-primary c-w w-60 w-p-100')
+                            ->onclick("formSubmit(this.form, '".e($submitUrl)."', rsvpFormSubmitResponse)")
+                            ->render(); ?>
                 </div>
 
             </form>
@@ -220,7 +220,6 @@
     const MAX_ADULTS = parseInt(form.dataset.maxAdults || '1', 10) || 1;
     const MAX_CHILDREN = parseInt(form.dataset.maxChildren || '0', 10) || 0;
     const childrenFeedback = document.getElementById('rsvp-children-feedback');
-    let childrenFeedbackTimer = null;
 
     function attendanceStatus() {
         if (attendanceInputs.length === 0) return 'confirmed';
@@ -263,31 +262,30 @@
         return participantsBox.querySelectorAll('[data-rsvp-participant]').length - checkedChildrenCount();
     }
 
-    function showLimitsFeedback() {
-        if (!childrenFeedback) return;
-        childrenFeedback.textContent = LIMITS_MAX_TEXT;
-        childrenFeedback.style.display = '';
-        if (childrenFeedbackTimer) clearTimeout(childrenFeedbackTimer);
-        childrenFeedbackTimer = setTimeout(() => {
-            childrenFeedback.style.display = 'none';
-        }, 4000);
+    function limitsViolated() {
+        if (!ALLOW_CHILDREN || attendanceStatus() !== 'confirmed') return false;
+        return checkedChildrenCount() > MAX_CHILDREN || currentAdultsCount() > MAX_ADULTS;
     }
 
-    function enforceLimits(changed) {
-        if (!ALLOW_CHILDREN) return;
+    /**
+     * Feedback limiti dichiarativo: visibile finché adulti/bambini superano
+     * i massimi, nascosto appena la combinazione torna valida. La violazione
+     * marca `participants_count` invalido via setCustomValidity, così il
+     * check() della lib tiene disabilitato il bottone .wi-submit.
+     */
+    function syncLimitsFeedback() {
+        const violated = limitsViolated();
 
-        // Spuntare un bambino oltre il limite bambini: annulla la spunta.
-        if (checkedChildrenCount() > MAX_CHILDREN) {
-            if (changed) changed.checked = false;
-            showLimitsFeedback();
-            return;
+        if (childrenFeedback) {
+            childrenFeedback.textContent = LIMITS_MAX_TEXT;
+            childrenFeedback.style.display = violated ? '' : 'none';
         }
 
-        // Togliere una spunta oltre il limite adulti: ripristina la spunta.
-        if (currentAdultsCount() > MAX_ADULTS && changed && !changed.checked) {
-            changed.checked = true;
-            showLimitsFeedback();
+        if (participantsCount) {
+            participantsCount.setCustomValidity(violated ? LIMITS_MAX_TEXT : '');
         }
+
+        if (typeof check === 'function') check();
     }
 
     function participantSnapshot() {
@@ -328,12 +326,36 @@
             if (input) setRequired(input, declined);
         });
     }
+
+    /**
+     * Disabilita/riabilita i campi di un blocco. La setDisabled() della lib
+     * gestisce un singolo campo (non i container) e check() non salta i
+     * required disabilitati: sospendiamo `required` (memo in data attribute)
+     * così i blocchi nascosti non tengono bloccato il bottone submit.
+     */
+    function setBlockDisabled(scope, disabled) {
+        if (!scope) return;
+
+        scope.querySelectorAll('input, select, textarea').forEach((el) => {
+            el.disabled = disabled;
+
+            if (disabled) {
+                if (el.required) {
+                    el.dataset.rsvpRequired = '1';
+                    el.required = false;
+                }
+            } else if (el.dataset.rsvpRequired === '1') {
+                el.required = true;
+                delete el.dataset.rsvpRequired;
+            }
+        });
+    }
     
     function renderGuests() {
 
         if (attendanceStatus() !== 'confirmed') {
             participantsBox.innerHTML = '';
-            if (typeof check === 'function') check();
+            syncLimitsFeedback();
             return;
         }
 
@@ -350,12 +372,7 @@
 
         setInput(participantsBox);
         restoreParticipants(previousParticipants);
-
-        // Con più partecipanti del limite adulti l'utente deve segnare i
-        // bambini: mostra subito i limiti massimi.
-        if (ALLOW_CHILDREN && currentAdultsCount() > MAX_ADULTS) {
-            showLimitsFeedback();
-        }
+        syncLimitsFeedback();
 
     }
 
@@ -366,9 +383,9 @@
         toggleBlock(attendingFields, !declined);
         toggleBlock(declineContact, declined);
 
-        setDisabled(attendingFields, declined);
-        setDisabled(declineContact, !declined);
-        setDisabled(imageReleaseWrap, declined);
+        setBlockDisabled(attendingFields, declined);
+        setBlockDisabled(declineContact, !declined);
+        setBlockDisabled(imageReleaseWrap, declined);
         syncDeclineContactRequirements(declined);
 
         renderGuests();
@@ -415,8 +432,7 @@
 
         if (ALLOW_CHILDREN) {
             participantsBox.addEventListener('change', (e) => {
-                const cb = e.target.closest('input.wi-checkbox[name$="[is_child]"]');
-                if (cb) enforceLimits(cb);
+                if (e.target.closest('input.wi-checkbox[name$="[is_child]"]')) syncLimitsFeedback();
             });
         }
 
