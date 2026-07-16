@@ -25,6 +25,8 @@
                 "privacy_required": "È necessario accettare la privacy.",
                 "image_release_required": "È necessario accettare la liberatoria immagini.",
                 "required_field_missing": "Campo obbligatorio mancante: {{field}}.",
+                "max_adults_exceeded": "Numero massimo di adulti superato: puoi indicarne al massimo {{max}}.",
+                "max_children_exceeded": "Numero massimo di bambini superato: puoi indicarne al massimo {{max}}.",
                 "save_failed": "Salvataggio RSVP non riuscito."
             }
         },
@@ -63,7 +65,7 @@
             "contact_surname_label": "Cognome referente",
             "participants_count_label": "Partecipanti",
             "children_count_label": "Numero bambini",
-            "children_max_text": "Hai raggiunto il numero massimo di bambini consentiti.",
+            "children_max_text": "Puoi indicare al massimo {{max_adults}} adulti e {{max_children}} bambini.",
             "participant_label": "Ospite",
             "child_label": "Bambino",
             "participant_name_label": "Nome",

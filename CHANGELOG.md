@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- **Fix**: il select partecipanti del form frontend ora arriva a
+  `max adulti + max bambini` (prima si fermava a `max_participants`, che in
+  backend è etichettato "Max adulti": con max adulti 2 e max bambini 2 il
+  select mostrava 2 invece di 4).
+- il form frontend verifica anche il numero di adulti compilati (partecipanti
+  senza spunta bambino): togliere una spunta oltre il limite adulti la
+  ripristina, e superare il limite bambini annulla la spunta come prima.
+  L'alert ora riporta entrambi i limiti
+  (`pages.rsvp.form.children_max_text` con `{{max_adults}}`/`{{max_children}}`).
+- validazione server-side dei limiti in `ResponseResource::assertSubmission`:
+  nuove chiavi lang `pages.rsvp.api.submit.max_adults_exceeded` e
+  `pages.rsvp.api.submit.max_children_exceeded`.
+
 ## 2.0.0
 
 - **Fix**: `SubmissionNotifier::settings()` ora gestisce il caso in cui

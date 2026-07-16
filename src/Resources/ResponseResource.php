@@ -425,6 +425,31 @@ final class ResponseResource extends Resource
             $fail('pages.rsvp.api.submit.missing_participants', 'Partecipanti mancanti.');
         }
 
+        // `max_participants` è il limite dei soli adulti; i bambini hanno il
+        // proprio limite. Specchia l'enforcement del form frontend.
+        if ($attendanceStatus === 'confirmed') {
+            $maxAdults = max(1, (int) ($state['max_participants'] ?? 1));
+            $maxChildren = max(0, (int) ($state['max_children'] ?? 0));
+            $childrenCount = (int) ($normalized['children_count'] ?? 0);
+            $adultsCount = max(0, (int) ($normalized['participants_count'] ?? 0) - $childrenCount);
+
+            if ($childrenCount > $maxChildren) {
+                $fail(
+                    'pages.rsvp.api.submit.max_children_exceeded',
+                    'Numero massimo di bambini superato: puoi indicarne al massimo {{max}}.',
+                    ['max' => $maxChildren]
+                );
+            }
+
+            if ($adultsCount > $maxAdults) {
+                $fail(
+                    'pages.rsvp.api.submit.max_adults_exceeded',
+                    'Numero massimo di adulti superato: puoi indicarne al massimo {{max}}.',
+                    ['max' => $maxAdults]
+                );
+            }
+        }
+
         if ($attendanceStatus === 'declined') {
             $requireField((string) ($normalized['contact_name'] ?? ''), __t('components.forms.fields.contact_name.label'));
             $requireField((string) ($normalized['contact_surname'] ?? ''), __t('components.forms.fields.contact_surname.label'));

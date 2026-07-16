@@ -23,7 +23,7 @@
     $hasSession = (int) ($session['id'] ?? 0) > 0;
     $canAccessForm = !$requiresInviteCode || $hasSession;
     $locale = (string) ($state['locale'] ?? __l());
-    $maxParticipants = max(1, (int) ($state['max_participants'] ?? 1));
+    $maxAdults = max(1, (int) ($state['max_participants'] ?? 1));
     $allowChildren = !empty($state['allow_children']);
     $maxChildren = max(0, (int) ($state['max_children'] ?? 0));
     $enableAttendanceStatus = !empty($state['enable_attendance_status']);
@@ -31,8 +31,12 @@
     $customFields = is_array($state['custom_fields'] ?? null) ? $state['custom_fields'] : [];
     $submitUrl = __e('api.resource.rsvp-responses.store');
 
+    // `max_participants` in backend è il limite dei soli adulti: il select
+    // dei partecipanti arriva quindi ad adulti + bambini.
+    $maxTotalParticipants = $maxAdults + $maxChildren;
+
     $partecipantiOptions = [];
-    for ($i = 1; $i <= $maxParticipants; $i++) {
+    for ($i = 1; $i <= $maxTotalParticipants; $i++) {
         $partecipantiOptions[(string) $i] = (string) $i;
     }
 
@@ -65,6 +69,7 @@
                 data-error-button-label="<?=e(__t('pages.rsvp.form.error_button_label'))?>"
                 data-participant-label="<?=e(__t('pages.rsvp.form.participant_label'))?>"
                 data-allow-children="<?=$allowChildren ? '1' : '0'?>"
+                data-max-adults="<?=$maxAdults?>"
                 data-max-children="<?=$maxChildren?>"
                 class="p-r f-start w-100 d-grid gap-5 mt-10 col-1 bg-white tx-black p-10 b-r-25 gap-p-3 p-p-5"
                 >
@@ -206,9 +211,13 @@
     const ERROR_TEXT = <?=js_e(__t('pages.rsvp.form.error_text'))?>;
     const RETRY_TEXT = <?=js_e(__t('pages.rsvp.form.error_button_label'))?>;
     const PARTICIPANT_LABEL = <?=js_e(__t('pages.rsvp.form.participant_label'))?>;
-    const CHILDREN_MAX_TEXT = <?=js_e(__t('pages.rsvp.form.children_max_text'))?>;
+    const LIMITS_MAX_TEXT = <?=js_e(__t('pages.rsvp.form.children_max_text', [
+        'max_adults' => $maxAdults,
+        'max_children' => $maxChildren,
+    ]))?>;
 
     const ALLOW_CHILDREN = form.dataset.allowChildren === '1';
+    const MAX_ADULTS = parseInt(form.dataset.maxAdults || '1', 10) || 1;
     const MAX_CHILDREN = parseInt(form.dataset.maxChildren || '0', 10) || 0;
     const childrenFeedback = document.getElementById('rsvp-children-feedback');
     let childrenFeedbackTimer = null;
@@ -250,9 +259,13 @@
             .filter((cb) => cb.checked).length;
     }
 
-    function showChildrenFeedback() {
+    function currentAdultsCount() {
+        return participantsBox.querySelectorAll('[data-rsvp-participant]').length - checkedChildrenCount();
+    }
+
+    function showLimitsFeedback() {
         if (!childrenFeedback) return;
-        childrenFeedback.textContent = CHILDREN_MAX_TEXT;
+        childrenFeedback.textContent = LIMITS_MAX_TEXT;
         childrenFeedback.style.display = '';
         if (childrenFeedbackTimer) clearTimeout(childrenFeedbackTimer);
         childrenFeedbackTimer = setTimeout(() => {
@@ -260,11 +273,21 @@
         }, 4000);
     }
 
-    function enforceMaxChildren(changed) {
+    function enforceLimits(changed) {
         if (!ALLOW_CHILDREN) return;
-        if (checkedChildrenCount() <= MAX_CHILDREN) return;
-        if (changed) changed.checked = false;
-        showChildrenFeedback();
+
+        // Spuntare un bambino oltre il limite bambini: annulla la spunta.
+        if (checkedChildrenCount() > MAX_CHILDREN) {
+            if (changed) changed.checked = false;
+            showLimitsFeedback();
+            return;
+        }
+
+        // Togliere una spunta oltre il limite adulti: ripristina la spunta.
+        if (currentAdultsCount() > MAX_ADULTS && changed && !changed.checked) {
+            changed.checked = true;
+            showLimitsFeedback();
+        }
     }
 
     function participantSnapshot() {
@@ -328,6 +351,12 @@
         setInput(participantsBox);
         restoreParticipants(previousParticipants);
 
+        // Con più partecipanti del limite adulti l'utente deve segnare i
+        // bambini: mostra subito i limiti massimi.
+        if (ALLOW_CHILDREN && currentAdultsCount() > MAX_ADULTS) {
+            showLimitsFeedback();
+        }
+
     }
 
     function syncAttendanceUI() {
@@ -387,7 +416,7 @@
         if (ALLOW_CHILDREN) {
             participantsBox.addEventListener('change', (e) => {
                 const cb = e.target.closest('input.wi-checkbox[name$="[is_child]"]');
-                if (cb) enforceMaxChildren(cb);
+                if (cb) enforceLimits(cb);
             });
         }
 

@@ -25,6 +25,8 @@
                 "privacy_required": "Privacy consent is required.",
                 "image_release_required": "Image release consent is required.",
                 "required_field_missing": "Required field missing: {{field}}.",
+                "max_adults_exceeded": "Maximum number of adults exceeded: you can add up to {{max}}.",
+                "max_children_exceeded": "Maximum number of children exceeded: you can add up to {{max}}.",
                 "save_failed": "Unable to save the RSVP."
             }
         },
@@ -63,7 +65,7 @@
             "contact_surname_label": "Contact last name",
             "participants_count_label": "Participants",
             "children_count_label": "Number of children",
-            "children_max_text": "You have reached the maximum number of children allowed.",
+            "children_max_text": "You can add up to {{max_adults}} adults and {{max_children}} children.",
             "participant_label": "Guest",
             "child_label": "Child",
             "participant_name_label": "First name",
