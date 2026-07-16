@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- i dati dell'evento in evidenza sono registrati come placeholder globali dei
+  testi alla costruzione di `Rsvp::context()`: qualunque chiave lang può usare
+  `{{event_name}}`, `{{event_date}}`, `{{event_location_name}}`, ecc. (elenco
+  completo in `docs/riferimento/traduzioni.md`). Con nessun evento in evidenza
+  i placeholder si risolvono in stringa vuota.
+
 - **Fix**: il select partecipanti del form frontend ora arriva a
   `max adulti + max bambini` (prima si fermava a `max_participants`, che in
   backend è etichettato "Max adulti": con max adulti 2 e max bambini 2 il

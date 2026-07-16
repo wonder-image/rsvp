@@ -31,9 +31,9 @@
             }
         },
         "home": {
-            "seo": {
-                "title": "RSVP - {{society_name}}",
-                "description": "Conferma la tua partecipazione."
+            "seo" : {
+                "title" : "{{society_name}} - {{event_date}}",
+                "description" : "Siamo lieti di all'evento di {{society_name}} che si terrà il {{event_date}} presso {{event_location_name}}. Conferma la tua partecipazione!"
             },
             "title": "RSVP",
             "section_title": "Conferma la tua partecipazione",

@@ -3,6 +3,7 @@
 namespace Wonder\Plugin\Rsvp;
 
 use Wonder\App\Module\Contracts\ModuleInterface;
+use Wonder\Localization\TranslationProvider;
 use Wonder\View\View;
 
 final class Rsvp implements ModuleInterface
@@ -55,9 +56,13 @@ final class Rsvp implements ModuleInterface
         $path = self::contextPath();
 
         if ($session !== null) {
-            return (static function (mixed $session) use ($path): array {
+            $state = (static function (mixed $session) use ($path): array {
                 return require $path;
             })($session);
+
+            self::setEventTextGlobals($state);
+
+            return $state;
         }
 
         static $cached = null;
@@ -68,9 +73,50 @@ final class Rsvp implements ModuleInterface
 
                 return require $path;
             })();
+
+            self::setEventTextGlobals($cached);
         }
 
         return $cached;
+    }
+
+    /**
+     * Registra i dati dell'evento in evidenza come placeholder globali dei
+     * testi: qualunque chiave lang (del modulo o del sito) può usare
+     * `{{event_name}}`, `{{event_date}}`, `{{event_location_name}}`, ecc.
+     *
+     * I placeholder vengono (ri)registrati a ogni costruzione del contesto:
+     * l'evento in evidenza può cambiare con la sessione (eventi visibili
+     * dell'autorizzazione). Con nessun evento in evidenza i valori sono
+     * stringhe vuote, così i testi non mostrano il placeholder crudo.
+     */
+    private static function setEventTextGlobals(array $state): void
+    {
+        $event = is_array($state['featured_event'] ?? null) ? $state['featured_event'] : [];
+
+        $globals = [];
+
+        foreach ([
+            'event_key' => 'key',
+            'event_name' => 'label',
+            'event_description' => 'description',
+            'event_date' => 'pretty_date',
+            'event_hour' => 'hour',
+            'event_day' => 'day',
+            'event_pretty_day' => 'pretty_day',
+            'event_month' => 'month',
+            'event_pretty_month' => 'pretty_month',
+            'event_location_name' => 'location_name',
+            'event_location_address' => 'location_address',
+            'event_location_address_url' => 'location_address_url',
+            'event_location_position_url' => 'location_position_url',
+        ] as $placeholder => $field) {
+            $globals[$placeholder] = trim((string) ($event[$field] ?? ''));
+        }
+
+        if (class_exists(TranslationProvider::class)) {
+            TranslationProvider::setGlobals($globals);
+        }
     }
 
     /**

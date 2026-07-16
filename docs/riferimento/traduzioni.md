@@ -35,12 +35,59 @@ Risultato: in italiano la pagina di login è servita su `/rsvp/accedi/`, in
 inglese su `/rsvp/login/`. Il route name (`rsvp.login`) resta invariato: per
 questo nei template usi sempre `__r('rsvp.login')` e non un path hardcoded.
 
+## Placeholder dell'evento in evidenza
+
+Quando `Rsvp::context()` viene costruito, i dati dell'evento in evidenza
+vengono registrati come variabili globali dei testi: qualunque chiave lang (del
+modulo o del sito) può usarli con la sintassi `{{placeholder}}`, senza passare
+`$replacements` a `__t()`.
+
+| Placeholder | Contenuto |
+| --- | --- |
+| `{{event_key}}` | codice evento |
+| `{{event_name}}` | nome evento |
+| `{{event_description}}` | descrizione evento |
+| `{{event_date}}` | data leggibile (es. "2 giugno 2026") |
+| `{{event_hour}}` | ora di inizio (`H:i`) |
+| `{{event_day}}` | giorno numerico (`d`) |
+| `{{event_pretty_day}}` | giorno della settimana leggibile |
+| `{{event_month}}` | mese numerico (`m`) |
+| `{{event_pretty_month}}` | mese leggibile |
+| `{{event_location_name}}` | nome della location |
+| `{{event_location_address}}` | indirizzo della location |
+| `{{event_location_address_url}}` | URL indirizzo (mappe) |
+| `{{event_location_position_url}}` | URL posizione (parcheggi/ingresso) |
+
+Esempio (`lang/it/pages.json` del sito):
+
+```json
+{
+    "rsvp": {
+        "home": {
+            "seo": {
+                "title": "{{society_name}} - {{event_date}}",
+                "description": "Ti aspettiamo il {{event_date}} presso {{event_location_name}}."
+            }
+        }
+    }
+}
+```
+
+Con nessun evento in evidenza i placeholder si risolvono in stringa vuota. Se
+la sessione (codice invito) cambia gli eventi visibili, i placeholder seguono
+l'evento in evidenza di quella sessione.
+
 ## Sovrascrivere o aggiungere testi dal sito
 
 Le view override del sito possono usare `__l()`, `__t()` e `__r()` come qualsiasi
 altra pagina. Per personalizzare le stringhe del modulo, aggiungi le chiavi
 corrispondenti nei file lingua del sito (`lang/{locale}/*.json`): le traduzioni
 del sito hanno priorità su quelle del package.
+
+> La priorità del sito sui moduli richiede `wonder-image/app` con l'ordine di
+> caricamento core → moduli → sito (fix in `TranslationBootstrap` +
+> `app/service/lang.php`). Con versioni precedenti del framework i testi dei
+> moduli sovrascrivono quelli del sito.
 
 ## Aggiungere una lingua
 
