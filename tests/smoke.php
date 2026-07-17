@@ -132,6 +132,9 @@ namespace {
     require __DIR__.'/../vendor/autoload.php';
     require_once __DIR__.'/../src/Services/SubmissionNormalizer.php';
 
+    use Wonder\Http\Route;
+    use Wonder\Plugin\Rsvp\Resources\ResponseResource;
+    use Wonder\Plugin\Rsvp\Services\ResponseExporter;
     use Wonder\Plugin\Rsvp\Services\SubmissionNormalizer;
 
     function assertSame(mixed $expected, mixed $actual, string $message): void
@@ -234,6 +237,69 @@ namespace {
 
         $assert(static fn () => assertSame([], SubmissionNormalizer::participantsFromNormalized($declined), 'Svuota i partecipanti quando la risposta è declined.'));
         $assert(static fn () => assertSame(0, $declined['participants_count'], 'Conta zero partecipanti per risposte declined.'));
+
+        $response = array_merge($normalized, [
+            'booking_code' => 'pre_0000042',
+            'creation' => '2026-07-17 10:30:00',
+            'pretty_attendance_status' => 'Confermato',
+            'pretty_accept_privacy_policy' => 'Accettato',
+            'pretty_accept_image_release' => 'Rifiutato',
+        ]);
+        $expanded = ResponseExporter::expandRows([$response]);
+
+        $assert(static fn () => assertSame(2, count($expanded), 'L’export genera una riga per ciascun partecipante.'));
+        $assert(static fn () => assertSame('Mario', $expanded[0]['export_participant_name'], 'Mantiene il primo partecipante come prima riga.'));
+        $assert(static fn () => assertSame('Adulto', $expanded[0]['export_participant_type'], 'Classifica correttamente un partecipante adulto.'));
+        $assert(static fn () => assertSame('No glutine', $expanded[0]['export_participant_dietary_requirements'], 'Esporta le esigenze alimentari del partecipante.'));
+        $assert(static fn () => assertSame('Luca', $expanded[1]['export_participant_name'], 'Mantiene il secondo partecipante come seconda riga.'));
+        $assert(static fn () => assertSame('Bambino', $expanded[1]['export_participant_type'], 'Classifica correttamente un bambino.'));
+        $assert(static fn () => assertSame('pre_0000042', $expanded[1]['booking_code'], 'Duplica i dati della prenotazione sulle righe partecipante.'));
+        $assert(static fn () => assertSame('user@example.com', $expanded[1]['contact_email'], 'Duplica i dati del referente sulle righe partecipante.'));
+
+        $declinedResponse = array_merge($declined, [
+            'booking_code' => 'pre_0000043',
+            'creation' => '2026-07-17 11:00:00',
+            'pretty_attendance_status' => 'Non partecipo',
+            'pretty_accept_privacy_policy' => 'Accettato',
+            'pretty_accept_image_release' => 'Rifiutato',
+        ]);
+        $declinedRows = ResponseExporter::expandRows([$declinedResponse]);
+
+        $assert(static fn () => assertSame(1, count($declinedRows), 'Mantiene una riga per le risposte senza partecipanti.'));
+        $assert(static fn () => assertSame('Giulia', $declinedRows[0]['export_participant_name'], 'Usa il referente come fallback per una risposta declined.'));
+        $assert(static fn () => assertSame('Non partecipa', $declinedRows[0]['export_participant_type'], 'Distingue il fallback declined da un partecipante adulto.'));
+
+        $invalidParticipantsResponse = array_replace($response, [
+            'participants' => '{"unexpected":["value"]}',
+        ]);
+        $invalidParticipantsRows = ResponseExporter::expandRows([$invalidParticipantsResponse]);
+
+        $assert(static fn () => assertSame(1, count($invalidParticipantsRows), 'Un payload partecipanti non valido produce una sola riga di fallback.'));
+        $assert(static fn () => assertSame('Mario', $invalidParticipantsRows[0]['export_participant_name'], 'Il fallback usa il referente anche per dati partecipante malformati.'));
+
+        $download = (array) ResponseResource::tableLayoutSchema()->get('download');
+        $matrix = ResponseExporter::matrix([$response], (array) ($download['columns'] ?? []));
+        $firstExportRow = array_combine($matrix[0], $matrix[1]);
+        $secondExportRow = array_combine($matrix[0], $matrix[2]);
+
+        $assert(static fn () => assertSame(3, count($matrix), 'La matrice contiene header più una riga per partecipante.'));
+        $assert(static fn () => assertSame('Mario', $firstExportRow['Nome'] ?? null, 'Le colonne TableLayout leggono il primo partecipante espanso.'));
+        $assert(static fn () => assertSame('Luca', $secondExportRow['Nome'] ?? null, 'Le colonne TableLayout leggono il secondo partecipante espanso.'));
+        $assert(static fn () => assertSame('Vegetariano', $secondExportRow['Pasto'] ?? null, 'Ripete e renderizza i custom field su ogni riga partecipante.'));
+
+        Route::reset();
+        Route::name('backend.resource.rsvp-responses.')
+            ->prefix('/backend/rsvp/responses')
+            ->group(static function (): void {
+                Route::get('/export/{format}/', __FILE__)->name('export');
+                ResponseResource::registerBackendRoutes('', 'rsvp-responses');
+            });
+
+        $assert(static fn () => assertSame(
+            '/backend/rsvp/responses/participants-export/csv/',
+            Route::resolvePath('backend.resource.rsvp-responses.export', ['format' => 'csv']),
+            'Il pulsante export standard risolve la route RSVP per partecipante.'
+        ));
 
         fwrite(STDOUT, "Smoke tests passed: {$assertions} assertions\n");
         exit(0);

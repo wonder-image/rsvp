@@ -36,6 +36,7 @@ orchestrazione, side-effect):
 | Classe | Ruolo |
 | --- | --- |
 | `InviteCodeSession` | gestisce login/logout e sessione del codice invito |
+| `ResponseExporter` | genera CSV/XLSX con una riga per partecipante |
 | `SubmissionNormalizer` | normalizza il payload del form in una row `rsvp_response` |
 | `SubmissionNotifier` | invia le email ad admin e ospite |
 | `LegalDocumentSeeder` | crea il documento legale "liberatoria immagini" |

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- l'export risposte XLSX/CSV genera ora una riga per partecipante, ripetendo i
+  dati della prenotazione, del referente e dei custom field. Le risposte senza
+  partecipanti conservano una riga di fallback, così i rifiuti restano visibili.
+
 - i dati dell'evento in evidenza sono registrati come placeholder globali dei
   testi alla costruzione di `Rsvp::context()`: qualunque chiave lang può usare
   `{{event_name}}`, `{{event_date}}`, `{{event_location_name}}`, ecc. (elenco

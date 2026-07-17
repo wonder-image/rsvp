@@ -13,6 +13,7 @@ use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\ResourceSchema\TableLayoutSchema;
 use Wonder\Elements\Components\Card;
 use Wonder\Elements\Form\Form;
+use Wonder\Http\Route;
 use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Rsvp;
 use Wonder\Plugin\Rsvp\Services\InviteCodeSession;
@@ -181,14 +182,9 @@ final class ResponseResource extends Resource
             ->searchFields(['contact_name', 'contact_surname', 'contact_email', 'contact_phone', 'event_key', 'invite_code', 'authorization_code'])
             ->download(['xlsx', 'csv'])
             ->downloadColumns(self::downloadColumnsSchema())
-            ->downloadFileName('RSVP-'.date('Y-m-d'));
+            ->downloadFileName('RSVP-'.date('Y-m-d-H-i-s'));
     }
 
-    /**
-     * Colonne dell'export tabella (una riga per risposta).
-     *
-     * @return array<int, array{label:string, value:string|callable}>
-     */
     private static function downloadColumnsSchema(): array
     {
         $columns = [
@@ -201,22 +197,32 @@ final class ResponseResource extends Resource
         }
 
         $columns = array_merge($columns, [
-            ['label' => 'Nome', 'value' => 'contact_name'],
-            ['label' => 'Cognome', 'value' => 'contact_surname'],
-            ['label' => 'Email', 'value' => 'contact_email'],
-            ['label' => 'Telefono', 'value' => 'contact_phone'],
-            ['label' => 'Partecipanti', 'value' => 'participants_count'],
-            ['label' => 'Bambini', 'value' => 'children_count'],
-            ['label' => 'Elenco partecipanti', 'value' => static fn (array $r): string => self::participantsSummary($r)],
-            ['label' => 'Eventi selezionati', 'value' => static fn (array $r): string => self::eventsSummary($r)],
-            ['label' => 'Codice invito', 'value' => 'invite_code'],
-            ['label' => 'Gruppo invito', 'value' => 'invite_group_code'],
-            ['label' => 'Autorizzazione', 'value' => 'authorization_code'],
-            ['label' => 'Richieste', 'value' => 'notes'],
+            [
+                'label' => 'Nome',
+                'value' => static fn (array $r): string => (string) (
+                    $r['export_participant_name'] ?? ($r['contact_name'] ?? '')
+                ),
+            ],
+            [
+                'label' => 'Cognome',
+                'value' => static fn (array $r): string => (string) (
+                    $r['export_participant_surname'] ?? ($r['contact_surname'] ?? '')
+                ),
+            ],
+            [
+                'label' => 'Tipo',
+                'value' => static fn (array $r): string => (string) ($r['export_participant_type'] ?? ''),
+            ],
+            [
+                'label' => 'Esigenze alimentari',
+                'value' => static fn (array $r): string => (string) ($r['export_participant_dietary_requirements'] ?? ''),
+            ],
+            ['label' => 'Email referente', 'value' => 'contact_email'],
+            ['label' => 'Telefono referente', 'value' => 'contact_phone'],
+            ['label' => 'Partecipanti prenotazione', 'value' => 'participants_count'],
+            ['label' => 'Bambini prenotazione', 'value' => 'children_count'],
             ['label' => 'Privacy', 'value' => 'pretty_accept_privacy_policy'],
-            ['label' => 'Foto', 'value' => 'pretty_accept_image_release'],
-            ['label' => 'Lingua', 'value' => 'locale'],
-            ['label' => 'URL origine', 'value' => 'request_url'],
+            ['label' => 'Foto', 'value' => 'pretty_accept_image_release']
         ]);
 
         foreach (Response::customFieldDefinitions() as $field) {
@@ -276,7 +282,6 @@ final class ResponseResource extends Resource
 
     public static function apiSchema(): ApiSchema
     {
-        // Solo `store`: è l'endpoint di submission del form frontend.
         return ApiSchema::for(static::class)->only(['store']);
     }
 
@@ -295,6 +300,22 @@ final class ResponseResource extends Resource
             ->title('Risposte')
             ->sectionOrder(610)
             ->authority([ 'admin', 'rsvp_response_viewer' ]);
+    }
+
+    /**
+     * Sostituisce la destinazione del pulsante export standard con il
+     * downloader RSVP, che espande ogni risposta in una riga per partecipante.
+     */
+    public static function registerBackendRoutes(string $rootApp, string $slug): void
+    {
+        $backendPermissions = (array) static::permissionSchema()->get('backend');
+
+        Route::get('/participants-export/{format}/', Rsvp::handlerPath('backend/response/export.php'), [
+            'resource' => $slug,
+            'resource_action' => 'export',
+        ])->name('export')
+            ->permit((array) ($backendPermissions['list'] ?? []))
+            ->where('format', '(csv|xlsx)');
     }
 
     public static function mutateRequestValues(

@@ -16,7 +16,7 @@ final class Settings extends Model
 
     public static function syncSchema(): ?SyncSchema
     {
-        return SyncSchema::multiRow();
+        return SyncSchema::multiRow()->exclude(['poster']);
     }
     
     public static function tableSchema(): array
