@@ -25,7 +25,7 @@ final class SubmissionNotifier
             'contact_name' => (string) ($normalized['contact_name'] ?? ''),
             'contact_surname' => (string) ($normalized['contact_surname'] ?? ''),
             'event_name' => $eventName,
-            'event_starts_at' => $eventDate,
+            'event_starts_at' => prettyDate($eventDate, true),
             'summary_html' => $summaryHtml,
             'response_url' => $responseUrl,
         ];
