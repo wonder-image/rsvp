@@ -206,6 +206,7 @@
     const imageReleaseWrap = document.getElementById('rsvp-image-release-wrap');
     const participantSelectWrap = participantsCount ? participantsCount.closest('[data-wi-select="true"]') : null;
     const attendanceWrap = attendanceInputs[0] ? attendanceInputs[0].closest('.wi-input-container') : null;
+    const submitButton = form.querySelector('.wi-submit');
 
     const SUCCESS_TEXT = <?=js_e(__t('pages.rsvp.form.success_text'))?>;
     const ERROR_TEXT = <?=js_e(__t('pages.rsvp.form.error_text'))?>;
@@ -225,6 +226,39 @@
         if (attendanceInputs.length === 0) return 'confirmed';
         const selected = form.querySelector('input[name="attendance_status"]:checked');
         return selected ? selected.value : 'confirmed';
+    }
+
+    /**
+     * Il check() della lib valuta ogni radio required separatamente: in un
+     * gruppo con più opzioni trova sempre almeno un radio non selezionato e
+     * lascia il submit disabilitato. Qui usiamo la validità del form RSVP,
+     * considerando i radio obbligatori come gruppo.
+     */
+    function fieldIsValid(input) {
+        if (!input || input.disabled) return true;
+
+        if (input.required) {
+            if (input.type === 'radio') {
+                return Array.from(form.elements).some((candidate) => (
+                    candidate.type === 'radio'
+                    && candidate.name === input.name
+                    && candidate.checked
+                    && !candidate.disabled
+                ));
+            }
+
+            if (input.type === 'checkbox' && !input.checked) return false;
+            if (input.type !== 'checkbox' && String(input.value || '').trim() === '') return false;
+        }
+
+        return !input.validity || input.validity.valid;
+    }
+
+    function syncSubmitState() {
+        if (!submitButton) return;
+
+        const valid = Array.from(form.elements).every(fieldIsValid);
+        submitButton.toggleAttribute('disabled', !valid);
     }
 
     function toggleBlock(scope, visible) {
@@ -286,6 +320,7 @@
         }
 
         if (typeof check === 'function') check();
+        syncSubmitState();
     }
 
     function participantSnapshot() {
@@ -427,6 +462,12 @@
     };
 
     window.addEventListener('loaded', () => {
+
+        // Questi listener girano in bubbling dopo quelli della lib e fanno sì
+        // che la validazione specifica RSVP sia sempre l'ultima applicata.
+        ['input', 'keyup', 'change', 'focusin', 'focusout', 'click'].forEach((eventName) => {
+            form.addEventListener(eventName, syncSubmitState);
+        });
 
         attendanceInputs.forEach((input) => input.addEventListener('change', syncAttendanceUI));
 

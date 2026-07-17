@@ -82,7 +82,9 @@ final class ResponseResource extends Resource
     public static function formSchema(): array
     {
         $schema = [
-            FormField::key('invite_code_id')->hidden()->required(),
+            // Il codice invito è obbligatorio solo quando lo richiede il
+            // contesto RSVP; `assertSubmission()` applica quel vincolo.
+            FormField::key('invite_code_id')->hidden(),
             FormField::key('locale')->hidden()->required(),
             FormField::key('request_url')->hidden(),
             FormField::key('event_key')->radio()->required(),
