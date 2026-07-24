@@ -20,9 +20,7 @@
 
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
     $visibleEvents = is_array($state['visible_events'] ?? null) ? $state['visible_events'] : [];
-    $requiresInviteCode = !empty($state['requires_invite_code']);
-    $hasSession = (int) ($session['id'] ?? 0) > 0;
-    $canAccessForm = !$requiresInviteCode || $hasSession;
+    $canAccessForm = Rsvp::canAccessForm($state);
     $locale = (string) ($state['locale'] ?? __l());
     $maxAdults = max(1, (int) ($state['max_participants'] ?? 1));
     $allowChildren = !empty($state['allow_children']);

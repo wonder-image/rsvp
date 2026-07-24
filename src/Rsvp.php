@@ -130,6 +130,24 @@ final class Rsvp implements ModuleInterface
     }
 
     /**
+     * Indica se lo stato corrente consente di mostrare il form RSVP.
+     *
+     * Una sessione invito attiva non basta: un codice monouso già utilizzato
+     * rimane associato alla sessione, ma espone `can_submit = false`.
+     */
+    public static function canAccessForm(array $context): bool
+    {
+        $session = is_array($context['session'] ?? null) ? $context['session'] : [];
+        $hasSession = (int) ($session['id'] ?? 0) > 0;
+
+        if (!empty($context['requires_invite_code']) && !$hasSession) {
+            return false;
+        }
+
+        return !$hasSession || ($session['can_submit'] ?? false) === true;
+    }
+
+    /**
      * Gate di accesso RSVP.
      *
      * Se l'RSVP richiede un codice invito e non c'è una sessione attiva,

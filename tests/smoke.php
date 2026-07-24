@@ -133,6 +133,7 @@ namespace {
     require_once __DIR__.'/../src/Services/SubmissionNormalizer.php';
 
     use Wonder\Http\Route;
+    use Wonder\Plugin\Rsvp\Rsvp;
     use Wonder\Plugin\Rsvp\Resources\ResponseResource;
     use Wonder\Plugin\Rsvp\Services\ResponseExporter;
     use Wonder\Plugin\Rsvp\Services\SubmissionNormalizer;
@@ -166,6 +167,41 @@ namespace {
         $assert(static fn () => assertSame('--', rsvpJsonPrettyList('[]'), 'Rende placeholder per liste JSON vuote.'));
         $assert(static fn () => assertSame(['uno', 'due'], rsvpParseListText("uno;\ndue\nuno"), 'Parsa liste testuali deduplicate.'));
         $assert(static fn () => assertSame('meta_guest_name', rsvpCustomFieldColumn(' Guest Name '), 'Normalizza il nome colonna dei custom field.'));
+        $assert(static fn () => assertTrue(Rsvp::canAccessForm([
+            'requires_invite_code' => false,
+            'session' => [],
+        ]), 'Il form pubblico resta accessibile senza sessione invito.'));
+        $assert(static fn () => assertTrue(!Rsvp::canAccessForm([
+            'requires_invite_code' => true,
+            'session' => [],
+        ]), 'Il form protetto non è accessibile senza sessione invito.'));
+        $assert(static fn () => assertTrue(Rsvp::canAccessForm([
+            'requires_invite_code' => true,
+            'session' => [
+                'id' => 42,
+                'usage_mode' => 'single_use',
+                'usage_count' => 0,
+                'can_submit' => true,
+            ],
+        ]), 'Un codice monouso non utilizzato consente di accedere al form.'));
+        $assert(static fn () => assertTrue(!Rsvp::canAccessForm([
+            'requires_invite_code' => true,
+            'session' => [
+                'id' => 42,
+                'usage_mode' => 'single_use',
+                'usage_count' => 1,
+                'can_submit' => false,
+            ],
+        ]), 'Un codice monouso già utilizzato non consente di accedere al form.'));
+        $assert(static fn () => assertTrue(Rsvp::canAccessForm([
+            'requires_invite_code' => true,
+            'session' => [
+                'id' => 42,
+                'usage_mode' => 'multiple_use',
+                'usage_count' => 1,
+                'can_submit' => true,
+            ],
+        ]), 'Un codice multiuso resta accessibile dopo un invio.'));
         $assert(static fn () => assertSame('Vegetariano', rsvpRenderCustomFieldValue([
             'type' => 'select',
             'options' => ['veg' => 'Vegetariano'],
