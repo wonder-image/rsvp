@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- nuovi campi per ogni partecipante nel form frontend, raccolti in una card
+  dedicata (`view/components/form.php`): **Età** (`number`, `->decimal(0)`,
+  obbligatorio), **Sesso** (`select` a una colonna con placeholder e opzioni
+  Uomo/Donna/Altro, obbligatorio). Le "allergie" riusano il campo esistente
+  `dietary_requirements` ("Intolleranze o allergie", `textarea`). Età e sesso
+  sono preservati nel JSON `participants`, mostrati nel dettaglio backend ed
+  esportati (`export_participant_age`, `export_participant_sex` con etichetta
+  leggibile via `rsvpSexText`).
+- nuovo campo **Azienda** a livello di prenotazione (`company`, `->text()`,
+  obbligatorio): colonna dedicata su `rsvp_response`, input vicino ai contatti,
+  validazione server-side in `assertSubmission`, colonna d'export e riga nel
+  dettaglio backend.
+- con un solo partecipante possibile (`max adulti + max bambini == 1`) il form
+  nasconde il select "Partecipanti" (reso come hidden `1`) e non mostra il
+  titolo "Ospite 1" sopra la card.
+- workaround al bug del widget select della lib (`selElmnt.value = this.id` in
+  closure sull'ultimo select del documento): `reconcileSexSelects()` riallinea
+  il valore nativo di ogni select sesso all'etichetta mostrata, prima dello
+  snapshot di re-render, ad ogni interazione e prima del submit.
 - l'export risposte XLSX/CSV genera ora una riga per partecipante, ripetendo i
   dati della prenotazione, del referente e dei custom field. Le risposte senza
   partecipanti conservano una riga di fallback, così i rifiuti restano visibili.

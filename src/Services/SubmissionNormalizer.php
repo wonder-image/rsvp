@@ -43,6 +43,7 @@ final class SubmissionNormalizer
             'contact_surname' => self::string($payload, ['contact_surname']) ?: ($participants[0]['surname'] ?? ''),
             'contact_phone' => self::string($payload, ['contact_phone', 'phone', 'cel']),
             'contact_email' => strtolower(self::string($payload, ['contact_email', 'email'])),
+            'company' => self::string($payload, ['company', 'azienda']),
             'participants' => json_encode($participants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'participants_count' => count($participants),
             'children_count' => count(array_filter(
@@ -205,6 +206,9 @@ final class SubmissionNormalizer
         $surname = trim((string) ($participant['surname'] ?? ''));
         $dietary = trim((string) ($participant['dietary_requirements'] ?? ($participant['allergies'] ?? '')));
         $isChild = self::boolean($participant['is_child'] ?? (($participant['type'] ?? '') === 'child'));
+        $ageRaw = trim((string) ($participant['age'] ?? ''));
+        $age = $ageRaw === '' ? null : (int) $ageRaw;
+        $sex = strtolower(trim((string) ($participant['sex'] ?? '')));
 
         if ($name === '' && $surname === '' && $dietary === '') {
             return null;
@@ -213,6 +217,8 @@ final class SubmissionNormalizer
         return [
             'name' => $name,
             'surname' => $surname,
+            'age' => $age,
+            'sex' => $sex,
             'dietary_requirements' => $dietary,
             'is_child' => $isChild,
         ];
@@ -299,6 +305,8 @@ final class SubmissionNormalizer
             'cel',
             'contact_email',
             'email',
+            'company',
+            'azienda',
             'notes',
             'requests',
             'request',

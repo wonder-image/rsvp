@@ -13,6 +13,9 @@ namespace {
                 'pages.rsvp.common.rejected' => 'Rifiutato',
                 'legal.privacy_policy.label' => 'Privacy policy',
                 'legal.image_release.label' => 'Liberatoria immagini',
+                'components.forms.fields.sex.options.male' => 'Uomo',
+                'components.forms.fields.sex.options.female' => 'Donna',
+                'components.forms.fields.sex.options.other' => 'Altro',
             ];
 
             $message = $messages[$key] ?? $key;
@@ -219,16 +222,21 @@ namespace {
             'invite_code_id' => 42,
             'contact_phone' => '+39 123456',
             'contact_email' => 'USER@EXAMPLE.COM',
+            'company' => '  Acme S.p.A.  ',
             'participants' => [
                 [
                     'name' => 'Mario',
                     'surname' => 'Rossi',
+                    'age' => '30',
+                    'sex' => 'male',
                     'dietary_requirements' => 'No glutine',
                     'is_child' => 'false',
                 ],
                 [
                     'name' => 'Luca',
                     'surname' => 'Rossi',
+                    'age' => '8',
+                    'sex' => 'other',
                     'dietary_requirements' => '',
                     'is_child' => 'true',
                 ],
@@ -240,6 +248,13 @@ namespace {
             'status' => 'confirmed',
             'unknown_flag' => 'keep-me',
         ]);
+
+        $normalizedParticipants = SubmissionNormalizer::participantsFromNormalized($normalized);
+
+        $assert(static fn () => assertSame('Acme S.p.A.', $normalized['company'], 'Normalizza il campo azienda a livello di prenotazione.'));
+        $assert(static fn () => assertSame(30, $normalizedParticipants[0]['age'], 'Preserva l’età del partecipante come intero.'));
+        $assert(static fn () => assertSame('male', $normalizedParticipants[0]['sex'], 'Preserva il sesso del partecipante.'));
+        $assert(static fn () => assertSame('other', $normalizedParticipants[1]['sex'], 'Preserva il sesso del secondo partecipante.'));
 
         $assert(static fn () => assertSame('Mario', $normalized['contact_name'], 'Deriva il contatto principale dal primo partecipante quando manca il campo dedicato.'));
         $assert(static fn () => assertSame('user@example.com', $normalized['contact_email'], 'Normalizza l’email in lowercase.'));
@@ -287,6 +302,8 @@ namespace {
         $assert(static fn () => assertSame('Mario', $expanded[0]['export_participant_name'], 'Mantiene il primo partecipante come prima riga.'));
         $assert(static fn () => assertSame('Adulto', $expanded[0]['export_participant_type'], 'Classifica correttamente un partecipante adulto.'));
         $assert(static fn () => assertSame('No glutine', $expanded[0]['export_participant_dietary_requirements'], 'Esporta le esigenze alimentari del partecipante.'));
+        $assert(static fn () => assertSame('30', $expanded[0]['export_participant_age'], 'Esporta l’età del partecipante.'));
+        $assert(static fn () => assertSame('Uomo', $expanded[0]['export_participant_sex'], 'Esporta il sesso del partecipante in forma leggibile.'));
         $assert(static fn () => assertSame('Luca', $expanded[1]['export_participant_name'], 'Mantiene il secondo partecipante come seconda riga.'));
         $assert(static fn () => assertSame('Bambino', $expanded[1]['export_participant_type'], 'Classifica correttamente un bambino.'));
         $assert(static fn () => assertSame('pre_0000042', $expanded[1]['booking_code'], 'Duplica i dati della prenotazione sulle righe partecipante.'));

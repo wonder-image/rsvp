@@ -142,6 +142,8 @@ final class ResponseExporter
                     'export_participant_number' => $index + 1,
                     'export_participant_name' => self::text($participant['name'] ?? ''),
                     'export_participant_surname' => self::text($participant['surname'] ?? ''),
+                    'export_participant_age' => self::text($participant['age'] ?? ''),
+                    'export_participant_sex' => rsvpSexText($participant['sex'] ?? ''),
                     'export_participant_type' => $type,
                     'export_participant_dietary_requirements' => $dietaryRequirements,
                     'export_participant_is_child' => $isChild,

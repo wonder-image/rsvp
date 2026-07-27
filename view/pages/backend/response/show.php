@@ -29,6 +29,20 @@ foreach ($participants as $index => $participant) {
         $participantsHtml .= ' <em>(bambino)</em>';
     }
 
+    $details = [];
+
+    if (isset($participant['age']) && $participant['age'] !== '' && $participant['age'] !== null) {
+        $details[] = 'Età: '.e((string) $participant['age']);
+    }
+
+    if (!empty($participant['sex'])) {
+        $details[] = 'Sesso: '.e(rsvpSexText($participant['sex']));
+    }
+
+    if ($details !== []) {
+        $participantsHtml .= ' <small>('.implode(', ', $details).')</small>';
+    }
+
     if (!empty($participant['dietary_requirements'])) {
         $participantsHtml .= ' - '.e($participant['dietary_requirements']);
     }
@@ -43,6 +57,7 @@ $mainCards = [
             (new RichText(
                 'Codice prenotazione: <b>'.e($RESPONSE['booking_code'] ?? '--').'</b><br>'
                 .'Nome: <b>'.e($fullName).'</b><br>'
+                .'Azienda: <b>'.e($RESPONSE['company'] ?? '--').'</b><br>'
                 .'Email: <b>'.e($RESPONSE['contact_email'] ?? '--').'</b><br>'
                 .'Telefono: <b>'.e($RESPONSE['contact_phone'] ?? '--').'</b>'
             )),

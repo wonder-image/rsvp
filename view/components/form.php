@@ -31,6 +31,10 @@
     $submitUrl = __e('api.resource.rsvp-responses.store');
     $maxTotalParticipants = $maxAdults + $maxChildren;
 
+    // Con un solo partecipante possibile la scelta del numero è inutile: si
+    // nasconde il select e non si mostra il titolo "Ospite 1" sopra la card.
+    $singleParticipant = $maxTotalParticipants === 1;
+
     $partecipantiOptions = [];
     for ($i = 1; $i <= $maxTotalParticipants; $i++) {
         $partecipantiOptions[(string) $i] = (string) $i;
@@ -112,9 +116,13 @@
                 
                 <div id="rsvp-attending-fields" class="w-100 d-grid gap-5">
 
-                    <div class="w-100">
-                        <?= ResponseResource::getInput('participants_count')->options($partecipantiOptions); ?>
-                    </div>
+                    <?php if ($singleParticipant) { ?>
+                        <?= ResponseResource::getInput('participants_count')->hidden()->value('1'); ?>
+                    <?php } else { ?>
+                        <div class="w-100">
+                            <?= ResponseResource::getInput('participants_count')->options($partecipantiOptions); ?>
+                        </div>
+                    <?php } ?>
 
                     <div id="rsvp-participants" class="w-100 d-grid gap-5"></div>
 
@@ -123,15 +131,19 @@
                     <?php } ?>
 
                     <template id="rsvp-guest-template">
-                        <div class="w-100" data-rsvp-participant="__INDEX__">
-                            <div class="text fw-500 w-100 mt-p-2">__TITLE__</div>
-                            <div class="w-100 d-grid col-2 gap-5 gap-p-3 mt-2">
+                        <div class="w-100 b-1 b-r-15 p-5 gap-5 d-grid" data-rsvp-participant="__INDEX__">
+                            <?php if (!$singleParticipant) { ?>
+                            <div class="text fw-500 w-100">__TITLE__</div>
+                            <?php } ?>
+                            <div class="w-100 d-grid col-2 gap-5 gap-p-3">
                                 <?=ResponseResource::getInput('participants[__INDEX__][name]')?>
                                 <?=ResponseResource::getInput('participants[__INDEX__][surname]')?>
+                                <?=ResponseResource::getInput('participants[__INDEX__][age]')?>
+                                <?=ResponseResource::getInput('participants[__INDEX__][sex]')?>
                                 <div class="col-2"><?=ResponseResource::getInput('participants[__INDEX__][dietary_requirements]')?></div>
                             </div>
                             <?php if ($allowChildren) : ?>
-                            <div class="w-100 mt-5">
+                            <div class="w-100">
                                 <?=ResponseResource::getInput('participants[__INDEX__][is_child]');?>
                             </div>
                             <?php endif; ?>
@@ -163,6 +175,8 @@
 
                 <?=ResponseResource::getInput('contact_email')?>
 
+                <?=ResponseResource::getInput('company')?>
+
                 <div class="w-100 bt-1 tx-black mh-p-2"></div>
 
                 <?= ResponseResource::getInput('accept_privacy_policy') ?>
@@ -177,7 +191,7 @@
                     <?=  (new Submit('send'))
                             ->label(__t('pages.rsvp.form.submit_label'))
                             ->class('btn btn-primary c-w w-60 w-p-100')
-                            ->onclick("formSubmit(this.form, '".e($submitUrl)."', rsvpFormSubmitResponse)")
+                            ->onclick("rsvpSubmitForm(this.form, '".e($submitUrl)."')")
                             ->render(); ?>
                 </div>
 
@@ -252,12 +266,48 @@
         return !input.validity || input.validity.valid;
     }
 
+    /**
+     * Il select custom della lib ha un bug noto: il click handler scrive
+     * `selElmnt.value = this.id` su una variabile in closure che punta
+     * all'ultimo select del documento, sporcando il valore nativo di un
+     * ALTRO select "sesso" quando ce n'è più di uno (più partecipanti). Il
+     * display resta corretto, quindi riallineiamo il valore nativo di ogni
+     * select sesso alla propria etichetta mostrata.
+     */
+    function reconcileSexSelects() {
+        form.querySelectorAll('select[name*="[sex]"]').forEach((select) => {
+            const wrap = select.closest('[data-wi-select="true"]');
+            const display = wrap ? wrap.querySelector('.select-selected') : null;
+
+            if (!display) return;
+
+            const label = display.textContent.trim();
+            const match = Array.from(select.options).find(
+                (option) => option.textContent.trim() === label
+            );
+
+            if (match && select.value !== match.value) select.value = match.value;
+        });
+    }
+
     function syncSubmitState() {
         if (!submitButton) return;
+
+        reconcileSexSelects();
 
         const valid = Array.from(form.elements).every(fieldIsValid);
         submitButton.toggleAttribute('disabled', !valid);
     }
+
+    /**
+     * Wrapper di submit: riallinea i select sesso PRIMA che formSubmit()
+     * serializzi il form, così i valori nativi eventualmente sporcati dal
+     * bug del widget non finiscono nel payload.
+     */
+    window.rsvpSubmitForm = function (formEl, url) {
+        reconcileSexSelects();
+        formSubmit(formEl, url, rsvpFormSubmitResponse);
+    };
 
     function toggleBlock(scope, visible) {
 
@@ -326,9 +376,24 @@
             index,
             name: (block.querySelector(`[name="participants[${index}][name]"]`) || {}).value || '',
             surname: (block.querySelector(`[name="participants[${index}][surname]"]`) || {}).value || '',
+            age: (block.querySelector(`[name="participants[${index}][age]"]`) || {}).value || '',
+            sex: (block.querySelector(`[name="participants[${index}][sex]"]`) || {}).value || '',
             dietary_requirements: (block.querySelector(`[name="participants[${index}][dietary_requirements]"]`) || {}).value || '',
             is_child: !!(childCheckbox(block, index) || {}).checked,
         }));
+    }
+
+    /**
+     * Il sesso è un select custom della lib: setInput() costruisce il widget
+     * leggendo il valore del <select> nativo, quindi va ripristinato PRIMA di
+     * setInput() (i campi testuali/numerici, invece, dopo va bene lo stesso).
+     */
+    function restoreParticipantSelects(values) {
+        values.forEach((participant, index) => {
+            if (!participant.sex) return;
+            const sex = participantsBox.querySelector(`select[name="participants[${index}][sex]"]`);
+            if (sex) sex.value = participant.sex;
+        });
     }
 
     function restoreParticipants(values) {
@@ -336,6 +401,7 @@
             [
                 ['name', participant.name],
                 ['surname', participant.surname],
+                ['age', participant.age],
                 ['dietary_requirements', participant.dietary_requirements],
             ].forEach(([field, value]) => {
                 const input = participantsBox.querySelector(`[name="participants[${index}][${field}]"]`);
@@ -392,6 +458,11 @@
             return;
         }
 
+        // Prima dello snapshot riallinea i select sesso: il cambio del select
+        // "Partecipanti" può aver sporcato il valore nativo dell'ultimo select
+        // sesso (bug closure del widget) proprio poco prima di questo render.
+        reconcileSexSelects();
+
         const previousParticipants = participantSnapshot();
         const n = parseInt(participantsCount ? participantsCount.value : '1', 10) || 1;
         let html = '';
@@ -403,6 +474,7 @@
             changeInputId(el);
         });
 
+        restoreParticipantSelects(previousParticipants);
         setInput(participantsBox);
         restoreParticipants(previousParticipants);
         syncLimitsFeedback();

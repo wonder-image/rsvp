@@ -143,6 +143,35 @@ if (!function_exists('rsvpAttendanceStatusDictionary')) {
     }
 }
 
+if (!function_exists('rsvpSexDictionary')) {
+    /**
+     * Opzioni canoniche del campo sesso partecipante (valore => etichetta).
+     *
+     * @return array<string, string>
+     */
+    function rsvpSexDictionary(): array
+    {
+        return [
+            'male' => __t('components.forms.fields.sex.options.male'),
+            'female' => __t('components.forms.fields.sex.options.female'),
+            'other' => __t('components.forms.fields.sex.options.other'),
+        ];
+    }
+}
+
+if (!function_exists('rsvpSexText')) {
+    function rsvpSexText(mixed $value): string
+    {
+        $value = strtolower(trim((string) $value));
+
+        if ($value === '') {
+            return '';
+        }
+
+        return rsvpSexDictionary()[$value] ?? ucfirst($value);
+    }
+}
+
 if (!function_exists('rsvpInviteGroupLabel')) {
     function rsvpInviteGroupLabel(mixed $groupId): string
     {

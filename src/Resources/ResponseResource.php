@@ -56,6 +56,7 @@ final class ResponseResource extends Resource
             'contact_surname' => 'Cognome',
             'contact_email' => 'Email',
             'contact_phone' => 'Telefono',
+            'company' => 'Azienda',
             'participants_count' => 'Partecipanti',
             'children_count' => 'Bambini',
             'event_key' => 'Evento',
@@ -109,6 +110,10 @@ final class ResponseResource extends Resource
                 ->autocomplete()
                 ->label(__t('components.forms.fields.contact_email.label')),
 
+            FormField::key('company')->text()->required()
+                ->autocomplete('organization')
+                ->label(__t('components.forms.fields.company.label')),
+
             /**
              * Dati di contatto altri partecipanti.
              */
@@ -121,6 +126,15 @@ final class ResponseResource extends Resource
 
             FormField::key('participants[__INDEX__][surname]')->text()->required()
                 ->label(__t('components.forms.fields.surname.label')),
+
+            FormField::key('participants[__INDEX__][age]')->number()->required()
+                ->decimal(0)
+                ->label(__t('components.forms.fields.age.label')),
+
+            FormField::key('participants[__INDEX__][sex]')->select(
+                    ['' => __t('components.forms.fields.sex.placeholder')] + rsvpSexDictionary()
+                )->required()
+                ->label(__t('components.forms.fields.sex.label')),
 
             FormField::key('participants[__INDEX__][dietary_requirements]')->textarea()
                 ->label(__t('components.forms.fields.dietary_requirements.label')),
@@ -210,6 +224,14 @@ final class ResponseResource extends Resource
                 ),
             ],
             [
+                'label' => 'Età',
+                'value' => static fn (array $r): string => (string) ($r['export_participant_age'] ?? ''),
+            ],
+            [
+                'label' => 'Sesso',
+                'value' => static fn (array $r): string => (string) ($r['export_participant_sex'] ?? ''),
+            ],
+            [
                 'label' => 'Tipo',
                 'value' => static fn (array $r): string => (string) ($r['export_participant_type'] ?? ''),
             ],
@@ -217,6 +239,7 @@ final class ResponseResource extends Resource
                 'label' => 'Esigenze alimentari',
                 'value' => static fn (array $r): string => (string) ($r['export_participant_dietary_requirements'] ?? ''),
             ],
+            ['label' => 'Azienda', 'value' => 'company'],
             ['label' => 'Email referente', 'value' => 'contact_email'],
             ['label' => 'Telefono referente', 'value' => 'contact_phone'],
             ['label' => 'Partecipanti prenotazione', 'value' => 'participants_count'],
@@ -443,6 +466,11 @@ final class ResponseResource extends Resource
         if (trim((string) ($normalized['contact_email'] ?? '')) === '') {
             $fail('pages.rsvp.api.submit.missing_email', 'Email mancante.');
         }
+
+        $requireField(
+            (string) ($normalized['company'] ?? ''),
+            __t('components.forms.fields.company.label')
+        );
 
         if ($attendanceStatus === 'confirmed' && (int) ($normalized['participants_count'] ?? 0) <= 0) {
             $fail('pages.rsvp.api.submit.missing_participants', 'Partecipanti mancanti.');

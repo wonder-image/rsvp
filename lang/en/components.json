@@ -19,11 +19,26 @@
             "contact_email": {
                 "label": "Email"
             },
+            "company": {
+                "label": "Company"
+            },
             "name": {
                 "label": "First name"
             },
             "surname": {
                 "label": "Last name"
+            },
+            "age": {
+                "label": "Age"
+            },
+            "sex": {
+                "label": "Sex",
+                "placeholder": "Select",
+                "options": {
+                    "male": "Male",
+                    "female": "Female",
+                    "other": "Other"
+                }
             },
             "dietary_requirements": {
                 "label": "Dietary requirements or allergies"
