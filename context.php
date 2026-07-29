@@ -51,6 +51,8 @@ foreach ($catalog as $eventKey => $event) {
     }
 
     $date = $event['starts_at'];
+    $endDate = trim((string) ($event['ends_at'] ?? ''));
+    $hasEnd = $endDate !== '' && strtotime($endDate) !== false;
 
     $eventCatalog[$eventKey] = rsvpResolveLocalizedValue([
         'key' => $eventKey,
@@ -63,6 +65,13 @@ foreach ($catalog as $eventKey => $event) {
         'pretty_day' => PrettyDate::day($date),
         'month' => date('m', strtotime($date)),
         'pretty_month' => PrettyDate::month($date),
+        'end_date' => $hasEnd ? $endDate : '',
+        'pretty_end_date' => $hasEnd ? prettyDate($endDate, false) : '',
+        'end_hour' => $hasEnd ? date('H:i', strtotime($endDate)) : '',
+        'end_day' => $hasEnd ? date('d', strtotime($endDate)) : '',
+        'pretty_end_day' => $hasEnd ? PrettyDate::day($endDate) : '',
+        'end_month' => $hasEnd ? date('m', strtotime($endDate)) : '',
+        'pretty_end_month' => $hasEnd ? PrettyDate::month($endDate) : '',
         'location_name' => (string) ($event['location_name'] ?? ''),
         'location_address' => (string) ($event['location_address'] ?? ''),
         'location_address_url' => (string) ($event['location_address_url'] ?? ''),

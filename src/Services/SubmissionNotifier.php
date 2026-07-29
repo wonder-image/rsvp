@@ -18,6 +18,7 @@ final class SubmissionNotifier
         $defaults = self::defaults();
         $eventName = trim((string) ($event['name'] ?? ''));
         $eventDate = trim((string) ($event['starts_at'] ?? ''));
+        $eventEndDate = trim((string) ($event['ends_at'] ?? ''));
         $adminEmail = trim((string) ($settings['admin_email'] ?? ($GLOBALS['SOCIETY']->email ?? '')));
         $customerEmail = trim((string) ($normalized['contact_email'] ?? ''));
 
@@ -26,6 +27,7 @@ final class SubmissionNotifier
             'contact_surname' => (string) ($normalized['contact_surname'] ?? ''),
             'event_name' => $eventName,
             'event_starts_at' => prettyDate($eventDate, true),
+            'event_ends_at' => $eventEndDate !== '' ? prettyDate($eventEndDate, true) : '',
             'summary_html' => $summaryHtml,
             'response_url' => $responseUrl,
         ];

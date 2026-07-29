@@ -38,7 +38,8 @@ final class EventResource extends Resource
             'code' => 'Codice',
             'name' => 'Nome',
             'description' => 'Descrizione',
-            'starts_at' => 'Data evento',
+            'starts_at' => 'Data inizio',
+            'ends_at' => 'Data fine',
             'location_name' => 'Nome',
             ...static::$model::addressExtension()->labels(),
             'location_position_url' => 'Link posizione',
@@ -56,6 +57,7 @@ final class EventResource extends Resource
             FormField::key('name')->text()->required(),
             FormField::key('description')->textarea(),
             FormField::key('starts_at')->textDatetime(),
+            FormField::key('ends_at')->textDatetime(),
             FormField::key('location_name')->text(),
             ...static::$model::addressExtension()->formSchema(),
             FormField::key('location_site_url')->url(),
@@ -71,10 +73,11 @@ final class EventResource extends Resource
             (new Container)->components([
 
                 (new Card)->components([
-                    
-                    static::getInput('code')->columnSpan(3),
-                    static::getInput('name')->columnSpan(6),
+
+                    static::getInput('code')->columnSpan(2),
+                    static::getInput('name')->columnSpan(4),
                     static::getInput('starts_at')->columnSpan(3),
+                    static::getInput('ends_at')->columnSpan(3),
                     static::getInput('description')->columnSpan(12)
 
                 ])->columns(12)->columnSpan(12),
@@ -121,6 +124,7 @@ final class EventResource extends Resource
             TableColumn::key('code')->text()->link('edit')->size('medium'),
             TableColumn::key('name')->text(),
             TableColumn::key('starts_at')->datetime(),
+            TableColumn::key('ends_at')->datetime(),
             TableColumn::key('position')->text()->size('little'),
             TableColumn::key('active')->activeBadge()->size('little'),
             TableColumn::key('actions')->button()->actions(['edit', 'active', 'delete']),
@@ -168,8 +172,10 @@ final class EventResource extends Resource
         string $context = 'backend'
     ): array {
 
-        if (!empty($values['starts_at']) && strtotime((string) $values['starts_at']) !== false) {
-            $values['starts_at'] = date('Y-m-d\TH:i', strtotime((string) $values['starts_at']));
+        foreach (['starts_at', 'ends_at'] as $dateField) {
+            if (!empty($values[$dateField]) && strtotime((string) $values[$dateField]) !== false) {
+                $values[$dateField] = date('Y-m-d\TH:i', strtotime((string) $values[$dateField]));
+            }
         }
 
         return $values;
