@@ -32,7 +32,6 @@ final class SettingsResource extends SingletonResource
     {
         return [
             'poster' => 'Locandina (immagine SEO di default)',
-            'require_invite_code' => 'Accesso con codice',
             'check_duplicate_submission' => 'Verifica compilazione duplicata',
             'admin_email' => 'Email notifiche',
             'admin_notifications' => 'Invia email',
@@ -54,10 +53,6 @@ final class SettingsResource extends SingletonResource
     {
         return [
             FormField::key('poster')->fileDragDrop(),
-            FormField::key('require_invite_code')->select([
-                'false' => 'Libero',
-                'true' => 'Richiede codice',
-            ])->value('false'),
             FormField::key('check_duplicate_submission')->bool()->value('false'),
             FormField::key('admin_email')->email(),
             FormField::key('admin_notifications')->bool()->value('true'),
@@ -84,7 +79,6 @@ final class SettingsResource extends SingletonResource
 
                 (new Container)->components([
                     (new SectionTitle('Impostazioni'))->columnSpan(12),
-                    static::getInput('require_invite_code')->columnSpan(6),
                     static::getInput('check_duplicate_submission')->columnSpan(6),
                 ])->columns(12)->columnSpan(9)
 
@@ -121,7 +115,6 @@ final class SettingsResource extends SingletonResource
     {
         return [
             TableColumn::key('admin_email')->text(),
-            TableColumn::key('require_invite_code')->text(),
         ];
     }
 

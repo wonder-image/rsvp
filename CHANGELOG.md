@@ -10,7 +10,8 @@
   "Libero"); `Rsvp::canAccessForm` è gated sulla presenza dell'autorizzazione.
   Al più una autorizzazione può essere "Libero": salvandone una tale, le altre
   tornano a "con codice" (`afterStore`/`afterUpdate`). Il flag Impostazioni
-  `require_invite_code` è ora superato da questo meccanismo.
+  `require_invite_code`, superato da questo meccanismo, è stato **rimosso** da
+  `Settings` e dal relativo form.
 
 - **Configurazione del form spostata da Impostazioni ad Autorizzazione.**
   `enable_attendance_status`, `require_image_release` e i mode 3-stati dei campi

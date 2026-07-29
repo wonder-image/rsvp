@@ -293,9 +293,10 @@ final class Rsvp implements ModuleInterface
      *   - 'url'           string   URL canonico (per SEO + breadcrumb).
      *                                Default: l'URL corrente.
      *   - 'require_session' bool   se true (default), redirect a login
-     *                                quando `require_invite_code` è on e
-     *                                non c'è sessione. Set false per
-     *                                pagine pubbliche RSVP-themed.
+     *                                quando il form richiede un codice
+     *                                (nessuna autorizzazione "Libero") e non
+     *                                c'è sessione. Set false per pagine
+     *                                pubbliche RSVP-themed.
      *   - 'data'          array    variabili extra passate al view (oltre
      *                                a $STATE già automatico). Default [].
      */
