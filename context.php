@@ -16,18 +16,36 @@ $isTrue = static fn (mixed $value): bool => in_array(
 $session = is_array($session ?? null) ? $session : InviteCodeSession::current();
 $settings = SubmissionNotifier::settings();
 $authorizationId = (int) ($session['authorization_id'] ?? 0);
-$authorization = [];
+
+// Autorizzazione da codice invito (se presente in sessione).
+$codeAuthorization = [];
 
 if ($authorizationId > 0) {
-    $authorization = Authorization::find([
+    $found = Authorization::find([
         'id' => $authorizationId,
         'deleted' => 'false',
     ], 1);
 
-    if (!is_array($authorization)) {
-        $authorization = [];
-    }
+    $codeAuthorization = is_array($found) ? $found : [];
 }
+
+// Autorizzazione "Libero" (accesso pubblico senza password): al più una.
+$freeAuthorization = [];
+$foundFree = Authorization::find([
+    'access' => 'free',
+    'deleted' => 'false',
+], 1);
+
+if (is_array($foundFree) && $foundFree !== []) {
+    $freeAuthorization = $foundFree;
+}
+
+// Autorizzazione attiva: quella del codice se c'è, altrimenti quella Libero.
+// Serve SEMPRE un'autorizzazione: senza nessuna delle due il form è chiuso.
+$authorization = $codeAuthorization !== [] ? $codeAuthorization : $freeAuthorization;
+
+// Serve un codice solo quando non esiste un accesso pubblico (nessuna Libero).
+$requiresInviteCode = $freeAuthorization === [];
 
 $locale = __l();
 
@@ -132,7 +150,7 @@ return [
     'authorization' => $authorization,
     'events_catalog' => $eventCatalog,
     'featured_event' => $featuredEvent,
-    'requires_invite_code' => $isTrue($settings['require_invite_code'] ?? 'false'),
+    'requires_invite_code' => $requiresInviteCode,
     'visible_events' => $visibleEvents,
     'allow_children' => $allowChildren,
     'max_participants' => $maxParticipants,

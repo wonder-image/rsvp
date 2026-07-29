@@ -39,6 +39,7 @@ final class AuthorizationResource extends Resource
             'code' => 'Codice',
             'name' => 'Nome',
             'description' => 'Descrizione',
+            'access' => 'Accesso',
             'visible_event_ids' => 'Eventi visibili',
             'max_participants' => 'Max adulti',
             'allow_children' => 'Bambini',
@@ -58,6 +59,10 @@ final class AuthorizationResource extends Resource
             FormField::key('code')->text()->required(),
             FormField::key('name')->text()->required(),
             FormField::key('description')->textarea(),
+            FormField::key('access')->select([
+                'code' => 'Con codice',
+                'free' => 'Libero (senza password)',
+            ])->required()->value('code'),
             FormField::key('visible_event_ids')->checkbox()->options(static::eventOptions())->multiple()->required(),
             FormField::key('max_participants')->number(),
             FormField::key('allow_children')->select([
@@ -79,7 +84,8 @@ final class AuthorizationResource extends Resource
         return (new Form)->components([
             (new Card)->components([
                 static::getInput('code')->columnSpan(4),
-                static::getInput('name')->columnSpan(8),
+                static::getInput('name')->columnSpan(5),
+                static::getInput('access')->columnSpan(3),
                 static::getInput('description')->columnSpan(12),
                 static::getInput('visible_event_ids')->columnSpan(12),
             ])->columns(12)->columnSpan(9),
@@ -169,6 +175,54 @@ final class AuthorizationResource extends Resource
         $values['visible_event_ids'] = json_encode($ids);
 
         return $values;
+    }
+
+    public static function afterStore(object $result, array $values = []): void
+    {
+        self::enforceSingleFreeAccess($values, (int) ($result->insert_id ?? 0));
+    }
+
+    public static function afterUpdate(int|string $id, object $result, array $values = []): void
+    {
+        self::enforceSingleFreeAccess($values, (int) $id);
+    }
+
+    /**
+     * Al più UNA autorizzazione può essere "Libero": quando se ne salva una
+     * con `access = free`, tutte le altre free vengono riportate a "con
+     * codice" (pattern "una sola primaria"). Il form pubblico senza codice usa
+     * quindi sempre l'unica autorizzazione Libero.
+     *
+     * @param array<string, mixed> $values
+     */
+    private static function enforceSingleFreeAccess(array $values, int $currentId): void
+    {
+        if (($values['access'] ?? 'code') !== 'free') {
+            return;
+        }
+
+        $rows = Authorization::find(['access' => 'free', 'deleted' => 'false']);
+
+        if (!is_array($rows) || $rows === []) {
+            return;
+        }
+
+        // `find()` senza limit può tornare una riga assoc o una lista.
+        if (array_key_exists('id', $rows)) {
+            $rows = [$rows];
+        }
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $rowId = (int) ($row['id'] ?? 0);
+
+            if ($rowId > 0 && $rowId !== $currentId) {
+                Authorization::update(['access' => 'code'], $rowId);
+            }
+        }
     }
 
     public static function mutateFormValues(

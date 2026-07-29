@@ -180,15 +180,15 @@ namespace {
         $assert(static fn () => assertSame(['uno', 'due'], rsvpParseListText("uno;\ndue\nuno"), 'Parsa liste testuali deduplicate.'));
         $assert(static fn () => assertSame('meta_guest_name', rsvpCustomFieldColumn(' Guest Name '), 'Normalizza il nome colonna dei custom field.'));
         $assert(static fn () => assertTrue(Rsvp::canAccessForm([
-            'requires_invite_code' => false,
+            'authorization' => ['id' => 5, 'access' => 'free'],
             'session' => [],
-        ]), 'Il form pubblico resta accessibile senza sessione invito.'));
+        ]), 'Con autorizzazione Libero il form pubblico è accessibile senza sessione.'));
         $assert(static fn () => assertTrue(!Rsvp::canAccessForm([
-            'requires_invite_code' => true,
+            'authorization' => [],
             'session' => [],
-        ]), 'Il form protetto non è accessibile senza sessione invito.'));
+        ]), 'Senza autorizzazione attiva il form non è accessibile.'));
         $assert(static fn () => assertTrue(Rsvp::canAccessForm([
-            'requires_invite_code' => true,
+            'authorization' => ['id' => 7, 'access' => 'code'],
             'session' => [
                 'id' => 42,
                 'usage_mode' => 'single_use',
@@ -197,7 +197,7 @@ namespace {
             ],
         ]), 'Un codice monouso non utilizzato consente di accedere al form.'));
         $assert(static fn () => assertTrue(!Rsvp::canAccessForm([
-            'requires_invite_code' => true,
+            'authorization' => ['id' => 7, 'access' => 'code'],
             'session' => [
                 'id' => 42,
                 'usage_mode' => 'single_use',
@@ -206,7 +206,7 @@ namespace {
             ],
         ]), 'Un codice monouso già utilizzato non consente di accedere al form.'));
         $assert(static fn () => assertTrue(Rsvp::canAccessForm([
-            'requires_invite_code' => true,
+            'authorization' => ['id' => 7, 'access' => 'code'],
             'session' => [
                 'id' => 42,
                 'usage_mode' => 'multiple_use',

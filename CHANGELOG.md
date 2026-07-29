@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Accesso governato dall'autorizzazione.** Nuovo campo `Authorization.access`
+  (`code` / `free`). Il form richiede SEMPRE un'autorizzazione attiva: quella
+  del codice invito se presente, altrimenti l'unica autorizzazione "Libero"
+  (accesso pubblico senza password). `context.php` risolve l'autorizzazione
+  attiva e deriva `requires_invite_code` (serve un codice solo se non esiste una
+  "Libero"); `Rsvp::canAccessForm` è gated sulla presenza dell'autorizzazione.
+  Al più una autorizzazione può essere "Libero": salvandone una tale, le altre
+  tornano a "con codice" (`afterStore`/`afterUpdate`). Il flag Impostazioni
+  `require_invite_code` è ora superato da questo meccanismo.
+
 - **Configurazione del form spostata da Impostazioni ad Autorizzazione.**
   `enable_attendance_status`, `require_image_release` e i mode 3-stati dei campi
   `field_age` / `field_sex` / `field_allergies` / `field_company`

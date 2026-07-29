@@ -143,13 +143,18 @@ final class Rsvp implements ModuleInterface
      */
     public static function canAccessForm(array $context): bool
     {
-        $session = is_array($context['session'] ?? null) ? $context['session'] : [];
-        $hasSession = (int) ($session['id'] ?? 0) > 0;
+        // Serve SEMPRE un'autorizzazione attiva (da codice invito o "Libero").
+        $authorization = is_array($context['authorization'] ?? null) ? $context['authorization'] : [];
 
-        if (!empty($context['requires_invite_code']) && !$hasSession) {
+        if ($authorization === []) {
             return false;
         }
 
+        $session = is_array($context['session'] ?? null) ? $context['session'] : [];
+        $hasSession = (int) ($session['id'] ?? 0) > 0;
+
+        // Con codice invito: rispetta il limite d'uso (monouso/esaurito).
+        // Accesso "Libero" (senza sessione): consentito dall'autorizzazione stessa.
         return !$hasSession || ($session['can_submit'] ?? false) === true;
     }
 
