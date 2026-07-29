@@ -46,6 +46,12 @@ final class SettingsResource extends SingletonResource
             'customer_message' => 'Messaggio email',
             'admin_subject' => 'Oggetto email',
             'admin_message' => 'Messaggio email',
+            'admin_declined_notifications' => 'Invia email',
+            'customer_declined_notifications' => 'Invia email',
+            'customer_declined_subject' => 'Oggetto email',
+            'customer_declined_message' => 'Messaggio email',
+            'admin_declined_subject' => 'Oggetto email',
+            'admin_declined_message' => 'Messaggio email',
         ];
     }
 
@@ -70,6 +76,12 @@ final class SettingsResource extends SingletonResource
             FormField::key('customer_message')->textarea(),
             FormField::key('admin_subject')->text(),
             FormField::key('admin_message')->textarea(),
+            FormField::key('admin_declined_notifications')->bool()->value('true'),
+            FormField::key('customer_declined_notifications')->bool()->value('true'),
+            FormField::key('customer_declined_subject')->text(),
+            FormField::key('customer_declined_message')->textarea(),
+            FormField::key('admin_declined_subject')->text(),
+            FormField::key('admin_declined_message')->textarea(),
         ];
     }
 
@@ -94,18 +106,27 @@ final class SettingsResource extends SingletonResource
             ])->columns(12)->columnSpan(12),
             
             (new Card)->components([
-                (new SectionTitle('Email ospite'))->columnSpan(12),
+                (new SectionTitle('Email ospite — Partecipa'))->columnSpan(12),
                 static::getInput('customer_notifications')->columnSpan(12),
                 static::getInput('customer_subject')->columnSpan(12),
                 static::getInput('customer_message')->columnSpan(12),
+                (new SectionTitle('Email ospite — Non partecipa'))->columnSpan(12),
+                static::getInput('customer_declined_notifications')->columnSpan(12),
+                static::getInput('customer_declined_subject')->columnSpan(12),
+                static::getInput('customer_declined_message')->columnSpan(12),
             ])->columns(12)->columnSpan(6),
 
             (new Card)->components([
                 (new SectionTitle('Email admin'))->columnSpan(12),
-                static::getInput('admin_notifications')->columnSpan(12),
                 static::getInput('admin_email')->columnSpan(12),
+                (new SectionTitle('Email admin — Partecipa'))->columnSpan(12),
+                static::getInput('admin_notifications')->columnSpan(12),
                 static::getInput('admin_subject')->columnSpan(12),
                 static::getInput('admin_message')->columnSpan(12),
+                (new SectionTitle('Email admin — Non partecipa'))->columnSpan(12),
+                static::getInput('admin_declined_notifications')->columnSpan(12),
+                static::getInput('admin_declined_subject')->columnSpan(12),
+                static::getInput('admin_declined_message')->columnSpan(12),
             ])->columns(12)->columnSpan(6),
 
         ])->columns(12);
@@ -135,18 +156,11 @@ final class SettingsResource extends SingletonResource
     ): array {
         $defaults = \Wonder\Plugin\Rsvp\Services\SubmissionNotifier::defaults();
 
-        $values['customer_subject'] = trim((string) ($values['customer_subject'] ?? '')) !== ''
-            ? (string) $values['customer_subject']
-            : $defaults['customer_subject'];
-        $values['customer_message'] = trim((string) ($values['customer_message'] ?? '')) !== ''
-            ? (string) $values['customer_message']
-            : $defaults['customer_message'];
-        $values['admin_subject'] = trim((string) ($values['admin_subject'] ?? '')) !== ''
-            ? (string) $values['admin_subject']
-            : $defaults['admin_subject'];
-        $values['admin_message'] = trim((string) ($values['admin_message'] ?? '')) !== ''
-            ? (string) $values['admin_message']
-            : $defaults['admin_message'];
+        foreach ($defaults as $field => $default) {
+            $values[$field] = trim((string) ($values[$field] ?? '')) !== ''
+                ? (string) $values[$field]
+                : (string) $default;
+        }
 
         return $values;
     }

@@ -7,6 +7,14 @@
         "subject": "New response for {{event_name}} - {{contact_name}} {{contact_surname}}",
         "text": "A new response has been received for <strong>{{event_name}}</strong>.<br><br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Open the backend detail</a>"
     },
+    "rsvp_request_customer_declined": {
+        "subject": "We received your response",
+        "text": "Hello {{contact_name}},<br>we noted that you won't be able to attend <strong>{{event_name}}</strong>. Thank you for letting us know."
+    },
+    "rsvp_request_admin_declined": {
+        "subject": "Decline for {{event_name}} - {{contact_name}} {{contact_surname}}",
+        "text": "A decline has been received for <strong>{{event_name}}</strong>.<br><br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Open the backend detail</a>"
+    },
     "summary": {
         "name": "Name",
         "attendance_status": "Attendance",

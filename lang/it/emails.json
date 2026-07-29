@@ -7,6 +7,14 @@
         "subject": "Nuova risposta per {{event_name}} - {{contact_name}} {{contact_surname}}",
         "text": "È arrivata una nuova risposta per <strong>{{event_name}}</strong>.<br><br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Apri il dettaglio in backend</a>"
     },
+    "rsvp_request_customer_declined": {
+        "subject": "Abbiamo ricevuto la tua risposta",
+        "text": "Ciao {{contact_name}},<br>abbiamo registrato che non potrai partecipare a <strong>{{event_name}}</strong>. Grazie per avercelo comunicato."
+    },
+    "rsvp_request_admin_declined": {
+        "subject": "Rinuncia per {{event_name}} - {{contact_name}} {{contact_surname}}",
+        "text": "È arrivata una rinuncia per <strong>{{event_name}}</strong>.<br><br>{{summary_html}}<br><br><a href=\"{{response_url}}\">Apri il dettaglio in backend</a>"
+    },
     "summary": {
         "name": "Nome",
         "attendance_status": "Conferma",

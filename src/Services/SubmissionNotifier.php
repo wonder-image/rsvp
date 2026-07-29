@@ -32,43 +32,58 @@ final class SubmissionNotifier
             'response_url' => $responseUrl,
         ];
 
-        if ($adminEmail !== '' && ($settings['admin_notifications'] ?? 'true') === 'true') {
+        // Le email variano per esito: la variante "non partecipa" usa i campi
+        // `*_declined_*` (settings + default lang); confermato usa i campi base.
+        $declined = rsvpAttendanceStatusValue($normalized['attendance_status'] ?? null) === 'declined';
+        $suffix = $declined ? '_declined' : '';
+        $from = $GLOBALS['SOCIETY']->email ?? $adminEmail;
+
+        if ($adminEmail !== '' && self::shouldSend($settings, 'admin'.$suffix.'_notifications')) {
             sendMail(
-                $GLOBALS['SOCIETY']->email ?? $adminEmail,
+                $from,
                 $adminEmail,
                 self::message(
-                    (string) ($settings['admin_subject'] ?? ''),
-                    'emails.rsvp_request_admin.subject',
-                    $defaults['admin_subject'],
+                    (string) ($settings['admin'.$suffix.'_subject'] ?? ''),
+                    'emails.rsvp_request_admin'.$suffix.'.subject',
+                    (string) ($defaults['admin'.$suffix.'_subject'] ?? ''),
                     $replacements
                 ),
                 self::message(
-                    (string) ($settings['admin_message'] ?? ''),
-                    'emails.rsvp_request_admin.text',
-                    $defaults['admin_message'],
+                    (string) ($settings['admin'.$suffix.'_message'] ?? ''),
+                    'emails.rsvp_request_admin'.$suffix.'.text',
+                    (string) ($defaults['admin'.$suffix.'_message'] ?? ''),
                     $replacements
                 )
             );
         }
 
-        if ($customerEmail !== '' && ($settings['customer_notifications'] ?? 'true') === 'true') {
+        if ($customerEmail !== '' && self::shouldSend($settings, 'customer'.$suffix.'_notifications')) {
             sendMail(
-                $GLOBALS['SOCIETY']->email ?? $adminEmail,
+                $from,
                 $customerEmail,
                 self::message(
-                    (string) ($settings['customer_subject'] ?? ''),
-                    'emails.rsvp_request_customer.subject',
-                    $defaults['customer_subject'],
+                    (string) ($settings['customer'.$suffix.'_subject'] ?? ''),
+                    'emails.rsvp_request_customer'.$suffix.'.subject',
+                    (string) ($defaults['customer'.$suffix.'_subject'] ?? ''),
                     $replacements
                 ),
                 self::message(
-                    (string) ($settings['customer_message'] ?? ''),
-                    'emails.rsvp_request_customer.text',
-                    $defaults['customer_message'],
+                    (string) ($settings['customer'.$suffix.'_message'] ?? ''),
+                    'emails.rsvp_request_customer'.$suffix.'.text',
+                    (string) ($defaults['customer'.$suffix.'_message'] ?? ''),
                     $replacements
                 )
             );
         }
+    }
+
+    /**
+     * Toggle "invia email" per la chiave data; abilitato di default (true)
+     * quando non impostato, coerente col comportamento storico.
+     */
+    private static function shouldSend(array $settings, string $key): bool
+    {
+        return ($settings[$key] ?? 'true') === 'true';
     }
 
     public static function settings(): array
@@ -91,6 +106,10 @@ final class SubmissionNotifier
             'customer_message' => __t('emails.rsvp_request_customer.text'),
             'admin_subject' => __t('emails.rsvp_request_admin.subject'),
             'admin_message' => __t('emails.rsvp_request_admin.text'),
+            'customer_declined_subject' => __t('emails.rsvp_request_customer_declined.subject'),
+            'customer_declined_message' => __t('emails.rsvp_request_customer_declined.text'),
+            'admin_declined_subject' => __t('emails.rsvp_request_admin_declined.subject'),
+            'admin_declined_message' => __t('emails.rsvp_request_admin_declined.text'),
         ];
     }
 

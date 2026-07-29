@@ -37,6 +37,13 @@ final class Settings extends Model
             Column::key('customer_message')->type('LONGTEXT')->null(),
             Column::key('admin_subject')->length(255)->null(),
             Column::key('admin_message')->type('LONGTEXT')->null(),
+            // Varianti email per risposta "non partecipa" (attendance declined).
+            Column::key('admin_declined_notifications')->length(10)->default('true'),
+            Column::key('customer_declined_notifications')->length(10)->default('true'),
+            Column::key('customer_declined_subject')->length(255)->null(),
+            Column::key('customer_declined_message')->type('LONGTEXT')->null(),
+            Column::key('admin_declined_subject')->length(255)->null(),
+            Column::key('admin_declined_message')->type('LONGTEXT')->null(),
         ];
     }
 
@@ -58,6 +65,12 @@ final class Settings extends Model
             Field::key('customer_message')->text()->sanitize(false),
             Field::key('admin_subject')->text()->sanitize(false),
             Field::key('admin_message')->text()->sanitize(false),
+            Field::key('admin_declined_notifications')->text(),
+            Field::key('customer_declined_notifications')->text(),
+            Field::key('customer_declined_subject')->text()->sanitize(false),
+            Field::key('customer_declined_message')->text()->sanitize(false),
+            Field::key('admin_declined_subject')->text()->sanitize(false),
+            Field::key('admin_declined_message')->text()->sanitize(false),
         ];
     }
 
