@@ -27,6 +27,7 @@
                 "required_field_missing": "Required field missing: {{field}}.",
                 "max_adults_exceeded": "Maximum number of adults exceeded: you can add up to {{max}}.",
                 "max_children_exceeded": "Maximum number of children exceeded: you can add up to {{max}}.",
+                "duplicate_submission": "A submission with this email or phone already exists.",
                 "save_failed": "Unable to save the RSVP."
             }
         },

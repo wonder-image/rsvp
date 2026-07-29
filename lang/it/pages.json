@@ -27,6 +27,7 @@
                 "required_field_missing": "Campo obbligatorio mancante: {{field}}.",
                 "max_adults_exceeded": "Numero massimo di adulti superato: puoi indicarne al massimo {{max}}.",
                 "max_children_exceeded": "Numero massimo di bambini superato: puoi indicarne al massimo {{max}}.",
+                "duplicate_submission": "Risulta già una compilazione con questa email o questo telefono.",
                 "save_failed": "Salvataggio RSVP non riuscito."
             }
         },

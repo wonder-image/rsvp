@@ -472,6 +472,32 @@ final class ResponseResource extends Resource
             __t('components.forms.fields.company.label')
         );
 
+        // Verifica compilazione duplicata (flag nelle Impostazioni RSVP): una
+        // sola risposta per email o per telefono già presenti a sistema.
+        $settings = is_array($state['settings'] ?? null) ? $state['settings'] : [];
+
+        if (rsvpDuplicateCheckEnabled($settings)) {
+            $alreadySubmitted = static function (string $column, string $value): bool {
+                if ($value === '') {
+                    return false;
+                }
+
+                $row = Response::find([$column => $value, 'deleted' => 'false'], 1);
+
+                return is_array($row) && $row !== [];
+            };
+
+            $email = strtolower(trim((string) ($normalized['contact_email'] ?? '')));
+            $phone = trim((string) ($normalized['contact_phone'] ?? ''));
+
+            if ($alreadySubmitted('contact_email', $email) || $alreadySubmitted('contact_phone', $phone)) {
+                $fail(
+                    'pages.rsvp.api.submit.duplicate_submission',
+                    'Risulta già una compilazione con questa email o questo telefono.'
+                );
+            }
+        }
+
         if ($attendanceStatus === 'confirmed' && (int) ($normalized['participants_count'] ?? 0) <= 0) {
             $fail('pages.rsvp.api.submit.missing_participants', 'Partecipanti mancanti.');
         }

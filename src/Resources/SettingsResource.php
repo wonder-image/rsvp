@@ -38,6 +38,7 @@ final class SettingsResource extends SingletonResource
             'allow_children' => 'Bambini',
             'max_children' => 'Max bambini',
             'require_image_release' => 'Richiedi liberatoria immagini',
+            'check_duplicate_submission' => 'Verifica compilazione duplicata',
             'admin_email' => 'Email notifiche',
             'admin_notifications' => 'Invia email',
             'customer_notifications' => 'Invia email',
@@ -61,6 +62,7 @@ final class SettingsResource extends SingletonResource
             FormField::key('allow_children')->bool()->value('false'),
             FormField::key('max_children')->number(),
             FormField::key('require_image_release')->bool()->value('false'),
+            FormField::key('check_duplicate_submission')->bool()->value('false'),
             FormField::key('admin_email')->email(),
             FormField::key('admin_notifications')->bool()->value('true'),
             FormField::key('customer_notifications')->bool()->value('true'),
@@ -86,6 +88,7 @@ final class SettingsResource extends SingletonResource
                     static::getInput('max_participants')->columnSpan(4),
                     static::getInput('allow_children')->columnSpan(4),
                     static::getInput('max_children')->columnSpan(4),
+                    static::getInput('check_duplicate_submission')->columnSpan(4),
                 ])->columns(12)->columnSpan(9)
 
             ])->columns(12)->columnSpan(12),

@@ -166,6 +166,8 @@ namespace {
         $assert(static fn () => assertSame('declined', rsvpAttendanceStatusValue('NO'), 'Normalizza correttamente lo stato declined.'));
         $assert(static fn () => assertSame('confirmed', rsvpAttendanceStatusValue('yes'), 'Normalizza correttamente lo stato confirmed.'));
         $assert(static fn () => assertTrue(rsvpAttendanceStatusEnabled(['enable_attendance_status' => 'on']), 'Riconosce il flag attendance attivo.'));
+        $assert(static fn () => assertTrue(rsvpDuplicateCheckEnabled(['check_duplicate_submission' => 'on']), 'Riconosce il flag verifica duplicati attivo.'));
+        $assert(static fn () => assertTrue(!rsvpDuplicateCheckEnabled([]), 'Verifica duplicati disattiva di default.'));
         $assert(static fn () => assertSame(['alpha' => 1], rsvpDecodeJsonArray('{"alpha":1}'), 'Decodifica JSON object in array associativo.'));
         $assert(static fn () => assertSame('--', rsvpJsonPrettyList('[]'), 'Rende placeholder per liste JSON vuote.'));
         $assert(static fn () => assertSame(['uno', 'due'], rsvpParseListText("uno;\ndue\nuno"), 'Parsa liste testuali deduplicate.'));

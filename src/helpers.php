@@ -66,6 +66,17 @@ if (!function_exists('rsvpAttendanceStatusEnabled')) {
     }
 }
 
+if (!function_exists('rsvpDuplicateCheckEnabled')) {
+    function rsvpDuplicateCheckEnabled(array $settings): bool
+    {
+        return in_array(
+            strtolower(trim((string) ($settings['check_duplicate_submission'] ?? 'false'))),
+            ['1', 'true', 'yes', 'on'],
+            true
+        );
+    }
+}
+
 if (!function_exists('rsvpAttendanceStatusText')) {
     function rsvpAttendanceStatusText(mixed $value): string
     {
