@@ -66,6 +66,54 @@ if (!function_exists('rsvpAttendanceStatusEnabled')) {
     }
 }
 
+if (!function_exists('rsvpFieldMode')) {
+    /**
+     * Normalizza il "mode" 3-stati di un campo partecipante/prenotazione
+     * (Nascosto / Facoltativo / Obbligatorio), con default per campo.
+     */
+    function rsvpFieldMode(mixed $value, string $default = 'required'): string
+    {
+        $value = strtolower(trim((string) $value));
+
+        return in_array($value, ['hidden', 'optional', 'required'], true) ? $value : $default;
+    }
+}
+
+if (!function_exists('rsvpFieldModes')) {
+    /**
+     * Risolve i mode dei campi configurabili da una sorgente (autorizzazione).
+     * Default: età/sesso/azienda obbligatori, allergie facoltativo.
+     *
+     * @param array<string, mixed> $source
+     * @return array<string, string>
+     */
+    function rsvpFieldModes(array $source): array
+    {
+        return [
+            'age' => rsvpFieldMode($source['field_age'] ?? null, 'required'),
+            'sex' => rsvpFieldMode($source['field_sex'] ?? null, 'required'),
+            'allergies' => rsvpFieldMode($source['field_allergies'] ?? null, 'optional'),
+            'company' => rsvpFieldMode($source['field_company'] ?? null, 'required'),
+        ];
+    }
+}
+
+if (!function_exists('rsvpFieldModeOptions')) {
+    /**
+     * Opzioni del select 3-stati per il backend (valore => etichetta).
+     *
+     * @return array<string, string>
+     */
+    function rsvpFieldModeOptions(): array
+    {
+        return [
+            'hidden' => 'Nascosto',
+            'optional' => 'Facoltativo',
+            'required' => 'Obbligatorio',
+        ];
+    }
+}
+
 if (!function_exists('rsvpDuplicateCheckEnabled')) {
     function rsvpDuplicateCheckEnabled(array $settings): bool
     {

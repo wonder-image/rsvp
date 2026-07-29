@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **Configurazione del form spostata da Impostazioni ad Autorizzazione.**
+  `enable_attendance_status`, `require_image_release` e i mode 3-stati dei campi
+  `field_age` / `field_sex` / `field_allergies` / `field_company`
+  (Nascosto/Facoltativo/Obbligatorio) vivono ora su `Authorization` (insieme a
+  capienze già presenti); rimossi da `Settings`. `context.php` risolve tutto
+  dall'autorizzazione attiva (default del modulo se assente). Il `formSchema` e
+  `view/components/form.php` mostrano/obbligano età/sesso/allergie/azienda in
+  base al mode; la conferma partecipazione è **sempre disponibile nel backend**
+  mentre il frontend la mostra solo se l'autorizzazione la abilita
+  (`SubmissionNormalizer::fromPayload($payload, $attendanceEnabled)`).
+- Email RSVP sdoppiate per esito confermato/rifiutato (cliente **e** admin),
+  con oggetto/messaggio/invio distinti; nuovi default in `emails.json`.
+- Nuovo flag Impostazioni "Verifica compilazione duplicata": rifiuta una
+  submission con email o telefono già presenti su una risposta non cancellata.
+- Nuovo campo evento **Data fine** (`ends_at`) opzionale, con placeholder
+  `{{event_end_date}}` ecc. e colonna in tabella eventi.
+- Fix (core `wonder-image/app`): normalizzazione simmetrica in lettura nel
+  Model, così l'apostrofo non resta con lo slash di escape (`O\'Brien`).
+
 - nuovi campi per ogni partecipante nel form frontend, raccolti in una card
   dedicata (`view/components/form.php`): **Età** (`number`, `->decimal(0)`,
   obbligatorio), **Sesso** (`select` a una colonna con placeholder e opzioni

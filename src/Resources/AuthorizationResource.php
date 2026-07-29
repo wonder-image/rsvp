@@ -10,7 +10,7 @@ use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
 use Wonder\App\ResourceSchema\TableColumn;
 use Wonder\App\ResourceSchema\TableLayoutSchema;
-use Wonder\Elements\Components\Card;
+use Wonder\Elements\Components\{Card, SectionTitle};
 use Wonder\Elements\Form\Form;
 use Wonder\Plugin\Rsvp\Models\Authorization;
 use Wonder\Plugin\Rsvp\Models\Event;
@@ -43,6 +43,12 @@ final class AuthorizationResource extends Resource
             'max_participants' => 'Max adulti',
             'allow_children' => 'Bambini',
             'max_children' => 'Max bambini',
+            'enable_attendance_status' => 'Abilita partecipo/non partecipo',
+            'require_image_release' => 'Richiedi liberatoria immagini',
+            'field_age' => 'Campo età',
+            'field_sex' => 'Campo sesso',
+            'field_allergies' => 'Campo allergie',
+            'field_company' => 'Campo azienda',
         ];
     }
 
@@ -59,6 +65,12 @@ final class AuthorizationResource extends Resource
                 'true' => 'Sì',
             ])->required()->value('false'),
             FormField::key('max_children')->number(),
+            FormField::key('enable_attendance_status')->bool()->value('false'),
+            FormField::key('require_image_release')->bool()->value('false'),
+            FormField::key('field_age')->select(rsvpFieldModeOptions())->required()->value('required'),
+            FormField::key('field_sex')->select(rsvpFieldModeOptions())->required()->value('required'),
+            FormField::key('field_allergies')->select(rsvpFieldModeOptions())->required()->value('optional'),
+            FormField::key('field_company')->select(rsvpFieldModeOptions())->required()->value('required'),
         ];
     }
 
@@ -75,7 +87,16 @@ final class AuthorizationResource extends Resource
                 static::getInput('max_participants')->columnSpan(12),
                 static::getInput('allow_children')->columnSpan(12),
                 static::getInput('max_children')->columnSpan(12),
+                static::getInput('enable_attendance_status')->columnSpan(12),
+                static::getInput('require_image_release')->columnSpan(12),
             ])->columns(12)->columnSpan(3),
+            (new Card)->components([
+                (new SectionTitle('Campi del form'))->columnSpan(12),
+                static::getInput('field_age')->columnSpan(6),
+                static::getInput('field_sex')->columnSpan(6),
+                static::getInput('field_allergies')->columnSpan(6),
+                static::getInput('field_company')->columnSpan(6),
+            ])->columns(12)->columnSpan(12),
         ])->columns(12);
     }
 

@@ -107,18 +107,18 @@ if ($allowedIds === []) {
     }
 }
 
-$maxParticipants = max(
-    1,
-    (int) ($authorization['max_participants'] ?? ($settings['max_participants'] ?? 1))
-);
-
-$allowChildren = array_key_exists('allow_children', $authorization)
-    ? $isTrue($authorization['allow_children'] ?? 'false')
-    : $isTrue($settings['allow_children'] ?? 'false');
-
+// Configurazione del form risolta SEMPRE dall'autorizzazione attiva (i campi
+// non stanno più in Impostazioni). Senza autorizzazione valgono i default
+// del modulo: un RSVP prevede sempre un'autorizzazione.
+$maxParticipants = max(1, (int) ($authorization['max_participants'] ?? 1));
+$allowChildren = $isTrue($authorization['allow_children'] ?? 'false');
 $maxChildren = $allowChildren
-    ? max(0, (int) ($authorization['max_children'] ?? ($settings['max_children'] ?? 0)))
+    ? max(0, (int) ($authorization['max_children'] ?? 0))
     : 0;
+$enableAttendance = rsvpAttendanceStatusEnabled($authorization);
+$requireImageRelease = $isTrue($authorization['require_image_release'] ?? 'false');
+$fieldModes = rsvpFieldModes(is_array($authorization) ? $authorization : []);
+
 $featuredEvent = [];
 
 if ($visibleEvents !== []) {
@@ -137,7 +137,8 @@ return [
     'allow_children' => $allowChildren,
     'max_participants' => $maxParticipants,
     'max_children' => $maxChildren,
-    'enable_attendance_status' => rsvpAttendanceStatusEnabled($settings),
-    'require_image_release' => $isTrue($settings['require_image_release'] ?? 'false'),
+    'enable_attendance_status' => $enableAttendance,
+    'require_image_release' => $requireImageRelease,
+    'field_modes' => $fieldModes,
     'custom_fields' => ExtensionRegistry::inputs(),
 ];

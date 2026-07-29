@@ -168,6 +168,13 @@ namespace {
         $assert(static fn () => assertTrue(rsvpAttendanceStatusEnabled(['enable_attendance_status' => 'on']), 'Riconosce il flag attendance attivo.'));
         $assert(static fn () => assertTrue(rsvpDuplicateCheckEnabled(['check_duplicate_submission' => 'on']), 'Riconosce il flag verifica duplicati attivo.'));
         $assert(static fn () => assertTrue(!rsvpDuplicateCheckEnabled([]), 'Verifica duplicati disattiva di default.'));
+        $assert(static fn () => assertSame('hidden', rsvpFieldMode('HIDDEN'), 'Normalizza il mode campo (case-insensitive).'));
+        $assert(static fn () => assertSame('required', rsvpFieldMode('boh', 'required'), 'Mode campo non valido → default.'));
+        $fieldModes = rsvpFieldModes(['field_age' => 'hidden', 'field_company' => 'optional']);
+        $assert(static fn () => assertSame('hidden', $fieldModes['age'], 'Legge il mode età dall’autorizzazione.'));
+        $assert(static fn () => assertSame('optional', $fieldModes['company'], 'Legge il mode azienda dall’autorizzazione.'));
+        $assert(static fn () => assertSame('required', $fieldModes['sex'], 'Default mode sesso = obbligatorio.'));
+        $assert(static fn () => assertSame('optional', $fieldModes['allergies'], 'Default mode allergie = facoltativo.'));
         $assert(static fn () => assertSame(['alpha' => 1], rsvpDecodeJsonArray('{"alpha":1}'), 'Decodifica JSON object in array associativo.'));
         $assert(static fn () => assertSame('--', rsvpJsonPrettyList('[]'), 'Rende placeholder per liste JSON vuote.'));
         $assert(static fn () => assertSame(['uno', 'due'], rsvpParseListText("uno;\ndue\nuno"), 'Parsa liste testuali deduplicate.'));

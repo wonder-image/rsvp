@@ -6,6 +6,7 @@ use Wonder\Plugin\Rsvp\Models\Event;
 use Wonder\Plugin\Rsvp\Models\Settings;
 use Wonder\Plugin\Rsvp\Models\Response;
 use Wonder\Plugin\Rsvp\Resources\ResponseResource;
+use Wonder\Plugin\Rsvp\Rsvp;
 
 final class SubmissionNotifier
 {
@@ -168,7 +169,7 @@ final class SubmissionNotifier
         $consents = SubmissionNormalizer::consents($normalized);
         $documents = SubmissionNormalizer::legalDocumentsFromNormalized($normalized);
         $event = self::eventFromNormalized($normalized);
-        $showAttendanceStatus = rsvpAttendanceStatusEnabled(self::settings());
+        $showAttendanceStatus = !empty(Rsvp::context()['enable_attendance_status']);
         $lines = [];
 
         $lines[] = __t('emails.summary.name')

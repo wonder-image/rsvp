@@ -28,6 +28,12 @@ final class Authorization extends Model
             Column::key('max_participants')->type('INT')->null(),
             Column::key('allow_children')->length(10)->default('false'),
             Column::key('max_children')->type('INT')->null(),
+            Column::key('enable_attendance_status')->length(10)->default('false'),
+            Column::key('require_image_release')->length(10)->default('false'),
+            Column::key('field_age')->length(10)->default('required'),
+            Column::key('field_sex')->length(10)->default('required'),
+            Column::key('field_allergies')->length(10)->default('optional'),
+            Column::key('field_company')->length(10)->default('required'),
         ];
     }
 
@@ -50,6 +56,12 @@ final class Authorization extends Model
             Field::key('max_participants')->number()->decimals(0),
             Field::key('allow_children')->text()->required(),
             Field::key('max_children')->number()->decimals(0),
+            Field::key('enable_attendance_status')->text(),
+            Field::key('require_image_release')->text(),
+            Field::key('field_age')->text(),
+            Field::key('field_sex')->text(),
+            Field::key('field_allergies')->text(),
+            Field::key('field_company')->text(),
         ];
     }
 }

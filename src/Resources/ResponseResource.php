@@ -83,6 +83,38 @@ final class ResponseResource extends Resource
      */
     public static function formSchema(): array
     {
+        // I campi configurabili (azienda + partecipante età/sesso/allergie)
+        // seguono il mode dell'autorizzazione attiva (Nascosto/Facoltativo/
+        // Obbligatorio). In backend, senza autorizzazione, valgono i default:
+        // vengono mostrati tutti.
+        $modes = self::fieldModes();
+
+        $company = self::modeField(
+            FormField::key('company')->text()
+                ->autocomplete('organization')
+                ->label(__t('components.forms.fields.company.label')),
+            $modes['company']
+        );
+
+        $age = self::modeField(
+            FormField::key('participants[__INDEX__][age]')->number()->decimal(0)
+                ->label(__t('components.forms.fields.age.label')),
+            $modes['age']
+        );
+
+        $sex = self::modeField(
+            FormField::key('participants[__INDEX__][sex]')->select(
+                ['' => __t('components.forms.fields.sex.placeholder')] + rsvpSexDictionary()
+            )->label(__t('components.forms.fields.sex.label')),
+            $modes['sex']
+        );
+
+        $dietary = self::modeField(
+            FormField::key('participants[__INDEX__][dietary_requirements]')->textarea()
+                ->label(__t('components.forms.fields.dietary_requirements.label')),
+            $modes['allergies']
+        );
+
         $schema = [
             // Il codice invito è obbligatorio solo quando lo richiede il
             // contesto RSVP; `assertSubmission()` applica quel vincolo.
@@ -109,59 +141,84 @@ final class ResponseResource extends Resource
             FormField::key('contact_email')->email()->required()
                 ->autocomplete()
                 ->label(__t('components.forms.fields.contact_email.label')),
-
-            FormField::key('company')->text()->required()
-                ->autocomplete('organization')
-                ->label(__t('components.forms.fields.company.label')),
-
-            /**
-             * Dati di contatto altri partecipanti.
-             */
-            FormField::key('participants_count')->select()
-                ->value('1')->required()
-                ->label(__t('components.forms.fields.participants_count.label')),
-
-            FormField::key('participants[__INDEX__][name]')->text()->required()
-                ->label(__t('components.forms.fields.name.label')),
-
-            FormField::key('participants[__INDEX__][surname]')->text()->required()
-                ->label(__t('components.forms.fields.surname.label')),
-
-            FormField::key('participants[__INDEX__][age]')->number()->required()
-                ->decimal(0)
-                ->label(__t('components.forms.fields.age.label')),
-
-            FormField::key('participants[__INDEX__][sex]')->select(
-                    ['' => __t('components.forms.fields.sex.placeholder')] + rsvpSexDictionary()
-                )->required()
-                ->label(__t('components.forms.fields.sex.label')),
-
-            FormField::key('participants[__INDEX__][dietary_requirements]')->textarea()
-                ->label(__t('components.forms.fields.dietary_requirements.label')),
-
-            FormField::key('participants[__INDEX__][is_child]')->checkbox()
-                ->label(__t('components.forms.fields.is_child.label')),
-
-            /**
-             * Dati consensi.
-             */
-            FormField::key('accept_privacy_policy')->acceptDocument('privacy_policy')->required(),
-            FormField::key('accept_image_release')->acceptDocument('image_release')->required()
-            
         ];
 
-        if (self::attendanceStatusEnabled()) {
-            array_splice($schema, 3, 0, [
-                FormField::key('attendance_status')->radio([
-                        'confirmed' => __t('pages.rsvp.form.attendance_confirmed_label'),
-                        'declined' => __t('pages.rsvp.form.attendance_declined_label'),
-                    ])
-                    ->label(__t('components.forms.fields.attendance_status.label'))
-                    ->required()->value('confirmed'),
-            ]);
+        if ($company !== null) {
+            $schema[] = $company;
         }
 
+        /**
+         * Dati di contatto altri partecipanti.
+         */
+        $schema[] = FormField::key('participants_count')->select()
+            ->value('1')->required()
+            ->label(__t('components.forms.fields.participants_count.label'));
+
+        $schema[] = FormField::key('participants[__INDEX__][name]')->text()->required()
+            ->label(__t('components.forms.fields.name.label'));
+
+        $schema[] = FormField::key('participants[__INDEX__][surname]')->text()->required()
+            ->label(__t('components.forms.fields.surname.label'));
+
+        foreach ([$age, $sex, $dietary] as $participantField) {
+            if ($participantField !== null) {
+                $schema[] = $participantField;
+            }
+        }
+
+        $schema[] = FormField::key('participants[__INDEX__][is_child]')->checkbox()
+            ->label(__t('components.forms.fields.is_child.label'));
+
+        /**
+         * Dati consensi.
+         */
+        $schema[] = FormField::key('accept_privacy_policy')->acceptDocument('privacy_policy')->required();
+        $schema[] = FormField::key('accept_image_release')->acceptDocument('image_release')->required();
+
+        // Conferma partecipazione: sempre presente nello schema (la gestione
+        // backend è sempre disponibile); il frontend la mostra solo se
+        // l'autorizzazione attiva la abilita (`$state['enable_attendance_status']`).
+        array_splice($schema, 3, 0, [
+            FormField::key('attendance_status')->radio([
+                    'confirmed' => __t('pages.rsvp.form.attendance_confirmed_label'),
+                    'declined' => __t('pages.rsvp.form.attendance_declined_label'),
+                ])
+                ->label(__t('components.forms.fields.attendance_status.label'))
+                ->required()->value('confirmed'),
+        ]);
+
         return $schema;
+    }
+
+    /**
+     * Mode dei campi configurabili dall'autorizzazione attiva.
+     *
+     * @return array<string, string>
+     */
+    private static function fieldModes(): array
+    {
+        $state = Rsvp::context();
+
+        return is_array($state['field_modes'] ?? null)
+            ? $state['field_modes']
+            : rsvpFieldModes([]);
+    }
+
+    /**
+     * Applica il mode a un campo: `hidden` → escluso (null), `required` →
+     * obbligatorio, `optional` → invariato.
+     */
+    private static function modeField(FormField $field, string $mode): ?FormField
+    {
+        if ($mode === 'hidden') {
+            return null;
+        }
+
+        if ($mode === 'required') {
+            $field->required();
+        }
+
+        return $field;
     }
 
     public static function tableSchema(): array
@@ -415,8 +472,11 @@ final class ResponseResource extends Resource
             }
         }
 
-        $normalized = SubmissionNormalizer::fromPayload($payload);
         $state = Rsvp::context();
+        $normalized = SubmissionNormalizer::fromPayload(
+            $payload,
+            !empty($state['enable_attendance_status'])
+        );
         $attendanceStatus = rsvpAttendanceStatusValue($normalized['attendance_status'] ?? null);
 
         self::assertSubmission($normalized, $attendanceStatus, $state, $payload);
@@ -467,10 +527,15 @@ final class ResponseResource extends Resource
             $fail('pages.rsvp.api.submit.missing_email', 'Email mancante.');
         }
 
-        $requireField(
-            (string) ($normalized['company'] ?? ''),
-            __t('components.forms.fields.company.label')
-        );
+        // Azienda obbligatoria solo se l'autorizzazione la marca "required".
+        $fieldModes = is_array($state['field_modes'] ?? null) ? $state['field_modes'] : rsvpFieldModes([]);
+
+        if (($fieldModes['company'] ?? 'required') === 'required') {
+            $requireField(
+                (string) ($normalized['company'] ?? ''),
+                __t('components.forms.fields.company.label')
+            );
+        }
 
         // Verifica compilazione duplicata (flag nelle Impostazioni RSVP): una
         // sola risposta per email o per telefono già presenti a sistema.
@@ -595,8 +660,14 @@ final class ResponseResource extends Resource
         }
     }
 
+    /**
+     * Backend: la gestione conferma partecipazione è SEMPRE disponibile
+     * (la conferma è ora per-autorizzazione e ogni risposta porta comunque il
+     * proprio `attendance_status`). Il gating lato frontend avviene invece per
+     * autorizzazione via `$state['enable_attendance_status']`.
+     */
     private static function attendanceStatusEnabled(): bool
     {
-        return rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
+        return true;
     }
 }

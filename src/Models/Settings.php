@@ -24,11 +24,6 @@ final class Settings extends Model
         return [
             Column::key('poster')->length(1000)->null(),
             Column::key('require_invite_code')->length(10)->default('false'),
-            Column::key('enable_attendance_status')->length(10)->default('false'),
-            Column::key('max_participants')->type('INT')->default('1'),
-            Column::key('allow_children')->length(10)->default('false'),
-            Column::key('max_children')->type('INT')->default('0'),
-            Column::key('require_image_release')->length(10)->default('false'),
             Column::key('check_duplicate_submission')->length(10)->default('false'),
             Column::key('admin_email')->length(255)->null(),
             Column::key('admin_notifications')->length(10)->default('true'),
@@ -52,11 +47,6 @@ final class Settings extends Model
         return [
             Field::key('poster')->file()->sanitize(false),
             Field::key('require_invite_code')->text(),
-            Field::key('enable_attendance_status')->text(),
-            Field::key('max_participants')->number()->decimals(0),
-            Field::key('allow_children')->text(),
-            Field::key('max_children')->number()->decimals(0),
-            Field::key('require_image_release')->text(),
             Field::key('check_duplicate_submission')->text(),
             Field::key('admin_email')->email(),
             Field::key('admin_notifications')->text(),

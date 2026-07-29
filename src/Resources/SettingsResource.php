@@ -33,11 +33,6 @@ final class SettingsResource extends SingletonResource
         return [
             'poster' => 'Locandina (immagine SEO di default)',
             'require_invite_code' => 'Accesso con codice',
-            'enable_attendance_status' => 'Abilita partecipo/non partecipo',
-            'max_participants' => 'Max adulti',
-            'allow_children' => 'Bambini',
-            'max_children' => 'Max bambini',
-            'require_image_release' => 'Richiedi liberatoria immagini',
             'check_duplicate_submission' => 'Verifica compilazione duplicata',
             'admin_email' => 'Email notifiche',
             'admin_notifications' => 'Invia email',
@@ -63,11 +58,6 @@ final class SettingsResource extends SingletonResource
                 'false' => 'Libero',
                 'true' => 'Richiede codice',
             ])->value('false'),
-            FormField::key('enable_attendance_status')->bool()->value('false'),
-            FormField::key('max_participants')->number(),
-            FormField::key('allow_children')->bool()->value('false'),
-            FormField::key('max_children')->number(),
-            FormField::key('require_image_release')->bool()->value('false'),
             FormField::key('check_duplicate_submission')->bool()->value('false'),
             FormField::key('admin_email')->email(),
             FormField::key('admin_notifications')->bool()->value('true'),
@@ -94,13 +84,8 @@ final class SettingsResource extends SingletonResource
 
                 (new Container)->components([
                     (new SectionTitle('Impostazioni'))->columnSpan(12),
-                    static::getInput('require_invite_code')->columnSpan(4),
-                    static::getInput('enable_attendance_status')->columnSpan(4),
-                    static::getInput('require_image_release')->columnSpan(4),
-                    static::getInput('max_participants')->columnSpan(4),
-                    static::getInput('allow_children')->columnSpan(4),
-                    static::getInput('max_children')->columnSpan(4),
-                    static::getInput('check_duplicate_submission')->columnSpan(4),
+                    static::getInput('require_invite_code')->columnSpan(6),
+                    static::getInput('check_duplicate_submission')->columnSpan(6),
                 ])->columns(12)->columnSpan(9)
 
             ])->columns(12)->columnSpan(12),

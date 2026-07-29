@@ -31,6 +31,15 @@
     $submitUrl = __e('api.resource.rsvp-responses.store');
     $maxTotalParticipants = $maxAdults + $maxChildren;
 
+    // Mode dei campi configurabili (dall'autorizzazione attiva): 'hidden' non
+    // renderizza, gli altri sì. Deve combaciare con ResponseResource::formSchema
+    // (che esclude i campi 'hidden'), altrimenti getInput() lancerebbe.
+    $fieldModes = is_array($state['field_modes'] ?? null) ? $state['field_modes'] : [];
+    $showAge = ($fieldModes['age'] ?? 'required') !== 'hidden';
+    $showSex = ($fieldModes['sex'] ?? 'required') !== 'hidden';
+    $showAllergies = ($fieldModes['allergies'] ?? 'optional') !== 'hidden';
+    $showCompany = ($fieldModes['company'] ?? 'required') !== 'hidden';
+
     // Con un solo partecipante possibile la scelta del numero è inutile: si
     // nasconde il select e non si mostra il titolo "Ospite 1" sopra la card.
     $singleParticipant = $maxTotalParticipants === 1;
@@ -138,9 +147,9 @@
                             <div class="w-100 d-grid col-2 gap-5 gap-p-3">
                                 <?=ResponseResource::getInput('participants[__INDEX__][name]')?>
                                 <?=ResponseResource::getInput('participants[__INDEX__][surname]')?>
-                                <?=ResponseResource::getInput('participants[__INDEX__][age]')?>
-                                <?=ResponseResource::getInput('participants[__INDEX__][sex]')?>
-                                <div class="col-2"><?=ResponseResource::getInput('participants[__INDEX__][dietary_requirements]')?></div>
+                                <?php if ($showAge) { ?><?=ResponseResource::getInput('participants[__INDEX__][age]')?><?php } ?>
+                                <?php if ($showSex) { ?><?=ResponseResource::getInput('participants[__INDEX__][sex]')?><?php } ?>
+                                <?php if ($showAllergies) { ?><div class="col-2"><?=ResponseResource::getInput('participants[__INDEX__][dietary_requirements]')?></div><?php } ?>
                             </div>
                             <?php if ($allowChildren) : ?>
                             <div class="w-100">
@@ -175,7 +184,9 @@
 
                 <?=ResponseResource::getInput('contact_email')?>
 
+                <?php if ($showCompany) { ?>
                 <?=ResponseResource::getInput('company')?>
+                <?php } ?>
 
                 <div class="w-100 bt-1 tx-black mh-p-2"></div>
 

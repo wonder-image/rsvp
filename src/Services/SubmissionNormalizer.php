@@ -9,10 +9,13 @@ use Wonder\Plugin\Rsvp\Models\Response;
 
 final class SubmissionNormalizer
 {
-    public static function fromPayload(array $payload): array
+    public static function fromPayload(array $payload, ?bool $attendanceEnabled = null): array
     {
         $payload = self::normalizePayload($payload);
-        $attendanceStatus = self::attendanceStatus($payload, SubmissionNotifier::settings());
+        // La conferma partecipazione è per-autorizzazione: il chiamante passa
+        // il flag risolto dallo stato. Fallback (usato dai test) via settings.
+        $attendanceEnabled ??= rsvpAttendanceStatusEnabled(SubmissionNotifier::settings());
+        $attendanceStatus = self::attendanceStatus($payload, $attendanceEnabled);
         $participants = $attendanceStatus === 'declined'
             ? []
             : self::participants($payload);
@@ -352,9 +355,9 @@ final class SubmissionNormalizer
         return $metadata;
     }
 
-    private static function attendanceStatus(array $payload, array $settings): string
+    private static function attendanceStatus(array $payload, bool $enabled): string
     {
-        if (!rsvpAttendanceStatusEnabled($settings)) {
+        if (!$enabled) {
             return 'confirmed';
         }
 
