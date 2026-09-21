@@ -523,6 +523,21 @@ final class ResponseResource extends Resource
             }
         };
 
+        // Iscrizioni chiuse: nessun evento è più compilabile (tutti oltre la
+        // `registration_closes_at`) → invito scaduto, blocca conferme e rifiuti.
+        $openEvents = is_array($state['open_events'] ?? null) ? $state['open_events'] : [];
+
+        if ($openEvents === []) {
+            $fail('pages.rsvp.api.submit.registration_closed', 'Le iscrizioni sono chiuse.');
+        }
+
+        // L'evento scelto deve essere tra quelli con iscrizioni ancora aperte.
+        $eventKey = trim((string) ($normalized['event_key'] ?? ($payload['event_key'] ?? '')));
+
+        if ($eventKey !== '' && !array_key_exists($eventKey, $openEvents)) {
+            $fail('pages.rsvp.api.submit.event_registration_closed', 'Le iscrizioni per l’evento selezionato sono chiuse.');
+        }
+
         if (trim((string) ($normalized['contact_email'] ?? '')) === '') {
             $fail('pages.rsvp.api.submit.missing_email', 'Email mancante.');
         }

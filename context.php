@@ -71,6 +71,7 @@ foreach ($catalog as $eventKey => $event) {
     $date = $event['starts_at'];
     $endDate = trim((string) ($event['ends_at'] ?? ''));
     $hasEnd = $endDate !== '' && strtotime($endDate) !== false;
+    $registrationClosesAt = trim((string) ($event['registration_closes_at'] ?? ''));
 
     $eventCatalog[$eventKey] = rsvpResolveLocalizedValue([
         'key' => $eventKey,
@@ -102,6 +103,8 @@ foreach ($catalog as $eventKey => $event) {
     $eventCatalog[$eventKey]['id'] = (int) ($event['id'] ?? 0);
     $eventCatalog[$eventKey]['key'] = $eventKey;
     $eventCatalog[$eventKey]['label'] = trim((string) ($eventCatalog[$eventKey]['label'] ?? $eventKey));
+    $eventCatalog[$eventKey]['registration_closes_at'] = $registrationClosesAt;
+    $eventCatalog[$eventKey]['registration_open'] = rsvpRegistrationOpen($registrationClosesAt);
 }
 
 uasort($eventCatalog, static function (array $left, array $right): int {
@@ -123,6 +126,22 @@ if ($allowedIds === []) {
             $visibleEvents[$eventKey] = $event;
         }
     }
+}
+
+// Eventi con iscrizioni ancora aperte: sottoinsieme dei visibili la cui
+// `registration_closes_at` non è ancora passata. Guida sia la scelta evento nel
+// form sia il messaggio "invito scaduto" quando nessun evento è più compilabile.
+$openEvents = array_filter(
+    $visibleEvents,
+    static fn (array $event): bool => !empty($event['registration_open'])
+);
+
+// Contatto per "invito scaduto": email notifiche RSVP, fallback all'email del
+// sito (stessa risoluzione di SubmissionNotifier).
+$contactEmail = trim((string) ($settings['admin_email'] ?? ''));
+
+if ($contactEmail === '') {
+    $contactEmail = trim((string) ($GLOBALS['SOCIETY']->email ?? ''));
 }
 
 // Configurazione del form risolta SEMPRE dall'autorizzazione attiva (i campi
@@ -152,6 +171,8 @@ return [
     'featured_event' => $featuredEvent,
     'requires_invite_code' => $requiresInviteCode,
     'visible_events' => $visibleEvents,
+    'open_events' => $openEvents,
+    'contact_email' => $contactEmail,
     'allow_children' => $allowChildren,
     'max_participants' => $maxParticipants,
     'max_children' => $maxChildren,

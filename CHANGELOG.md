@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Chiusura iscrizioni per evento.** Nuovo campo `Event.registration_closes_at`
+  (data/ora): oltre quella data/ora l'evento non è più compilabile. `context.php`
+  espone `open_events` (visibili con iscrizioni ancora aperte, via l'helper puro
+  `rsvpRegistrationOpen()`) e `contact_email` (da `Settings.admin_email`, fallback
+  `SOCIETY->email`). `view/components/form.php` mostra la scelta evento solo tra
+  gli eventi aperti e, quando nessun evento è più aperto, sostituisce il form con
+  "Invito scaduto" + "Per ulteriori informazioni contattare {{email}}"; countdown
+  e data evento restano visibili. `ResponseResource::assertSubmission` rifiuta con
+  422 le submission a iscrizioni chiuse (`registration_closed`) o verso un evento
+  chiuso (`event_registration_closed`). Campo aggiunto al form backend evento
+  (`EventResource`). Nuove chiavi in `lang/{it,en}/pages.json`.
+
 - **Accesso governato dall'autorizzazione.** Nuovo campo `Authorization.access`
   (`code` / `free`). Il form richiede SEMPRE un'autorizzazione attiva: quella
   del codice invito se presente, altrimenti l'unica autorizzazione "Libero"

@@ -19,8 +19,12 @@
     $state = Rsvp::context();
 
     $session = is_array($state['session'] ?? null) ? $state['session'] : [];
-    $visibleEvents = is_array($state['visible_events'] ?? null) ? $state['visible_events'] : [];
+    $openEvents = is_array($state['open_events'] ?? null) ? $state['open_events'] : [];
     $canAccessForm = Rsvp::canAccessForm($state);
+    // Iscrizioni aperte solo se, oltre all'accesso, esiste almeno un evento non
+    // ancora chiuso. Senza eventi aperti il form lascia il posto a "invito scaduto".
+    $registrationOpen = $canAccessForm && $openEvents !== [];
+    $contactEmail = trim((string) ($state['contact_email'] ?? ''));
     $locale = (string) ($state['locale'] ?? __l());
     $maxAdults = max(1, (int) ($state['max_participants'] ?? 1));
     $allowChildren = !empty($state['allow_children']);
@@ -54,7 +58,9 @@
 <section class="mt-10">
     <div class="content content-medium">
 
-        <div class="subtitle a-c tx-upper w-100"><?= __t('pages.rsvp.form.intro') ?></div>
+        <?php if (!$canAccessForm || $registrationOpen) { ?>
+            <div class="subtitle a-c tx-upper w-100"><?= __t('pages.rsvp.form.intro') ?></div>
+        <?php } ?>
 
         <?php if (!$canAccessForm) { ?>
 
@@ -66,6 +72,15 @@
                     <?= __t('pages.rsvp.form.invite_required_button') ?>
                 </a>
             </div>
+
+        <?php } elseif (!$registrationOpen) { ?>
+
+            <div class="subtitle a-c tx-upper w-100"><?= __t('pages.rsvp.form.expired_title') ?></div>
+            <?php if ($contactEmail !== '') { ?>
+                <div class="text a-c mt-5 tx-white">
+                    <?= __t('pages.rsvp.form.expired_contact_text', ['email' => e($contactEmail)]) ?>
+                </div>
+            <?php } ?>
 
         <?php } else { ?>
 
@@ -107,17 +122,18 @@
                 <?php 
 
                     /**
-                     * Se ci sono più eventi visibili dai la scelta
+                     * Solo tra gli eventi con iscrizioni ancora aperte: se è
+                     * uno solo va in hidden, altrimenti si dà la scelta.
                      */
-                
-                    if (count($visibleEvents) === 1) {
 
-                        $singleKey = array_key_first($visibleEvents);
+                    if (count($openEvents) === 1) {
+
+                        $singleKey = array_key_first($openEvents);
                         echo ResponseResource::getInput('event_key')->hidden()->value($singleKey);
 
                     } else {
 
-                        echo ResponseResource::getInput('event_key')->options($visibleEvents);
+                        echo ResponseResource::getInput('event_key')->options($openEvents);
 
                     }
                         
@@ -213,7 +229,7 @@
     </div>
 </section>
 
-<?php if ($canAccessForm) { ?>
+<?php if ($registrationOpen) { ?>
 <script>
 (() => {
 

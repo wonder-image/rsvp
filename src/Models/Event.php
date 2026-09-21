@@ -29,6 +29,7 @@ final class Event extends Model
                 'description',
                 'starts_at',
                 'ends_at',
+                'registration_closes_at',
                 'location_name',
                 'location_site_url',
                 'location_logo',
@@ -64,6 +65,7 @@ final class Event extends Model
             Field::key('description')->text(),
             Field::key('starts_at')->date(),
             Field::key('ends_at')->date(),
+            Field::key('registration_closes_at')->date(),
             Field::key('position')->number()->decimals(0),
             Field::key('active')->text()->required(),
 

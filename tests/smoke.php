@@ -175,6 +175,17 @@ namespace {
         $assert(static fn () => assertSame('optional', $fieldModes['company'], 'Legge il mode azienda dall’autorizzazione.'));
         $assert(static fn () => assertSame('required', $fieldModes['sex'], 'Default mode sesso = obbligatorio.'));
         $assert(static fn () => assertSame('optional', $fieldModes['allergies'], 'Default mode allergie = facoltativo.'));
+
+        // Chiusura iscrizioni per evento: le iscrizioni sono aperte finché
+        // "adesso" <= data/ora di chiusura (confine inclusivo); una chiusura
+        // vuota o non interpretabile lascia le iscrizioni aperte (fail-open).
+        $closesNow = strtotime('2026-06-01 12:00:00');
+        $assert(static fn () => assertTrue(rsvpRegistrationOpen('', $closesNow), 'Senza data di chiusura le iscrizioni sono aperte.'));
+        $assert(static fn () => assertTrue(rsvpRegistrationOpen('   ', $closesNow), 'Una chiusura solo spazi lascia le iscrizioni aperte.'));
+        $assert(static fn () => assertTrue(rsvpRegistrationOpen('2026-06-02 12:00', $closesNow), 'Con chiusura nel futuro le iscrizioni sono aperte.'));
+        $assert(static fn () => assertTrue(!rsvpRegistrationOpen('2026-05-31 12:00', $closesNow), 'Con chiusura nel passato le iscrizioni sono chiuse.'));
+        $assert(static fn () => assertTrue(rsvpRegistrationOpen('2026-06-01 12:00', $closesNow), 'Al minuto esatto di chiusura le iscrizioni sono ancora aperte (inclusivo).'));
+        $assert(static fn () => assertTrue(rsvpRegistrationOpen('non-una-data', $closesNow), 'Una data di chiusura non interpretabile lascia le iscrizioni aperte.'));
         $assert(static fn () => assertSame(['alpha' => 1], rsvpDecodeJsonArray('{"alpha":1}'), 'Decodifica JSON object in array associativo.'));
         $assert(static fn () => assertSame('--', rsvpJsonPrettyList('[]'), 'Rende placeholder per liste JSON vuote.'));
         $assert(static fn () => assertSame(['uno', 'due'], rsvpParseListText("uno;\ndue\nuno"), 'Parsa liste testuali deduplicate.'));

@@ -125,6 +125,39 @@ if (!function_exists('rsvpDuplicateCheckEnabled')) {
     }
 }
 
+if (!function_exists('rsvpRegistrationOpen')) {
+    /**
+     * Indica se le iscrizioni a un evento sono ancora aperte data la sua
+     * data/ora di chiusura (`registration_closes_at`).
+     *
+     * Le iscrizioni sono aperte finché "adesso" <= chiusura (confine
+     * inclusivo). Una chiusura vuota, di soli spazi o non interpretabile
+     * lascia le iscrizioni aperte (fail-open): un valore mancante o malformato
+     * non deve bloccare le compilazioni.
+     *
+     * @param string   $closesAt data/ora di chiusura (formato interpretabile
+     *                            da strtotime, es. `Y-m-d\TH:i`); vuota = nessuna
+     *                            scadenza.
+     * @param int|null $now      timestamp di riferimento; `null` = adesso.
+     */
+    function rsvpRegistrationOpen(string $closesAt, ?int $now = null): bool
+    {
+        $closesAt = trim($closesAt);
+
+        if ($closesAt === '') {
+            return true;
+        }
+
+        $deadline = strtotime($closesAt);
+
+        if ($deadline === false) {
+            return true;
+        }
+
+        return ($now ?? time()) <= $deadline;
+    }
+}
+
 if (!function_exists('rsvpAttendanceStatusText')) {
     function rsvpAttendanceStatusText(mixed $value): string
     {

@@ -28,6 +28,8 @@
                 "max_adults_exceeded": "Maximum number of adults exceeded: you can add up to {{max}}.",
                 "max_children_exceeded": "Maximum number of children exceeded: you can add up to {{max}}.",
                 "duplicate_submission": "A submission with this email or phone already exists.",
+                "registration_closed": "Registrations are closed.",
+                "event_registration_closed": "Registrations for the selected event are closed.",
                 "save_failed": "Unable to save the RSVP."
             }
         },
@@ -57,6 +59,8 @@
         "form": {
             "invite_required_text": "An invite code is required to fill in this RSVP.",
             "invite_required_button": "Go to login",
+            "expired_title": "Invitation expired",
+            "expired_contact_text": "For more information contact {{email}}",
             "attendance_status_label": "Attendance",
             "attendance_confirmed_label": "I will attend",
             "attendance_declined_label": "No, I will not attend",

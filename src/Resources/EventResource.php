@@ -40,6 +40,7 @@ final class EventResource extends Resource
             'description' => 'Descrizione',
             'starts_at' => 'Data inizio',
             'ends_at' => 'Data fine',
+            'registration_closes_at' => 'Chiusura iscrizioni',
             'location_name' => 'Nome',
             ...static::$model::addressExtension()->labels(),
             'location_position_url' => 'Link posizione',
@@ -58,6 +59,7 @@ final class EventResource extends Resource
             FormField::key('description')->textarea(),
             FormField::key('starts_at')->textDatetime(),
             FormField::key('ends_at')->textDatetime(),
+            FormField::key('registration_closes_at')->textDatetime(),
             FormField::key('location_name')->text(),
             ...static::$model::addressExtension()->formSchema(),
             FormField::key('location_site_url')->url(),
@@ -78,6 +80,7 @@ final class EventResource extends Resource
                     static::getInput('name')->columnSpan(4),
                     static::getInput('starts_at')->columnSpan(3),
                     static::getInput('ends_at')->columnSpan(3),
+                    static::getInput('registration_closes_at')->columnSpan(4),
                     static::getInput('description')->columnSpan(12)
 
                 ])->columns(12)->columnSpan(12),
@@ -172,7 +175,7 @@ final class EventResource extends Resource
         string $context = 'backend'
     ): array {
 
-        foreach (['starts_at', 'ends_at'] as $dateField) {
+        foreach (['starts_at', 'ends_at', 'registration_closes_at'] as $dateField) {
             if (!empty($values[$dateField]) && strtotime((string) $values[$dateField]) !== false) {
                 $values[$dateField] = date('Y-m-d\TH:i', strtotime((string) $values[$dateField]));
             }
