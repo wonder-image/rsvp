@@ -63,7 +63,7 @@ final class AuthorizationResource extends Resource
                 'code' => 'Con codice',
                 'free' => 'Libero (senza password)',
             ])->required()->value('code'),
-            FormField::key('visible_event_ids')->checkbox()->options(static::eventOptions())->multiple()->required(),
+            FormField::key('visible_event_ids')->checkbox()->options(static::eventOptions())->required(),
             FormField::key('max_participants')->number(),
             FormField::key('allow_children')->select([
                 'false' => 'No',
