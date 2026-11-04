@@ -6,6 +6,7 @@ use Wonder\Api\EndpointException;
 use Wonder\App\Resource;
 use Wonder\App\ResourceSchema\ApiSchema;
 use Wonder\App\ResourceSchema\FormField;
+use Wonder\App\ResourceSchema\Input;
 use Wonder\App\ResourceSchema\NavigationSchema;
 use Wonder\App\ResourceSchema\PageSchema;
 use Wonder\App\ResourceSchema\PermissionSchema;
@@ -208,7 +209,7 @@ final class ResponseResource extends Resource
      * Applica il mode a un campo: `hidden` → escluso (null), `required` →
      * obbligatorio, `optional` → invariato.
      */
-    private static function modeField(FormField $field, string $mode): ?FormField
+    private static function modeField(Input $field, string $mode): ?Input
     {
         if ($mode === 'hidden') {
             return null;
