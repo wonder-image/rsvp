@@ -363,7 +363,10 @@ final class ResponseResource extends Resource
 
     public static function apiSchema(): ApiSchema
     {
-        return ApiSchema::for(static::class)->only(['store']);
+        return ApiSchema::for(static::class)
+            ->only(['store'])
+            // Il form RSVP invia dalle pagine del sito: sessione + CSRF, nessun Bearer nell'HTML.
+            ->allowPageToken();
     }
 
     public static function permissionSchema(): PermissionSchema
