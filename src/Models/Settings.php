@@ -16,7 +16,9 @@ final class Settings extends Model
 
     public static function syncSchema(): ?SyncSchema
     {
-        return SyncSchema::multiRow()->exclude(['poster']);
+        // Singleton: l'import aggiorna la riga 1 senza svuotare la tabella,
+        // così la locandina (esclusa dal sync) sopravvive ai deploy.
+        return SyncSchema::singleton()->exclude(['poster']);
     }
     
     public static function tableSchema(): array
@@ -44,7 +46,7 @@ final class Settings extends Model
     public static function dataSchema(): array
     {
         return [
-            Field::key('poster')->file()->sanitize(false),
+            Field::key('poster')->file()->extensions(['png', 'jpg', 'jpeg', 'webp'])->maxSize(10)->sanitize(false),
             Field::key('check_duplicate_submission')->text(),
             Field::key('admin_email')->email(),
             Field::key('admin_notifications')->text(),
