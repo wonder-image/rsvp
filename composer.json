@@ -2,7 +2,7 @@
     "name": "wonder-image/rsvp",
     "description": "RSVP plugin for wonder-image/new-site projects.",
     "type": "library",
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
         "php": "^8.2",
         "wonder-image/app": "dev-main"
