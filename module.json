@@ -1,7 +1,7 @@
 {
     "name": "Wonder RSVP",
     "slug": "rsvp",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Modulo RSVP con frontend, backend e API per wonder-image/app, pronto per wonder-image/new-site.",
     "namespace": "Wonder\\Plugin\\Rsvp\\",
     "entrypoint": "Wonder\\Plugin\\Rsvp\\Rsvp",
@@ -10,7 +10,7 @@
         "email": "info@wonderimage.it"
     },
     "frameworkCompatibility": {
-        "wonder-app": "^2.1",
+        "wonder-app": "^2.4.0",
         "php": "^8.2"
     },
     "dependencies": {
