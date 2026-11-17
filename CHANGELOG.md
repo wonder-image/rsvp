@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
 
 - **Chiusura iscrizioni per evento.** Nuovo campo `Event.registration_closes_at`
   (data/ora): oltre quella data/ora l'evento non è più compilabile. `context.php`
